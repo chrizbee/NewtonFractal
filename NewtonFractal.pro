@@ -25,10 +25,16 @@ DESTDIR = build
 
 SOURCES += \
     src/main.cpp \
-    src/mainwindow.cpp
+    src/mainwindow.cpp \
+    src/fractalwidget.cpp \
+    src/renderthread.cpp \
+    src/parameters.cpp
 
 HEADERS += \
-    src/mainwindow.h
+    src/mainwindow.h \
+    src/fractalwidget.h \
+    src/renderthread.h \
+    src/parameters.h
 
 FORMS += \
     src/mainwindow.ui
@@ -37,3 +43,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc
