@@ -2,14 +2,6 @@
 #include <QImage>
 #include <QPixmap>
 
-#define XA	-1.0
-#define XB   1.0
-#define YA	-1.0
-#define YB   1.0
-#define H	 1e-6	// Step size for numerical derivative
-#define EPS	 1e-3	// Max error allowed
-#define N	 6		// Number of roots
-
 static complex step(H, H);
 static QColor colors[N] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
 
@@ -102,13 +94,11 @@ void RenderThread::run()
 
 complex RenderThread::f(complex z)
 {
-	// Calculate function with given roots <-- TODO: super slow and super wrong
-//	complex result;
-//	quint8 rootCount = currentParams_.roots.length();
-//	for (quint8 i = 0; i < rootCount; ++i) {
-//		result = result * (z - currentParams_.roots[i]);
-//	}
-
-//	return result;
-	return z * z * z - 1.0;
+	// Calculate function with given roots
+	complex result(1, 0);
+	quint8 rootCount = currentParams_.roots.length();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		result = result * (z - currentParams_.roots[i]);
+	}
+	return result;
 }

@@ -2,5 +2,17 @@
     <qresource prefix="/">
         <file>resources/icons/icon.ico</file>
         <file>resources/icons/settings.png</file>
+        <file>resources/icons/degree.png</file>
+        <file>resources/icons/size.png</file>
+        <file>resources/icons/iteration.png</file>
+        <file>resources/icons/blue.png</file>
+        <file>resources/icons/cyan.png</file>
+        <file>resources/icons/green.png</file>
+        <file>resources/icons/magenta.png</file>
+        <file>resources/icons/red.png</file>
+        <file>resources/icons/yellow.png</file>
+        <file>resources/icons/save.png</file>
+        <file>resources/icons/user1.png</file>
+        <file>resources/icons/user2.png</file>
     </qresource>
 </RCC>

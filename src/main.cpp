@@ -3,9 +3,14 @@
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
-	MainWindow w;
-	w.show();
+	QApplication app(argc, argv);
+	app.setOrganizationName("inf4");
+	app.setOrganizationDomain("th-nuernberg.de");
+	app.setApplicationName("NewtonFractal");
+	app.setApplicationVersion(APP_VERSION);
+	app.setStyle("Fusion");
 
-	return a.exec();
+	MainWindow window;
+	window.show();
+	return app.exec();
 }
