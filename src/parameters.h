@@ -24,5 +24,6 @@ struct Parameters {
 
 QString complex2string(complex z);
 complex string2complex(QString s);
+QVector<complex> equidistantRoots(quint8 rootCount);
 
 #endif // PARAMETERS_H

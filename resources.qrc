@@ -14,5 +14,6 @@
         <file>resources/icons/save.png</file>
         <file>resources/icons/user1.png</file>
         <file>resources/icons/user2.png</file>
+        <file>resources/icons/reset.png</file>
     </qresource>
 </RCC>

@@ -7,10 +7,7 @@ Parameters::Parameters(quint8 rootCount)
 	// Initialize with rootCount
 	maxIterations = 30;
 	resultSize = QSize(128, 128);
-	for (quint8 i = 0; i < rootCount; ++i) {
-		double angle = 2 * PI * i / rootCount;
-		roots.append(complex(cos(angle), sin(angle)));
-	}
+	roots = equidistantRoots(rootCount);
 }
 
 QString complex2string(complex z)
@@ -30,4 +27,15 @@ complex string2complex(QString s)
 		z.imag(parts[1].simplified().toDouble());
 	}
 	return z;
+}
+
+QVector<complex> equidistantRoots(quint8 rootCount)
+{
+	// Return equidistant points on a circle
+	QVector<complex> roots;
+	for (quint8 i = 0; i < rootCount; ++i) {
+		double angle = 2 * PI * i / rootCount;
+		roots.append(complex(cos(angle), sin(angle)));
+	}
+	return roots;
 }

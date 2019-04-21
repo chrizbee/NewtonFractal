@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 
+static bool resetRoots = false;
 static QList<QLineEdit*> rootEdits;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -27,9 +28,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui_->spinSize, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinDegree, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
-	connect(ui_->actionSettings, &QAction::triggered, [this]() {
-		ui_->settingsWidget->setVisible(ui_->settingsWidget->isHidden());
-	});
+	connect(ui_->btnReset, &QPushButton::clicked, [this]() { resetRoots = true; on_settingsChanged(); });
+	connect(ui_->actionSettings, &QAction::triggered, [this]() { ui_->settingsWidget->setVisible(ui_->settingsWidget->isHidden()); });
+	for (QLineEdit *rootEdit : rootEdits) {
+		connect(rootEdit, &QLineEdit::editingFinished, this, &MainWindow::on_settingsChanged);
+	}
 
 	// Render with defaults
 	on_settingsChanged();
@@ -51,18 +54,25 @@ void MainWindow::on_settingsChanged()
 	params.resultSize = QSize(wh, wh);
 	params.maxIterations = ui_->spinIterations->value();
 
-	// Update roots
+	// Update rootEdit visibility
 	for (quint8 i = 0; i < N; ++i) {
-		if (i < degree) {
-			rootEdits[i]->setEnabled(true);
-			params.roots.append(string2complex(rootEdits[i]->text()));
-		} else {
-			rootEdits[i]->setEnabled(false);
-		}
+		rootEdits[i]->setEnabled(i < degree);
+	}
+
+	// Update roots from rootEdits
+	for (quint8 i = 0; i < degree; ++i) {
+		params.roots.append(string2complex(rootEdits[i]->text()));
+	}
+
+	// Update rootEdits from roots
+	if (resetRoots) params.roots = equidistantRoots(degree);
+	for (quint8 i = 0; i < degree; ++i) {
+		rootEdits[i]->setText(complex2string(params.roots[i]));
 	}
 
 	// Render
 	ui_->fractalWidget->render(params);
+	resetRoots = false;
 }
 
 void MainWindow::on_rootMoved(quint8 index, complex value)
