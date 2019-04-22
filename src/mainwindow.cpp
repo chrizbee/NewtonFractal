@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 
-static bool resetRoots = false;
 static QList<QLineEdit*> rootEdits;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -15,27 +14,24 @@ MainWindow::MainWindow(QWidget *parent) :
 	addAction(ui_->actionSettings);
 	rootEdits.append(QList<QLineEdit*>() << ui_->lineRoot0 << ui_->lineRoot1 << ui_->lineRoot2 << ui_->lineRoot3 << ui_->lineRoot4 << ui_->lineRoot5);
 
-	// Create default parameters
-	Parameters defaults(3);
-	ui_->spinSize->setValue(defaults.resultSize.width());
-	ui_->spinIterations->setValue(defaults.maxIterations);
-	ui_->spinDegree->setValue(defaults.roots.count());
-	for (quint8 i = 0; i < defaults.roots.count(); ++i) {
-		on_rootMoved(i, defaults.roots[i]);
-	}
-
 	// Connect signals and slots
+	connect(ui_->fractalWidget, &FractalWidget::rootMoved, this, &MainWindow::on_rootMoved);
 	connect(ui_->spinSize, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinDegree, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
-	connect(ui_->btnReset, &QPushButton::clicked, [this]() { resetRoots = true; on_settingsChanged(); });
+	connect(ui_->btnReset, &QPushButton::clicked, ui_->fractalWidget, &FractalWidget::resetRoots);
 	connect(ui_->actionSettings, &QAction::triggered, [this]() { ui_->settingsWidget->setVisible(ui_->settingsWidget->isHidden()); });
 	for (QLineEdit *rootEdit : rootEdits) {
 		connect(rootEdit, &QLineEdit::editingFinished, this, &MainWindow::on_settingsChanged);
 	}
 
-	// Render with defaults
-	on_settingsChanged();
+	// Start rendering with 3 default roots
+	Parameters defaults(3);
+	ui_->spinSize->setValue(defaults.resultSize.width());
+	ui_->spinIterations->setValue(defaults.maxIterations);
+	ui_->spinDegree->setValue(defaults.roots.count());
+	ui_->fractalWidget->setParams(defaults);
+	ui_->fractalWidget->resetRoots();
 }
 
 MainWindow::~MainWindow()
@@ -57,22 +53,13 @@ void MainWindow::on_settingsChanged()
 	// Update rootEdit visibility
 	for (quint8 i = 0; i < N; ++i) {
 		rootEdits[i]->setEnabled(i < degree);
-	}
-
-	// Update roots from rootEdits
-	for (quint8 i = 0; i < degree; ++i) {
-		params.roots.append(string2complex(rootEdits[i]->text()));
-	}
-
-	// Update rootEdits from roots
-	if (resetRoots) params.roots = equidistantRoots(degree);
-	for (quint8 i = 0; i < degree; ++i) {
-		rootEdits[i]->setText(complex2string(params.roots[i]));
+		if (i < degree) {
+			params.roots.append(string2complex(rootEdits[i]->text()));
+		}
 	}
 
 	// Render
-	ui_->fractalWidget->render(params);
-	resetRoots = false;
+	ui_->fractalWidget->setParams(params);
 }
 
 void MainWindow::on_rootMoved(quint8 index, complex value)

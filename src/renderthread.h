@@ -6,6 +6,12 @@
 #include <QWaitCondition>
 #include "parameters.h"
 
+struct ImageLine {
+	quint8 *scanLine;
+	int lineIndex;
+	int lineSize;
+};
+
 class RenderThread : public QThread
 {
 	Q_OBJECT

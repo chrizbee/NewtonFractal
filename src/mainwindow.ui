@@ -529,6 +529,9 @@
            <property name="toolTip">
             <string/>
            </property>
+           <property name="text">
+            <string>0 j 0</string>
+           </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
@@ -625,6 +628,9 @@
            <property name="toolTip">
             <string/>
            </property>
+           <property name="text">
+            <string>0 j 0</string>
+           </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
@@ -652,6 +658,9 @@
            </property>
            <property name="toolTip">
             <string/>
+           </property>
+           <property name="text">
+            <string>0 j 0</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -749,6 +758,9 @@
            <property name="toolTip">
             <string/>
            </property>
+           <property name="text">
+            <string>0 j 0</string>
+           </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
@@ -776,6 +788,9 @@
            </property>
            <property name="toolTip">
             <string/>
+           </property>
+           <property name="text">
+            <string>0 j 0</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -872,6 +887,9 @@
            </property>
            <property name="toolTip">
             <string/>
+           </property>
+           <property name="text">
+            <string>0 j 0</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

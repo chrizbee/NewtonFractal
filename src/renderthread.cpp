@@ -51,7 +51,7 @@ void RenderThread::run()
 		qint32 width = currentParams_.resultSize.width();
 		qint32 height = currentParams_.resultSize.height();
 		quint8 rootCount = currentParams_.roots.length();
-		double darkerFactor = 300.0 / currentParams_.maxIterations;
+		double darkerFactor = 300.0 / currentParams_.maxIterations; // TODO: static, not dynamic
 
 		// Iterate y-pixels
 		for (int y = 0; y < height; ++y) {
