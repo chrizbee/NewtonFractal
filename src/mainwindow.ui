@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>NewtonFractal</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources.qrc">
+    <normaloff>:/resources/icons/icon.png</normaloff>:/resources/icons/icon.png</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="spacing">
