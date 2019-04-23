@@ -1,4 +1,4 @@
-QT += core gui widgets
+QT += core gui widgets concurrent
 
 TARGET = NewtonFractal
 TEMPLATE = app

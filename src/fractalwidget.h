@@ -31,6 +31,7 @@ private:
 	QPixmap pixmap_;
 	Parameters params_;
 	RenderThread renderThread_;
+	QList<QPoint> rootPoints_;
 };
 
 #endif // FRACTALWIDGET_H

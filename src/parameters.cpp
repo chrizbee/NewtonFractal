@@ -5,8 +5,8 @@ static const double PI = 3.141592653589793238463;
 Parameters::Parameters(quint8 rootCount)
 {
 	// Initialize with rootCount
-	maxIterations = 30;
-	resultSize = QSize(128, 128);
+	maxIterations = DMI;
+	resultSize = QSize(DSI, DSI);
 	roots = equidistantRoots(rootCount);
 }
 
@@ -29,13 +29,40 @@ complex string2complex(QString s)
 	return z;
 }
 
-QVector<complex> equidistantRoots(quint8 rootCount)
+QPoint complex2point(complex z, QRect stretched, QRect limits)
+{
+	// Convert complex to point
+	double xStretch = (double)stretched.width() / limits.width();
+	double yStretch = (double)stretched.height() / limits.height();
+	int x = xStretch * (z.real() - XA) * (limits.width() - 1) / (XB - XA);
+	int y = yStretch * (z.imag() - YA) * (limits.height() - 1) / (YB - YA);
+	return QPoint(x, y);
+}
+
+complex point2complex(QPoint p, QRect stretched, QRect limits)
+{
+	// Convert point to complex
+	double xStretch = (double)stretched.width() / limits.width();
+	double yStretch = (double)stretched.height() / limits.height();
+	double real = p.x() * (XB - XA) / (xStretch * (limits.width() - 1)) + XA;
+	double imag = p.y() * (YB - YA) / (yStretch * (limits.height() - 1)) + YA;
+	return complex(real, imag);
+}
+
+RootVector equidistantRoots(quint8 rootCount)
 {
 	// Return equidistant points on a circle
-	QVector<complex> roots;
+	RootVector roots;
 	for (quint8 i = 0; i < rootCount; ++i) {
 		double angle = 2 * PI * i / rootCount;
 		roots.append(complex(cos(angle), sin(angle)));
 	}
 	return roots;
+}
+
+bool rootContainsPoint(QPoint root, QPoint point)
+{
+	// Check if root contains point
+	QPoint dist = root - point;
+	return (abs(dist.x()) < RR && abs(dist.y()) < RR);
 }

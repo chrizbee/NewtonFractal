@@ -51,7 +51,7 @@ void MainWindow::on_settingsChanged()
 	params.maxIterations = ui_->spinIterations->value();
 
 	// Update rootEdit visibility
-	for (quint8 i = 0; i < N; ++i) {
+	for (quint8 i = 0; i < NR; ++i) {
 		rootEdits[i]->setEnabled(i < degree);
 		if (i < degree) {
 			params.roots.append(string2complex(rootEdits[i]->text()));
@@ -65,7 +65,7 @@ void MainWindow::on_settingsChanged()
 void MainWindow::on_rootMoved(quint8 index, complex value)
 {
 	// Update settings
-	if (index < N) {
+	if (index < NR) {
 		rootEdits[index]->setText(complex2string(value));
 	}
 }
