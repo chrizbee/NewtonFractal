@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QDebug>
+#include <QStandardPaths>
+#include <QFileDialog>
+#include <QSettings>
 
 static QList<QLineEdit*> rootEdits;
 
@@ -11,6 +13,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	// Initialize
 	ui_->setupUi(this);
 	ui_->settingsWidget->hide();
+	ui_->cbThreading->setEditable(true);
+	ui_->cbThreading->lineEdit()->setReadOnly(true);
+	ui_->cbThreading->lineEdit()->setAlignment(Qt::AlignCenter);
 	addAction(ui_->actionSettings);
 	rootEdits.append(QList<QLineEdit*>() << ui_->lineRoot0 << ui_->lineRoot1 << ui_->lineRoot2 << ui_->lineRoot3 << ui_->lineRoot4 << ui_->lineRoot5);
 
@@ -19,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui_->spinSize, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinDegree, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
+	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_settingsChanged);
+	connect(ui_->btnExport, &QPushButton::clicked, this, &MainWindow::on_btnExportClicked);
 	connect(ui_->btnReset, &QPushButton::clicked, ui_->fractalWidget, &FractalWidget::resetRoots);
 	connect(ui_->actionSettings, &QAction::triggered, [this]() { ui_->settingsWidget->setVisible(ui_->settingsWidget->isHidden()); });
 	for (QLineEdit *rootEdit : rootEdits) {
@@ -30,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui_->spinSize->setValue(defaults.resultSize.width());
 	ui_->spinIterations->setValue(defaults.maxIterations);
 	ui_->spinDegree->setValue(defaults.roots.count());
+	ui_->cbThreading->setCurrentIndex(defaults.multiThreaded);
 	ui_->fractalWidget->setParams(defaults);
 	ui_->fractalWidget->resetRoots();
 }
@@ -49,6 +57,7 @@ void MainWindow::on_settingsChanged()
 	params.roots.clear();
 	params.resultSize = QSize(wh, wh);
 	params.maxIterations = ui_->spinIterations->value();
+	params.multiThreaded = ui_->cbThreading->currentIndex();
 
 	// Update rootEdit visibility
 	for (quint8 i = 0; i < NR; ++i) {
@@ -60,6 +69,18 @@ void MainWindow::on_settingsChanged()
 
 	// Render
 	ui_->fractalWidget->setParams(params);
+}
+
+void MainWindow::on_btnExportClicked()
+{
+	// Export pixmap to file
+	QSettings settings;
+	QString exportDir = settings.value("exportdir", QStandardPaths::standardLocations(QStandardPaths::PicturesLocation)).toString();
+	exportDir = QFileDialog::getExistingDirectory(this, tr("Export fractal to"), exportDir);
+	if (!exportDir.isEmpty()) {
+		settings.setValue("exportdir", exportDir);
+		ui_->fractalWidget->exportTo(exportDir);
+	}
 }
 
 void MainWindow::on_rootMoved(quint8 index, complex value)

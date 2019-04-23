@@ -15,5 +15,6 @@
         <file>resources/icons/user1.png</file>
         <file>resources/icons/user2.png</file>
         <file>resources/icons/reset.png</file>
+        <file>resources/icons/thread.png</file>
     </qresource>
 </RCC>

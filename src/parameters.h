@@ -25,6 +25,7 @@ struct Parameters {
 	RootVector roots;
 	QSize resultSize;
 	quint8 maxIterations;
+	bool multiThreaded;
 };
 
 QString complex2string(complex z);

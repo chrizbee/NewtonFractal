@@ -5,7 +5,6 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QColor>
-#include <QDebug>
 #include "parameters.h"
 
 struct ImageLine {

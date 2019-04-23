@@ -2,12 +2,12 @@
 
 static const double PI = 3.141592653589793238463;
 
-Parameters::Parameters(quint8 rootCount)
+Parameters::Parameters(quint8 rootCount) :
+	roots(equidistantRoots(rootCount)),
+	resultSize(QSize(DSI, DSI)),
+	maxIterations(DMI),
+	multiThreaded(true)
 {
-	// Initialize with rootCount
-	maxIterations = DMI;
-	resultSize = QSize(DSI, DSI);
-	roots = equidistantRoots(rootCount);
 }
 
 QString complex2string(complex z)

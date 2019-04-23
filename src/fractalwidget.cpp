@@ -1,5 +1,6 @@
 #include "fractalwidget.h"
 #include <QMouseEvent>
+#include <QDateTime>
 #include <QPainter>
 #include <QDebug>
 
@@ -36,6 +37,18 @@ void FractalWidget::resetRoots()
 	for (quint8 i = 0; i < rootCount; ++i) {
 		emit rootMoved(i, params_.roots[i]);
 	}
+}
+
+void FractalWidget::exportTo(const QString &exportDir)
+{
+	// Export fractal to file
+	QString filePath = exportDir + "/fractal_" +
+		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
+		QString::number(params_.roots.size()) + "roots_" +
+		QString::number(params_.resultSize.width()) + "px.png";
+	QFile f(filePath);
+	f.open(QIODevice::WriteOnly | QIODevice::Truncate);
+	pixmap_.save(&f, "png");
 }
 
 void FractalWidget::updateFractal(const QPixmap &pixmap)

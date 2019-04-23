@@ -2,7 +2,6 @@
 #include <QtConcurrent>
 #include <QImage>
 #include <QPixmap>
-#include <QDebug>
 
 static const complex step(HS, HS);
 static const QColor colors[NR] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
@@ -68,8 +67,15 @@ void RenderThread::run()
 			lineList.append(il);
 		}
 
+		// Iterate x-pixels with one threads
+		if (!currentParams_.multiThreaded) {
+			for (ImageLine &il : lineList) {
+				iterateX(il);
+			}
+
 		// Iterate x-pixels with multiple threads
-		QtConcurrent::blockingMap(lineList, iterateX);
+		// TODO: use map to report progress with QFuture
+		} else QtConcurrent::blockingMap(lineList, iterateX);
 
 		// Return if aborted, else emit signal
 		if (abort_) return;
@@ -93,7 +99,7 @@ void iterateX(ImageLine &il)
 			complex dz = (func(z + step, il.params.roots) - func(z, il.params.roots)) / step;
 			complex z0 = z - func(z, il.params.roots) / dz;
 
-			// If root has been found check which
+			// If root has been found color it and break
 			if (abs(z0 - z) < EPS) {
 				for (quint8 r = 0; r < rootCount; ++r) {
 					if (abs(z0 - il.params.roots[r]) < EPS) {

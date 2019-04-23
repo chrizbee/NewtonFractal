@@ -14,6 +14,7 @@ public:
 	Parameters params() const;
 	void setParams(Parameters params);
 	void resetRoots();
+	void exportTo(const QString &exportDir);
 
 public slots:
 	void updateFractal(const QPixmap &pixmap);
