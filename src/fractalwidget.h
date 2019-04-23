@@ -11,17 +11,27 @@ class FractalWidget : public QWidget
 
 public:
 	FractalWidget(QWidget *parent = nullptr);
-	void render(Parameters params);
+	Parameters params() const;
+	void setParams(Parameters params);
+	void resetRoots();
 
 public slots:
 	void updateFractal(const QPixmap &pixmap);
 
 protected:
 	void paintEvent(QPaintEvent *);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event);
+
+signals:
+	void rootMoved(quint8 index, complex value);
 
 private:
 	QPixmap pixmap_;
+	Parameters params_;
 	RenderThread renderThread_;
+	QList<QPoint> rootPoints_;
 };
 
 #endif // FRACTALWIDGET_H

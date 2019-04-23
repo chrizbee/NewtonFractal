@@ -4,7 +4,19 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include <QColor>
+#include <QDebug>
 #include "parameters.h"
+
+struct ImageLine {
+	ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters &params);
+	QRgb *scanLine;
+	int lineIndex;
+	int lineSize;
+	double zx;
+	double zy;
+	const Parameters &params;
+};
 
 class RenderThread : public QThread
 {
@@ -17,7 +29,6 @@ public:
 
 protected:
 	void run() override;
-	complex f(complex z);
 
 signals:
 	void fractalRendered(const QPixmap &pixmap);
@@ -29,5 +40,8 @@ private:
 	Parameters currentParams_;
 	Parameters nextParams_;
 };
+
+void iterateX(ImageLine &il);
+complex func(complex z, const RootVector &roots);
 
 #endif // RENDERTHREAD_H
