@@ -2,12 +2,54 @@
 
 static const double PI = 3.141592653589793238463;
 
+Limits::Limits(double left, double right, double top, double bottom) :
+	left(left),
+	right(right),
+	top(top),
+	bottom(bottom)
+{
+}
+
+bool Limits::operator==(const Limits &other) const
+{
+	// Check if limits are the same
+	return (
+		left == other.left &&
+		right == other.right &&
+		top == other.top &&
+		bottom == other.bottom
+	);
+}
+
 Parameters::Parameters(quint8 rootCount) :
 	roots(equidistantRoots(rootCount)),
+	limits(-1, 1, 1, -1),
 	resultSize(QSize(DSI, DSI)),
 	maxIterations(DMI),
 	multiThreaded(true)
 {
+}
+
+bool Parameters::operator==(const Parameters &other) const
+{
+	// Check for same root count
+	if (roots.size() != other.roots.size())
+		return false;
+
+	// Check for same roots
+	for (quint8 i = 0; i < roots.size(); ++i) {
+		if (roots[i] != other.roots[i]) {
+			return false;
+		}
+	}
+
+	// Check for remaining parameters
+	return (
+		limits == other.limits &&
+		resultSize == other.resultSize &&
+		maxIterations == other.maxIterations &&
+		multiThreaded == other.multiThreaded
+	);
 }
 
 QString complex2string(complex z)
@@ -29,23 +71,23 @@ complex string2complex(QString s)
 	return z;
 }
 
-QPoint complex2point(complex z, QRect stretched, QRect limits)
+QPoint complex2point(complex z, const QRect &res, const QRect &stretched, const Limits &limits)
 {
 	// Convert complex to point
-	double xStretch = (double)stretched.width() / limits.width();
-	double yStretch = (double)stretched.height() / limits.height();
-	int x = xStretch * (z.real() - XA) * (limits.width() - 1) / (XB - XA);
-	int y = yStretch * (z.imag() - YA) * (limits.height() - 1) / (YB - YA);
+	double xStretch = (double)stretched.width() / res.width();
+	double yStretch = (double)stretched.height() / res.height();
+	int x = xStretch * (z.real() - limits.left) * (res.width() - 1) / (limits.right - limits.left);
+	int y = yStretch * (z.imag() - limits.top) * (res.height() - 1) / (limits.bottom - limits.top);
 	return QPoint(x, y);
 }
 
-complex point2complex(QPoint p, QRect stretched, QRect limits)
+complex point2complex(QPoint p, const QRect &res, const QRect &stretched, const Limits &limits)
 {
 	// Convert point to complex
-	double xStretch = (double)stretched.width() / limits.width();
-	double yStretch = (double)stretched.height() / limits.height();
-	double real = p.x() * (XB - XA) / (xStretch * (limits.width() - 1)) + XA;
-	double imag = p.y() * (YB - YA) / (yStretch * (limits.height() - 1)) + YA;
+	double xStretch = (double)stretched.width() / res.width();
+	double yStretch = (double)stretched.height() / res.height();
+	double real = p.x() * (limits.right - limits.left) / (xStretch * (res.width() - 1)) + limits.left;
+	double imag = p.y() * (limits.bottom - limits.top) / (yStretch * (res.height() - 1)) + limits.top;
 	return complex(real, imag);
 }
 

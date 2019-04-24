@@ -82,9 +82,9 @@ void FractalWidget::paintEvent(QPaintEvent *)
 		painter.setPen(rootPen);
 		quint8 rootCount = params_.roots.size();
 		for (quint8 i = 0; i < rootCount; ++i) {
-			QPoint rootPoint = complex2point(params_.roots[i], rect(), pixmap_.rect());
-			painter.drawEllipse(rootPoint, RR, RR);
-			rootPoints_.append(rootPoint);
+			QPoint point = complex2point(params_.roots[i], pixmap_.rect(), rect(), params_.limits);
+			painter.drawEllipse(point, RR, RR);
+			rootPoints_.append(point);
 		}
 
 	} else text = tr("Rendering initial image, please wait...");
@@ -118,7 +118,7 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 	// Test if event over root
 	QPoint pos = event->pos();
 	if (dragging && draggedIndex >= 0 && draggedIndex < rootPoints_.length()) {
-		params_.roots[draggedIndex] = point2complex(pos, rect(), pixmap_.rect());
+		params_.roots[draggedIndex] = point2complex(pos, pixmap_.rect(), rect(), params_.limits);
 		setParams(params_);
 		emit rootMoved(draggedIndex, params_.roots[draggedIndex]);
 	} else {

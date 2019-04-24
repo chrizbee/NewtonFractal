@@ -47,23 +47,28 @@ void RenderThread::render(Parameters params)
 
 void RenderThread::run()
 {
-	// Run foooooorrreeeeevvvvvveeeeer
+	// Run forever
 	while (1) {
 
-		// Get new parameters
+		// Get new parameters and return if same as before
+		bool keepRunning = true;
 		mutex_.lock();
-		currentParams_ = nextParams_;
+		if (nextParams_ == currentParams_) {
+			keepRunning = false;
+		} else currentParams_ = nextParams_;
 		mutex_.unlock();
+		if (!keepRunning) return;
 
 		// Create image for fast pixel IO
 		QList<ImageLine> lineList;
 		QImage image(currentParams_.resultSize, QImage::Format_RGB32);
 		qint32 height = currentParams_.resultSize.height();
+		Limits limits = currentParams_.limits;
 
 		// Iterate y-pixels
 		for (int y = 0; y < height; ++y) {
 			ImageLine il((QRgb*)(image.scanLine(y)), y, image.width(), currentParams_);
-			il.zy = y * (YB - YA) / (height - 1) + YA;
+			il.zy = y * (limits.bottom - limits.top) / (height - 1) + limits.top;
 			lineList.append(il);
 		}
 
@@ -87,11 +92,12 @@ void iterateX(ImageLine &il)
 {
 	// Iterate x-pixels
 	quint8 rootCount = il.params.roots.size();
+	Limits limits = il.params.limits;
 
 	for (int x = 0; x < il.lineSize; ++x) {
 
 		// Create complex number from current pixel
-		il.zx = x * (XB - XA) / (il.lineSize - 1) + XA;
+		il.zx = x * (limits.right - limits.left) / (il.lineSize - 1) + limits.left;
 		complex z(il.zx, il.zy);
 
 		// Newton iteration

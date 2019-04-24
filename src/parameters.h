@@ -6,10 +6,6 @@
 #include <QRect>
 #include <complex>
 
-#define XA	-1.0
-#define XB   1.0
-#define YA	 1.0
-#define YB  -1.0
 #define HS	 1e-6	// Step size for numerical derivative
 #define EPS	 1e-3	// Max error allowed
 #define NR	 6		// Number of roots
@@ -20,9 +16,20 @@
 typedef std::complex<double> complex;
 typedef QVector<std::complex<double>> RootVector;
 
+struct Limits {
+	Limits(double left, double right, double top, double bottom);
+	bool operator==(const Limits &other) const;
+	double left;
+	double right;
+	double top;
+	double bottom;
+};
+
 struct Parameters {
 	Parameters(quint8 rootCount = NR);
+	bool operator==(const Parameters &other) const;
 	RootVector roots;
+	Limits limits;
 	QSize resultSize;
 	quint8 maxIterations;
 	bool multiThreaded;
@@ -30,8 +37,8 @@ struct Parameters {
 
 QString complex2string(complex z);
 complex string2complex(QString s);
-QPoint complex2point(complex z, QRect stretched, QRect limits);
-complex point2complex(QPoint p, QRect stretched, QRect limits);
+QPoint complex2point(complex z, const QRect &res, const QRect &stretched, const Limits &limits);
+complex point2complex(QPoint p, const QRect &res, const QRect &stretched, const Limits &limits);
 RootVector equidistantRoots(quint8 rootCount);
 bool rootContainsPoint(QPoint root, QPoint point);
 
