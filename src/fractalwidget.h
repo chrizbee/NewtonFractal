@@ -5,6 +5,8 @@
 #include "renderthread.h"
 #include "parameters.h"
 
+enum DraggingMode : quint8 { NoDragging, DraggingRoot, DraggingFractal };
+
 class FractalWidget : public QWidget
 {
 	Q_OBJECT
@@ -12,18 +14,19 @@ class FractalWidget : public QWidget
 public:
 	FractalWidget(QWidget *parent = nullptr);
 	Parameters params() const;
-	void setParams(Parameters params);
-	void resetRoots();
+	void updateParams(Parameters params);
+	void reset();
 	void exportTo(const QString &exportDir);
 
 public slots:
 	void updateFractal(const QPixmap &pixmap);
 
 protected:
-	void paintEvent(QPaintEvent *);
-	void mousePressEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
+	void paintEvent(QPaintEvent *) override;
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
+	void wheelEvent(QWheelEvent *event) override;
 
 signals:
 	void rootMoved(quint8 index, complex value);
@@ -33,6 +36,7 @@ private:
 	Parameters params_;
 	RenderThread renderThread_;
 	QList<QPoint> rootPoints_;
+	DraggingMode draggingMode_;
 };
 
 #endif // FRACTALWIDGET_H

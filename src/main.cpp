@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
 	app.setApplicationName("NewtonFractal");
 	app.setApplicationVersion(APP_VERSION);
 	app.setStyle("Fusion");
+	app.setFont(QFont("Consolas", 10));
 
 	MainWindow window;
 	window.show();

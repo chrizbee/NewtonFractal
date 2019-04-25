@@ -1,14 +1,16 @@
 #include "fractalwidget.h"
+#include <QApplication>
 #include <QMouseEvent>
 #include <QDateTime>
 #include <QPainter>
-#include <QDebug>
 
-static bool dragging = false;
+static QPoint lastPos;
 static int draggedIndex = -1;
 
 FractalWidget::FractalWidget(QWidget *parent) :
-	QWidget(parent)
+	QWidget(parent),
+	params_(Parameters(DRC)),
+	draggingMode_(NoDragging)
 {
 	// Enable mouse movements and connect render thread
 	setMouseTracking(true);
@@ -21,19 +23,20 @@ Parameters FractalWidget::params() const
 	return params_;
 }
 
-void FractalWidget::setParams(Parameters params)
+void FractalWidget::updateParams(Parameters params)
 {
 	// Pass params to render thread
 	params_ = params;
 	renderThread_.render(params_);
 }
 
-void FractalWidget::resetRoots()
+void FractalWidget::reset()
 {
 	// Reset roots to be equidistant
 	quint8 rootCount = params_.roots.size();
 	params_.roots = equidistantRoots(rootCount);
-	setParams(params_);
+	params_.limits = Limits();
+	updateParams(params_);
 	for (quint8 i = 0; i < rootCount; ++i) {
 		emit rootMoved(i, params_.roots[i]);
 	}
@@ -75,7 +78,7 @@ void FractalWidget::paintEvent(QPaintEvent *)
 	// Draw pixmap if rendered yet
 	if (!pixmap_.isNull()) {
 		painter.drawPixmap(rect(), pixmap_);
-		text = tr("Press F1 to change settings.");
+		text = tr("F1 → Settings");
 
 		// Draw roots
 		rootPoints_.clear();
@@ -93,9 +96,9 @@ void FractalWidget::paintEvent(QPaintEvent *)
 	QFontMetrics metrics = painter.fontMetrics();
 	int textWidth = metrics.horizontalAdvance(text);
 	painter.setPen(Qt::NoPen);
-	painter.drawRect((width() - textWidth) / 2 - 5, 0, textWidth + 10, metrics.lineSpacing() + 5);
+	painter.drawRect((width() - textWidth) / 2 - 6, 0, textWidth + 10, metrics.lineSpacing() + 6);
 	painter.setPen(whitePen);
-	painter.drawText((width() - textWidth) / 2, metrics.leading() + metrics.ascent(), text);
+	painter.drawText((width() - textWidth) / 2, metrics.leading() + metrics.ascent() + 1, text);
 }
 
 void FractalWidget::mousePressEvent(QMouseEvent *event)
@@ -105,27 +108,41 @@ void FractalWidget::mousePressEvent(QMouseEvent *event)
 	quint8 rootCount = rootPoints_.length();
 	for (quint8 i = 0; i < rootCount; ++i) {
 		if (rootContainsPoint(rootPoints_[i], pos)) {
-			setCursor(Qt::SizeAllCursor);
-			dragging = true;
+			setCursor(Qt::ClosedHandCursor);
+			draggingMode_ = DraggingRoot;
 			draggedIndex = i;
 			return;
 		}
 	}
+
+	// Else dragging fractal
+	setCursor(Qt::SizeAllCursor);
+	draggingMode_ = DraggingFractal;
+	lastPos = event->pos();
 }
 
 void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 {
-	// Test if event over root
+	// Move root if dragging
 	QPoint pos = event->pos();
-	if (dragging && draggedIndex >= 0 && draggedIndex < rootPoints_.length()) {
+	if (draggingMode_ == DraggingRoot && draggedIndex >= 0 && draggedIndex < rootPoints_.length()) {
 		params_.roots[draggedIndex] = point2complex(pos, pixmap_.rect(), rect(), params_.limits);
-		setParams(params_);
+		updateParams(params_);
 		emit rootMoved(draggedIndex, params_.roots[draggedIndex]);
+
+	// Else move fractal if dragging
+	} else if (draggingMode_ == DraggingFractal) {
+		complex d = distance2complex(lastPos - event->pos(), pixmap_.rect(), rect(), params_.limits);
+		params_.limits.move(d.real(), d.imag());
+		updateParams(params_);
+		lastPos = event->pos();
+
+	// Else if event over root change cursor
 	} else {
 		quint8 rootCount = rootPoints_.length();
 		for (quint8 i = 0; i < rootCount; ++i) {
 			if (rootContainsPoint(rootPoints_[i], pos)) {
-				setCursor(Qt::SizeAllCursor);
+				setCursor(Qt::OpenHandCursor);
 				return;
 			}
 		}
@@ -137,6 +154,13 @@ void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 	// Reset dragging
 	Q_UNUSED(event);
-	dragging = false;
+	draggingMode_ = NoDragging;
 	draggedIndex = -1;
+}
+
+void FractalWidget::wheelEvent(QWheelEvent *event)
+{
+	// Zoom fractal in / out
+	params_.limits.zoom(event->angleDelta().y() > 0);
+	updateParams(params_);
 }

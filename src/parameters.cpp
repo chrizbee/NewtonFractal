@@ -2,11 +2,12 @@
 
 static const double PI = 3.141592653589793238463;
 
-Limits::Limits(double left, double right, double top, double bottom) :
-	left(left),
-	right(right),
-	top(top),
-	bottom(bottom)
+Limits::Limits() :
+	left(-1.0),
+	right(1.0),
+	top(1.0),
+	bottom(-1.0),
+	zoomFactor(DZM)
 {
 }
 
@@ -21,9 +22,30 @@ bool Limits::operator==(const Limits &other) const
 	);
 }
 
+void Limits::move(double dx, double dy)
+{
+	// Move limits
+	left += dx;
+	right += dx;
+	top += dy;
+	bottom += dy;
+}
+
+void Limits::zoom(bool in)
+{
+	// Zoom limits in / out
+	double zoom = in ? -zoomFactor : zoomFactor;
+	double wZoom = (right - left) * zoom;
+	double hZoom = (top - bottom) * zoom;
+	left -= wZoom;
+	right += wZoom;
+	top += hZoom;
+	bottom -= hZoom;
+}
+
 Parameters::Parameters(quint8 rootCount) :
 	roots(equidistantRoots(rootCount)),
-	limits(-1, 1, 1, -1),
+	limits(Limits()),
 	resultSize(QSize(DSI, DSI)),
 	maxIterations(DMI),
 	multiThreaded(true)
@@ -88,6 +110,16 @@ complex point2complex(QPoint p, const QRect &res, const QRect &stretched, const 
 	double yStretch = (double)stretched.height() / res.height();
 	double real = p.x() * (limits.right - limits.left) / (xStretch * (res.width() - 1)) + limits.left;
 	double imag = p.y() * (limits.bottom - limits.top) / (yStretch * (res.height() - 1)) + limits.top;
+	return complex(real, imag);
+}
+
+complex distance2complex(QPoint d, const QRect &res, const QRect &stretched, const Limits &limits)
+{
+	// Convert distance to complex
+	double xStretch = (double)stretched.width() / res.width();
+	double yStretch = (double)stretched.height() / res.height();
+	double real = d.x() * (limits.right - limits.left) / (xStretch * (res.width() - 1));
+	double imag = d.y() * (limits.bottom - limits.top) / (yStretch * (res.height() - 1));
 	return complex(real, imag);
 }
 

@@ -17,5 +17,6 @@
         <file>resources/icons/thread.png</file>
         <file>resources/icons/icon.ico</file>
         <file>resources/icons/icon.png</file>
+        <file>resources/icons/zoom.png</file>
     </qresource>
 </RCC>
