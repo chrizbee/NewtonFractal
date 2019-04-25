@@ -31,16 +31,16 @@ void Limits::move(double dx, double dy)
 	bottom += dy;
 }
 
-void Limits::zoom(bool in)
+void Limits::zoom(bool in, double xw, double yw)
 {
 	// Zoom limits in / out
 	double zoom = in ? -zoomFactor : zoomFactor;
 	double wZoom = (right - left) * zoom;
 	double hZoom = (top - bottom) * zoom;
-	left -= wZoom;
-	right += wZoom;
-	top += hZoom;
-	bottom -= hZoom;
+	left -= xw * wZoom;
+	right += (1.0 - xw) * wZoom;
+	top += yw * hZoom;
+	bottom -= (1.0 - yw) * hZoom;
 }
 
 Parameters::Parameters(quint8 rootCount) :
@@ -48,7 +48,8 @@ Parameters::Parameters(quint8 rootCount) :
 	limits(Limits()),
 	resultSize(QSize(DSI, DSI)),
 	maxIterations(DMI),
-	multiThreaded(true)
+	multiThreaded(true),
+	zoomToCursor(true)
 {
 }
 
@@ -70,7 +71,8 @@ bool Parameters::operator==(const Parameters &other) const
 		limits == other.limits &&
 		resultSize == other.resultSize &&
 		maxIterations == other.maxIterations &&
-		multiThreaded == other.multiThreaded
+		multiThreaded == other.multiThreaded &&
+		zoomToCursor == other.zoomToCursor
 	);
 }
 

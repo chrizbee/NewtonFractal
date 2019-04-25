@@ -160,7 +160,14 @@ void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void FractalWidget::wheelEvent(QWheelEvent *event)
 {
+	// Calculate weight
+	double xw = 0.5, yw = 0.5;
+	if (params_.zoomToCursor) {
+		xw = (double)event->pos().x() / width();
+		yw = (double)event->pos().y() / height();
+	}
+
 	// Zoom fractal in / out
-	params_.limits.zoom(event->angleDelta().y() > 0);
+	params_.limits.zoom(event->angleDelta().y() > 0, xw, yw);
 	updateParams(params_);
 }

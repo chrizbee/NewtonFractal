@@ -11,7 +11,7 @@
 #define NR		6		// Number of roots
 #define RR		5		// Root indicator radius
 #define DRC		5		// Default root count
-#define DMI		80		// Default max. iterations
+#define DMI		160		// Default max. iterations
 #define DSI		300		// Default size
 #define DZM		0.05	// Default zoom factor
 
@@ -22,7 +22,7 @@ struct Limits {
 	Limits();
 	bool operator==(const Limits &other) const;
 	void move(double dx, double dy);
-	void zoom(bool in);
+	void zoom(bool in, double xw, double yw);
 	double left;
 	double right;
 	double top;
@@ -36,8 +36,9 @@ struct Parameters {
 	RootVector roots;
 	Limits limits;
 	QSize resultSize;
-	quint8 maxIterations;
+	quint16 maxIterations;
 	bool multiThreaded;
+	bool zoomToCursor;
 };
 
 QString complex2string(complex z);

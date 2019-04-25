@@ -99,18 +99,18 @@ void iterateX(ImageLine &il)
 		// Create complex number from current pixel
 		il.zx = x * (limits.right - limits.left) / (il.lineSize - 1) + limits.left;
 		complex z(il.zx, il.zy);
+		QColor color(Qt::black);
 
 		// Newton iteration
-		for (quint8 i = 0; i < il.params.maxIterations; ++i) {
+		for (quint16 i = 0; i < il.params.maxIterations; ++i) {
 			complex dz = (func(z + step, il.params.roots) - func(z, il.params.roots)) / step;
 			complex z0 = z - func(z, il.params.roots) / dz;
 
-			// If root has been found color it and break
+			// If root has been found set color and break
 			if (abs(z0 - z) < EPS) {
 				for (quint8 r = 0; r < rootCount; ++r) {
 					if (abs(z0 - il.params.roots[r]) < EPS) {
-						QColor c = colors[r].darker(50 + i * 10);
-						il.scanLine[x] = c.rgb();
+						color = colors[r].darker(50 + i * 8);
 						break;
 					}
 				}
@@ -119,6 +119,9 @@ void iterateX(ImageLine &il)
 			// Else next iteration
 			} else z = z0;
 		}
+
+		// Color the pixel
+		il.scanLine[x] = color.rgb();
 	}
 }
 

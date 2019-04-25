@@ -18,5 +18,6 @@
         <file>resources/icons/icon.ico</file>
         <file>resources/icons/icon.png</file>
         <file>resources/icons/zoom.png</file>
+        <file>resources/icons/cursor.png</file>
     </qresource>
 </RCC>

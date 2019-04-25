@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui_->spinDegree, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_settingsChanged);
+	connect(ui_->btnZoom, &QPushButton::clicked, this, &MainWindow::on_settingsChanged);
 	connect(ui_->btnExport, &QPushButton::clicked, this, &MainWindow::on_btnExportClicked);
 	connect(ui_->btnReset, &QPushButton::clicked, ui_->fractalWidget, &FractalWidget::reset);
 	connect(ui_->actionSettings, &QAction::triggered, [this]() { ui_->settingsWidget->setVisible(ui_->settingsWidget->isHidden()); });
@@ -39,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui_->spinIterations->setValue(defaults.maxIterations);
 	ui_->spinDegree->setValue(defaults.roots.count());
 	ui_->cbThreading->setCurrentIndex(defaults.multiThreaded);
+	ui_->spinZoom->setValue(defaults.limits.zoomFactor);
+	ui_->btnZoom->setChecked(defaults.zoomToCursor);
 	ui_->fractalWidget->updateParams(defaults);
 	ui_->fractalWidget->reset();
 }
@@ -59,6 +62,7 @@ void MainWindow::on_settingsChanged()
 	params.resultSize = QSize(wh, wh);
 	params.maxIterations = ui_->spinIterations->value();
 	params.multiThreaded = ui_->cbThreading->currentIndex();
+	params.zoomToCursor = ui_->btnZoom->isChecked();
 	params.limits = ui_->fractalWidget->params().limits;
 	params.limits.zoomFactor = ui_->spinZoom->value();
 
