@@ -30,7 +30,7 @@ protected:
 	void run() override;
 
 signals:
-	void fractalRendered(const QPixmap &pixmap);
+	void fractalRendered(const QPixmap &pixmap, double fps);
 
 private:
 	bool abort_;

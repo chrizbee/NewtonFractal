@@ -1,7 +1,5 @@
 #include "parameters.h"
 
-static const double PI = 3.141592653589793238463;
-
 Limits::Limits() :
 	left(-1.0),
 	right(1.0),
@@ -43,10 +41,20 @@ void Limits::zoom(bool in, double xw, double yw)
 	bottom -= (1.0 - yw) * hZoom;
 }
 
+void Limits::reset(QSize size)
+{
+	// Reset limits
+	right = DSF * size.width();
+	left = -DSF * size.width();
+	top = DSF * size.height();
+	bottom = -DSF * size.height();
+}
+
 Parameters::Parameters(quint8 rootCount) :
 	roots(equidistantRoots(rootCount)),
 	limits(Limits()),
-	resultSize(QSize(DSI, DSI)),
+	size(DSI, DSI),
+	scaleDown(DSC),
 	maxIterations(DMI),
 	multiThreaded(true),
 	zoomToCursor(true)
@@ -69,11 +77,28 @@ bool Parameters::operator==(const Parameters &other) const
 	// Check for remaining parameters
 	return (
 		limits == other.limits &&
-		resultSize == other.resultSize &&
+		size == other.size &&
+		scaleDown == other.scaleDown &&
 		maxIterations == other.maxIterations &&
 		multiThreaded == other.multiThreaded &&
 		zoomToCursor == other.zoomToCursor
 	);
+}
+
+void Parameters::resize(QSize newSize, bool resizeLimits)
+{
+	// Update limits if necessary
+	if (resizeLimits) {
+		int dx = newSize.width() - size.width();
+		int dy = newSize.height() - size.height();
+		limits.right += DSF * dx;
+		limits.left -= DSF * dx;
+		limits.top += DSF * dy;
+		limits.bottom -= DSF * dy;
+	}
+
+	// Update size
+	size = newSize;
 }
 
 QString complex2string(complex z)

@@ -2,8 +2,8 @@
 #include <QtConcurrent>
 #include <QImage>
 #include <QPixmap>
+#include <QElapsedTimer>
 
-static const complex step(HS, HS);
 static const QColor colors[NR] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
 
 ImageLine::ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters &params) :
@@ -50,6 +50,10 @@ void RenderThread::run()
 	// Run forever
 	while (1) {
 
+		// Start timer to measure fps
+		QElapsedTimer timer;
+		timer.start();
+
 		// Get new parameters and return if same as before
 		bool keepRunning = true;
 		mutex_.lock();
@@ -61,8 +65,8 @@ void RenderThread::run()
 
 		// Create image for fast pixel IO
 		QList<ImageLine> lineList;
-		QImage image(currentParams_.resultSize, QImage::Format_RGB32);
-		qint32 height = currentParams_.resultSize.height();
+		QImage image(currentParams_.size, QImage::Format_RGB32);
+		qint32 height = currentParams_.size.height();
 		Limits limits = currentParams_.limits;
 
 		// Iterate y-pixels
@@ -84,7 +88,7 @@ void RenderThread::run()
 
 		// Return if aborted, else emit signal
 		if (abort_) return;
-		emit fractalRendered(QPixmap::fromImage(image));
+		emit fractalRendered(QPixmap::fromImage(image), 1000.0 / timer.elapsed());
 	}
 }
 
@@ -103,7 +107,7 @@ void iterateX(ImageLine &il)
 
 		// Newton iteration
 		for (quint16 i = 0; i < il.params.maxIterations; ++i) {
-			complex dz = (func(z + step, il.params.roots) - func(z, il.params.roots)) / step;
+			complex dz = (func(z + STEP, il.params.roots) - func(z, il.params.roots)) * INV_STEP;
 			complex z0 = z - func(z, il.params.roots) / dz;
 
 			// If root has been found set color and break

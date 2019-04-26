@@ -12,16 +12,17 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	// Initialize
 	ui_->setupUi(this);
-	ui_->settingsWidget->hide();
+	ui_->settingsScroll->hide();
 	ui_->cbThreading->setEditable(true);
 	ui_->cbThreading->lineEdit()->setReadOnly(true);
 	ui_->cbThreading->lineEdit()->setAlignment(Qt::AlignCenter);
-	addAction(ui_->actionSettings);
 	rootEdits.append(QList<QLineEdit*>() << ui_->lineRoot0 << ui_->lineRoot1 << ui_->lineRoot2 << ui_->lineRoot3 << ui_->lineRoot4 << ui_->lineRoot5);
+	addAction(ui_->actionSettings);
+	resize(DSI, DSI);
 
 	// Connect signals and slots
 	connect(ui_->fractalWidget, &FractalWidget::rootMoved, this, &MainWindow::on_rootMoved);
-	connect(ui_->spinSize, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
+	connect(ui_->spinScale, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinDegree, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
@@ -29,14 +30,16 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui_->btnZoom, &QPushButton::clicked, this, &MainWindow::on_settingsChanged);
 	connect(ui_->btnExport, &QPushButton::clicked, this, &MainWindow::on_btnExportClicked);
 	connect(ui_->btnReset, &QPushButton::clicked, ui_->fractalWidget, &FractalWidget::reset);
-	connect(ui_->actionSettings, &QAction::triggered, [this]() { ui_->settingsWidget->setVisible(ui_->settingsWidget->isHidden()); });
+	connect(ui_->actionSettings, &QAction::triggered, [this]() {
+		ui_->settingsScroll->setVisible(ui_->settingsScroll->isHidden());
+	});
 	for (QLineEdit *rootEdit : rootEdits) {
 		connect(rootEdit, &QLineEdit::editingFinished, this, &MainWindow::on_settingsChanged);
 	}
 
 	// Start rendering with 3 default roots
 	Parameters defaults = ui_->fractalWidget->params();
-	ui_->spinSize->setValue(defaults.resultSize.width());
+	ui_->spinScale->setValue(defaults.scaleDown);
 	ui_->spinIterations->setValue(defaults.maxIterations);
 	ui_->spinDegree->setValue(defaults.roots.count());
 	ui_->cbThreading->setCurrentIndex(defaults.multiThreaded);
@@ -56,10 +59,9 @@ void MainWindow::on_settingsChanged()
 {
 	// Update fractal with new settings
 	Parameters params;
-	int wh = ui_->spinSize->value();
 	quint8 degree = ui_->spinDegree->value();
 	params.roots.clear();
-	params.resultSize = QSize(wh, wh);
+	params.scaleDown = ui_->spinScale->value();
 	params.maxIterations = ui_->spinIterations->value();
 	params.multiThreaded = ui_->cbThreading->currentIndex();
 	params.zoomToCursor = ui_->btnZoom->isChecked();

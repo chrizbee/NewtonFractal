@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>resources/icons/settings.png</file>
         <file>resources/icons/degree.png</file>
-        <file>resources/icons/size.png</file>
         <file>resources/icons/iteration.png</file>
         <file>resources/icons/blue.png</file>
         <file>resources/icons/cyan.png</file>
@@ -19,5 +18,6 @@
         <file>resources/icons/icon.png</file>
         <file>resources/icons/zoom.png</file>
         <file>resources/icons/cursor.png</file>
+        <file>resources/icons/downscale.png</file>
     </qresource>
 </RCC>
