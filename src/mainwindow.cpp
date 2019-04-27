@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	// Start rendering with 3 default roots
 	Parameters defaults = ui_->fractalWidget->params();
-	ui_->spinScale->setValue(defaults.scaleDown);
+	ui_->spinScale->setValue(defaults.scaleDownFactor);
 	ui_->spinIterations->setValue(defaults.maxIterations);
 	ui_->spinDegree->setValue(defaults.roots.count());
 	ui_->cbThreading->setCurrentIndex(defaults.multiThreaded);
@@ -61,7 +61,7 @@ void MainWindow::on_settingsChanged()
 	Parameters params;
 	quint8 degree = ui_->spinDegree->value();
 	params.roots.clear();
-	params.scaleDown = ui_->spinScale->value();
+	params.scaleDownFactor = ui_->spinScale->value();
 	params.maxIterations = ui_->spinIterations->value();
 	params.multiThreaded = ui_->cbThreading->currentIndex();
 	params.zoomToCursor = ui_->btnZoom->isChecked();
@@ -69,7 +69,7 @@ void MainWindow::on_settingsChanged()
 	params.limits.zoomFactor = ui_->spinZoom->value();
 
 	// Update rootEdit visibility
-	for (quint8 i = 0; i < NR; ++i) {
+	for (quint8 i = 0; i < NRT; ++i) {
 		rootEdits[i]->setEnabled(i < degree);
 		if (i < degree) {
 			params.roots.append(string2complex(rootEdits[i]->text()));
@@ -95,7 +95,7 @@ void MainWindow::on_btnExportClicked()
 void MainWindow::on_rootMoved(quint8 index, complex value)
 {
 	// Update settings
-	if (index < NR) {
+	if (index < NRT) {
 		rootEdits[index]->setText(complex2string(value));
 	}
 }

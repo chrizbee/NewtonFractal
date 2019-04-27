@@ -4,7 +4,7 @@
 #include <QPixmap>
 #include <QElapsedTimer>
 
-static const QColor colors[NR] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
+static const QColor colors[NRT] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
 
 ImageLine::ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters &params) :
 	scanLine(scanLine),
@@ -35,8 +35,8 @@ void RenderThread::render(Parameters params)
 	// Lock mutex
 	QMutexLocker locker(&mutex_);
 	nextParams_ = params;
-	if (nextParams_.roots.length() > NR) {
-		nextParams_.roots.resize(NR);
+	if (nextParams_.roots.length() > NRT) {
+		nextParams_.roots.resize(NRT);
 	}
 
 	// Start working
@@ -65,8 +65,9 @@ void RenderThread::run()
 
 		// Create image for fast pixel IO
 		QList<ImageLine> lineList;
-		QImage image(currentParams_.size, QImage::Format_RGB32);
-		qint32 height = currentParams_.size.height();
+		QSize size = currentParams_.size * (currentParams_.scaleDown ? currentParams_.scaleDownFactor : 1);
+		QImage image(size, QImage::Format_RGB32);
+		qint32 height = size.height();
 		Limits limits = currentParams_.limits;
 
 		// Iterate y-pixels

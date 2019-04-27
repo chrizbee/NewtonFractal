@@ -12,7 +12,6 @@ struct Dragger {
 	Dragger();
 	DraggingMode mode;
 	QPoint previousPos;
-	QSize previousSize;
 	int index;
 };
 
@@ -24,8 +23,8 @@ public:
 	FractalWidget(QWidget *parent = nullptr);
 	Parameters params() const;
 	void updateParams(Parameters params);
-	void reset();
 	void exportTo(const QString &exportDir);
+	void reset();
 
 public slots:
 	void updateFractal(const QPixmap &pixmap, double fps);

@@ -20,9 +20,11 @@ bool Limits::operator==(const Limits &other) const
 	);
 }
 
-void Limits::move(double dx, double dy)
+void Limits::move(QPoint distance, const QSize &ref)
 {
-	// Move limits
+	// Move limits by distance
+	double dx = distance.x() * (right - left) / (ref.width() - 1);
+	double dy = distance.y() * (bottom - top) / (ref.height() - 1);
 	left += dx;
 	right += dx;
 	top += dy;
@@ -54,8 +56,9 @@ Parameters::Parameters(quint8 rootCount) :
 	roots(equidistantRoots(rootCount)),
 	limits(Limits()),
 	size(DSI, DSI),
-	scaleDown(DSC),
 	maxIterations(DMI),
+	scaleDownFactor(DSC),
+	scaleDown(false),
 	multiThreaded(true),
 	zoomToCursor(true)
 {
@@ -78,8 +81,9 @@ bool Parameters::operator==(const Parameters &other) const
 	return (
 		limits == other.limits &&
 		size == other.size &&
-		scaleDown == other.scaleDown &&
 		maxIterations == other.maxIterations &&
+		scaleDownFactor == other.scaleDownFactor &&
+		scaleDown == other.scaleDown &&
 		multiThreaded == other.multiThreaded &&
 		zoomToCursor == other.zoomToCursor
 	);
@@ -101,6 +105,15 @@ void Parameters::resize(QSize newSize, bool resizeLimits)
 	size = newSize;
 }
 
+void Parameters::reset()
+{
+	// Reset roots and limits
+	quint8 rootCount = roots.size();
+	roots = equidistantRoots(rootCount);
+	limits.reset(size);
+	scaleDown = false;
+}
+
 QString complex2string(complex z)
 {
 	// Convert complex to string
@@ -120,33 +133,19 @@ complex string2complex(QString s)
 	return z;
 }
 
-QPoint complex2point(complex z, const QRect &res, const QRect &stretched, const Limits &limits)
+QPoint complex2point(complex z, const Parameters &params)
 {
 	// Convert complex to point
-	double xStretch = (double)stretched.width() / res.width();
-	double yStretch = (double)stretched.height() / res.height();
-	int x = xStretch * (z.real() - limits.left) * (res.width() - 1) / (limits.right - limits.left);
-	int y = yStretch * (z.imag() - limits.top) * (res.height() - 1) / (limits.bottom - limits.top);
+	int x = (z.real() - params.limits.left) * (params.size.width() - 1) / (params.limits.right - params.limits.left);
+	int y = (z.imag() - params.limits.top) * (params.size.height() - 1) / (params.limits.bottom - params.limits.top);
 	return QPoint(x, y);
 }
 
-complex point2complex(QPoint p, const QRect &res, const QRect &stretched, const Limits &limits)
+complex point2complex(QPoint p, const Parameters &params)
 {
 	// Convert point to complex
-	double xStretch = (double)stretched.width() / res.width();
-	double yStretch = (double)stretched.height() / res.height();
-	double real = p.x() * (limits.right - limits.left) / (xStretch * (res.width() - 1)) + limits.left;
-	double imag = p.y() * (limits.bottom - limits.top) / (yStretch * (res.height() - 1)) + limits.top;
-	return complex(real, imag);
-}
-
-complex distance2complex(QPoint d, const QRect &res, const QRect &stretched, const Limits &limits)
-{
-	// Convert distance to complex
-	double xStretch = (double)stretched.width() / res.width();
-	double yStretch = (double)stretched.height() / res.height();
-	double real = d.x() * (limits.right - limits.left) / (xStretch * (res.width() - 1));
-	double imag = d.y() * (limits.bottom - limits.top) / (yStretch * (res.height() - 1));
+	double real = p.x() * (params.limits.right - params.limits.left) / (params.size.width() - 1) + params.limits.left;
+	double imag = p.y() * (params.limits.bottom - params.limits.top) / (params.size.height() - 1) + params.limits.top;
 	return complex(real, imag);
 }
 
@@ -165,5 +164,5 @@ bool rootContainsPoint(QPoint root, QPoint point)
 {
 	// Check if root contains point
 	QPoint dist = root - point;
-	return (abs(dist.x()) < RR && abs(dist.y()) < RR);
+	return (abs(dist.x()) < RAD && abs(dist.y()) < RAD);
 }

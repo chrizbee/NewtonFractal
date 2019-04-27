@@ -21,7 +21,7 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	timer_.setSingleShot(true);
 	connect(&renderThread_, &RenderThread::fractalRendered, this, &FractalWidget::updateFractal);
 	connect(&timer_, &QTimer::timeout, [this]() {
-		params_.resize(dragger_.previousSize);
+		params_.scaleDown = false;
 		updateParams(params_);
 	});
 }
@@ -39,18 +39,6 @@ void FractalWidget::updateParams(Parameters params)
 	renderThread_.render(params_);
 }
 
-void FractalWidget::reset()
-{
-	// Reset roots to be equidistant
-	quint8 rootCount = params_.roots.size();
-	params_.roots = equidistantRoots(rootCount);
-	params_.limits.reset(params_.size);
-	updateParams(params_);
-	for (quint8 i = 0; i < rootCount; ++i) {
-		emit rootMoved(i, params_.roots[i]);
-	}
-}
-
 void FractalWidget::exportTo(const QString &exportDir)
 {
 	// Export fractal to file
@@ -61,6 +49,17 @@ void FractalWidget::exportTo(const QString &exportDir)
 	QFile f(filePath);
 	f.open(QIODevice::WriteOnly | QIODevice::Truncate);
 	pixmap_.save(&f, "png");
+}
+
+void FractalWidget::reset()
+{
+	// Reset roots to be equidistant
+	params_.reset();
+	updateParams(params_);
+	quint8 rootCount = params_.roots.size();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		emit rootMoved(i, params_.roots[i]);
+	}
 }
 
 void FractalWidget::updateFractal(const QPixmap &pixmap, double fps)
@@ -95,8 +94,8 @@ void FractalWidget::paintEvent(QPaintEvent *)
 		painter.setPen(rootPen);
 		quint8 rootCount = params_.roots.size();
 		for (quint8 i = 0; i < rootCount; ++i) {
-			QPoint point = complex2point(params_.roots[i], pixmap_.rect(), rect(), params_.limits);
-			painter.drawEllipse(point, RR, RR);
+			QPoint point = complex2point(params_.roots[i], params_);
+			painter.drawEllipse(point, RAD, RAD);
 			rootPoints_.append(point);
 		}
 
@@ -113,9 +112,8 @@ void FractalWidget::paintEvent(QPaintEvent *)
 
 void FractalWidget::mousePressEvent(QMouseEvent *event)
 {
-	// Overwrite size with scaleSize for smooth moving
-	dragger_.previousSize = params_.size;
-	params_.resize(params_.size * params_.scaleDown);
+	// Set scaleDown
+	params_.scaleDown = true;
 
 	// Check if mouse press is on root
 	QPoint pos = event->pos();
@@ -146,10 +144,9 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 
 	// Else move fractal if dragging
 	} else if (dragger_.mode == DraggingFractal) {
-		complex d = distance2complex(dragger_.previousPos - event->pos(), pixmap_.rect(), rect(), params_.limits);
-		params_.limits.move(d.real(), d.imag());
-		updateParams(params_);
+		params_.limits.move(dragger_.previousPos - event->pos(), params_.size);
 		dragger_.previousPos = event->pos();
+		updateParams(params_);
 
 	// Else if event over root change cursor
 	} else {
@@ -168,7 +165,7 @@ void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 	// Reset dragging and render actual size
 	Q_UNUSED(event);
-	params_.resize(dragger_.previousSize);
+	params_.scaleDown = false;
 	dragger_.mode = NoDragging;
 	dragger_.index = -1;
 	updateParams(params_);
@@ -192,8 +189,7 @@ void FractalWidget::wheelEvent(QWheelEvent *event)
 
 	// Overwrite size with scaleSize for smooth moving
 	if (!timer_.isActive()) {
-		dragger_.previousSize = params_.size;
-		params_.resize(params_.size * params_.scaleDown);
+		params_.scaleDown = true;
 	}
 	timer_.start();
 
