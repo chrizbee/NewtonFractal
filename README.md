@@ -2,10 +2,10 @@
 
 **NewtonFractal** is a *Qt5-Application* that renders fractals based on **Newton's method**.
 
-- Move up to 6 roots with drag & drop
+- Move up to *6* roots with drag & drop
 - Move fractal
 - Zoom in and out
-- Export fractal as PNG
+- Export fractal as *png*
 - Multi- or singlethreading
 - Change maximum number of newton iterations, ...
 
@@ -13,7 +13,7 @@
 
 ## Getting Started
 
-Get started by either downloading the current release (for Windows) or by building it with `qmake` and `make` (*Windows*, *Linux*, *Mac*).
+Get started by either downloading the current release (for *Windows*) or by building it with `qmake` and `make` (for *Windows*, *Linux* and *Mac*).
 
 ### Prerequisites
 
@@ -51,7 +51,7 @@ cd build
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. The current version is stored in [LICENSE.md](LICENSE.md).
+We use [SemVer](http://semver.org/) for versioning. The current version is stored in [NewtonFractal.pro](NewtonFractal.pro) (`VERSION`).
 
 ## Authors
 
