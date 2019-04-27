@@ -138,7 +138,7 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 	// Move root if dragging
 	QPoint pos = event->pos();
 	if (dragger_.mode == DraggingRoot && dragger_.index >= 0 && dragger_.index < rootPoints_.length()) {
-		params_.roots[dragger_.index] = point2complex(pos, pixmap_.rect(), rect(), params_.limits);
+		params_.roots[dragger_.index] = point2complex(pos, params_);
 		updateParams(params_);
 		emit rootMoved(dragger_.index, params_.roots[dragger_.index]);
 

@@ -19,5 +19,7 @@
         <file>resources/icons/zoom.png</file>
         <file>resources/icons/cursor.png</file>
         <file>resources/icons/downscale.png</file>
+        <file>resources/icons/icons8.png</file>
+        <file>resources/icons/ohm.png</file>
     </qresource>
 </RCC>

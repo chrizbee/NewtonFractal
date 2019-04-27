@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QDesktopServices>
 #include <QStandardPaths>
 #include <QFileDialog>
 #include <QSettings>
@@ -20,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	addAction(ui_->actionSettings);
 	resize(DSI, DSI);
 
-	// Connect signals and slots
+	// Connect fractal signals and slots
 	connect(ui_->fractalWidget, &FractalWidget::rootMoved, this, &MainWindow::on_rootMoved);
 	connect(ui_->spinScale, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
@@ -36,6 +37,12 @@ MainWindow::MainWindow(QWidget *parent) :
 	for (QLineEdit *rootEdit : rootEdits) {
 		connect(rootEdit, &QLineEdit::editingFinished, this, &MainWindow::on_settingsChanged);
 	}
+
+	// Connect external links
+	connect(ui_->btnOpit7, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://github.com/opit7"));});
+	connect(ui_->btnChrizbee, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://github.com/chrizbee"));});
+	connect(ui_->btnOhm, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://www.th-nuernberg.de/fakultaeten/efi"));});
+	connect(ui_->btnIcons8, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://icons8.com"));});
 
 	// Start rendering with 3 default roots
 	Parameters defaults = ui_->fractalWidget->params();
@@ -66,6 +73,7 @@ void MainWindow::on_settingsChanged()
 	params.multiThreaded = ui_->cbThreading->currentIndex();
 	params.zoomToCursor = ui_->btnZoom->isChecked();
 	params.limits = ui_->fractalWidget->params().limits;
+	params.size = ui_->fractalWidget->params().size;
 	params.limits.zoomFactor = ui_->spinZoom->value();
 
 	// Update rootEdit visibility

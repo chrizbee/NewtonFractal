@@ -117,7 +117,7 @@ void Parameters::reset()
 QString complex2string(complex z)
 {
 	// Convert complex to string
-	static QString complexFormat("%1 j %2");
+	static QString complexFormat("%1 i %2");
 	return complexFormat.arg(z.real()).arg(z.imag());
 }
 
@@ -125,7 +125,7 @@ complex string2complex(QString s)
 {
 	// Convert string to complex
 	complex z(0, 0);
-	QStringList parts = s.split('j');
+	QStringList parts = s.split('i');
 	z.real(parts.first().simplified().toDouble());
 	if (parts.length() >= 2) {
 		z.imag(parts[1].simplified().toDouble());
