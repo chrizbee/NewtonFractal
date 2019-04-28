@@ -1,3 +1,8 @@
+// This file is part of the NewtonFractal project.
+// Copyright (C) 2019 Christian Bauer and Timon Föehl
+// License: GNU General Public License version 3 or later,
+// see the file LICENSE in the main directory.
+
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
@@ -55,9 +60,6 @@ struct Parameters {
 	bool multiThreaded;
 	bool zoomToCursor;
 };
-
-QString complex2string(complex z);
-complex string2complex(QString s);
 
 QPoint  complex2point(complex z, const Parameters &params);
 complex point2complex(QPoint p, const Parameters &params);

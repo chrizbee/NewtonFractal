@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>resources/icons/settings.png</file>
-        <file>resources/icons/degree.png</file>
         <file>resources/icons/iteration.png</file>
         <file>resources/icons/blue.png</file>
         <file>resources/icons/cyan.png</file>
@@ -21,5 +20,6 @@
         <file>resources/icons/downscale.png</file>
         <file>resources/icons/icons8.png</file>
         <file>resources/icons/ohm.png</file>
+        <file>resources/icons/degree.png</file>
     </qresource>
 </RCC>

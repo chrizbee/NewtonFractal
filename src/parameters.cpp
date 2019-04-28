@@ -1,3 +1,8 @@
+// This file is part of the NewtonFractal project.
+// Copyright (C) 2019 Christian Bauer and Timon Föehl
+// License: GNU General Public License version 3 or later,
+// see the file LICENSE in the main directory.
+
 #include "parameters.h"
 
 Limits::Limits() :
@@ -112,25 +117,6 @@ void Parameters::reset()
 	roots = equidistantRoots(rootCount);
 	limits.reset(size);
 	scaleDown = false;
-}
-
-QString complex2string(complex z)
-{
-	// Convert complex to string
-	static QString complexFormat("%1 i %2");
-	return complexFormat.arg(z.real()).arg(z.imag());
-}
-
-complex string2complex(QString s)
-{
-	// Convert string to complex
-	complex z(0, 0);
-	QStringList parts = s.split('i');
-	z.real(parts.first().simplified().toDouble());
-	if (parts.length() >= 2) {
-		z.imag(parts[1].simplified().toDouble());
-	}
-	return z;
 }
 
 QPoint complex2point(complex z, const Parameters &params)
