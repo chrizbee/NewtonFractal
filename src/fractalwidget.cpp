@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QDateTime>
 #include <QPainter>
+#include <QDebug>
 
 Dragger::Dragger() :
 	mode(NoDragging),
@@ -108,7 +109,7 @@ void FractalWidget::paintEvent(QPaintEvent *)
 
 	// Draw text
 	QFontMetrics metrics = painter.fontMetrics();
-	int textWidth = metrics.horizontalAdvance(text);
+	int textWidth = metrics.width(text);
 	painter.setPen(Qt::NoPen);
 	painter.drawRect((width() - textWidth) / 2 - 6, 0, textWidth + 10, metrics.lineSpacing() + 6);
 	painter.setPen(whitePen);
@@ -117,11 +118,12 @@ void FractalWidget::paintEvent(QPaintEvent *)
 
 void FractalWidget::mousePressEvent(QMouseEvent *event)
 {
-	// Set scaleDown
+	// Set scaleDown and previousPos
+	QPoint pos = event->pos();
 	params_.scaleDown = true;
+	dragger_.previousPos = pos;
 
 	// Check if mouse press is on root
-	QPoint pos = event->pos();
 	quint8 rootCount = rootPoints_.length();
 	for (quint8 i = 0; i < rootCount; ++i) {
 		if (rootContainsPoint(rootPoints_[i], pos)) {
@@ -135,7 +137,6 @@ void FractalWidget::mousePressEvent(QMouseEvent *event)
 	// Else dragging fractal
 	setCursor(Qt::SizeAllCursor);
 	dragger_.mode = DraggingFractal;
-	dragger_.previousPos = event->pos();
 }
 
 void FractalWidget::mouseMoveEvent(QMouseEvent *event)
@@ -143,7 +144,11 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 	// Move root if dragging
 	QPoint pos = event->pos();
 	if (dragger_.mode == DraggingRoot && dragger_.index >= 0 && dragger_.index < rootPoints_.length()) {
-		params_.roots[dragger_.index] = point2complex(pos, params_);
+		if (event->modifiers() == Qt::KeyboardModifier::ShiftModifier) {
+			QPoint distance = pos - dragger_.previousPos;
+			params_.roots[dragger_.index] += distance2complex(distance * MOD, params_);
+			dragger_.previousPos = pos;
+		} else params_.roots[dragger_.index] = point2complex(pos, params_);
 		updateParams(params_);
 		emit rootMoved(dragger_.index, params_.roots[dragger_.index]);
 

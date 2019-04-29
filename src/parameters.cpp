@@ -135,6 +135,14 @@ complex point2complex(QPoint p, const Parameters &params)
 	return complex(real, imag);
 }
 
+complex distance2complex(QPoint d, const Parameters &params)
+{
+	// Convert distance to complex
+	double real = d.x() * (params.limits.right - params.limits.left) / (params.size.width() - 1);
+	double imag = d.y() * (params.limits.bottom - params.limits.top) / (params.size.height() - 1);
+	return complex(real, imag);
+}
+
 RootVector equidistantRoots(quint8 rootCount)
 {
 	// Return equidistant points on a circle

@@ -10,7 +10,6 @@
 #include <QStandardPaths>
 #include <QFileDialog>
 #include <QSettings>
-#include <QTimer>
 
 static QList<RootEdit*> rootEdits;
 
@@ -26,9 +25,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui_->cbThreading->lineEdit()->setAlignment(Qt::AlignCenter);
 	rootEdits.append(QList<RootEdit*>() << ui_->lineRoot0 << ui_->lineRoot1 << ui_->lineRoot2 << ui_->lineRoot3 << ui_->lineRoot4 << ui_->lineRoot5);
 	addAction(ui_->actionSettings);
+	addAction(ui_->actionQuit);
 	resize(DSI, DSI);
 
-	// Connect fractal signals and slots
+	// Connect fractal signals to slots
 	connect(ui_->fractalWidget, &FractalWidget::rootMoved, this, &MainWindow::on_rootMoved);
 	connect(ui_->spinScale, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
@@ -38,12 +38,15 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui_->btnZoom, &QPushButton::clicked, this, &MainWindow::on_settingsChanged);
 	connect(ui_->btnExport, &QPushButton::clicked, this, &MainWindow::on_btnExportClicked);
 	connect(ui_->btnReset, &QPushButton::clicked, ui_->fractalWidget, &FractalWidget::reset);
-	connect(ui_->actionSettings, &QAction::triggered, [this]() {
-		ui_->settingsScroll->setVisible(ui_->settingsScroll->isHidden());
-	});
 	for (RootEdit *rootEdit : rootEdits) {
 		connect(rootEdit, &RootEdit::rootChanged, this, &MainWindow::on_settingsChanged);
 	}
+
+	// Connect action signals to slots
+	connect(ui_->actionQuit, &QAction::triggered, QApplication::instance(), &QCoreApplication::quit);
+	connect(ui_->actionSettings, &QAction::triggered, [this]() {
+		ui_->settingsScroll->setVisible(ui_->settingsScroll->isHidden());
+	});
 
 	// Connect external links
 	connect(ui_->btnOpit7, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://github.com/opit7"));});
@@ -60,9 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui_->spinZoom->setValue(defaults.limits.zoomFactor * 100);
 	ui_->btnZoom->setChecked(defaults.zoomToCursor);
 	ui_->fractalWidget->updateParams(defaults);
-
-	// Start rendering with 3 default roots
-	QTimer::singleShot(100, ui_->fractalWidget, &FractalWidget::reset);
+	ui_->fractalWidget->reset();
 }
 
 MainWindow::~MainWindow()

@@ -21,5 +21,6 @@
         <file>resources/icons/icons8.png</file>
         <file>resources/icons/ohm.png</file>
         <file>resources/icons/degree.png</file>
+        <file>resources/icons/quit.png</file>
     </qresource>
 </RCC>

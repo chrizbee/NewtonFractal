@@ -21,6 +21,7 @@ ImageLine::ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Paramete
 
 RenderThread::RenderThread(QObject *parent) :
 	QThread(parent),
+	first_(false),
 	abort_(false)
 {
 }
@@ -66,7 +67,7 @@ void RenderThread::run()
 			keepRunning = false;
 		} else currentParams_ = nextParams_;
 		mutex_.unlock();
-		if (!keepRunning) return;
+		if (!keepRunning && first_) return;
 
 		// Create image for fast pixel IO
 		QList<ImageLine> lineList;
@@ -93,6 +94,7 @@ void RenderThread::run()
 		} else QtConcurrent::blockingMap(lineList, iterateX);
 
 		// Return if aborted, else emit signal
+		first_ = true;
 		if (abort_) return;
 		emit fractalRendered(QPixmap::fromImage(image), 1000.0 / timer.elapsed());
 	}

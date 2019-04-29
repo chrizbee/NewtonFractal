@@ -38,6 +38,7 @@ signals:
 	void fractalRendered(const QPixmap &pixmap, double fps);
 
 private:
+	bool first_;
 	bool abort_;
 	QMutex mutex_;
 	QWaitCondition condition_;

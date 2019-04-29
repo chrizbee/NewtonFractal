@@ -26,7 +26,7 @@ void RootEdit::setRoot(complex root)
 	// Create string from complex number
 	QString real = QString::number(root.real(), 'f', 2);
 	QString imag = QString::number(abs(root.imag()), 'f', 2);
-	QString sign = root.imag() >= 0 ? '+' : '-';
+	QString sign = root.imag() >= 0 ? "+" : "-";
 	QString zstr = complexFormat.arg(real, sign, imag);
 
 	// Set root and text

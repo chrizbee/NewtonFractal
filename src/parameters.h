@@ -20,6 +20,7 @@ static constexpr double  HST = 1e-6;					// Step size for numerical derivative
 static constexpr double  EPS = 1e-3;					// Max error allowed
 static constexpr quint8  NRT = 6;						// Number of roots
 static constexpr quint8  RAD = 5;						// Root indicator radius
+static constexpr double  MOD = 0.2;						// Root drag speed modifier
 
 static constexpr quint8  DRC = 5;						// Default root count
 static constexpr double  DZM = 0.05;					// Default zoom factor
@@ -63,6 +64,7 @@ struct Parameters {
 
 QPoint  complex2point(complex z, const Parameters &params);
 complex point2complex(QPoint p, const Parameters &params);
+complex distance2complex(QPoint d, const Parameters &params);
 
 RootVector equidistantRoots(quint8 rootCount);
 bool rootContainsPoint(QPoint root, QPoint point);
