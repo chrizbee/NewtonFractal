@@ -94,17 +94,15 @@ bool Parameters::operator==(const Parameters &other) const
 	);
 }
 
-void Parameters::resize(QSize newSize, bool resizeLimits)
+void Parameters::resize(QSize newSize)
 {
-	// Update limits if necessary
-	if (resizeLimits) {
-		int dx = newSize.width() - size.width();
-		int dy = newSize.height() - size.height();
-		limits.right += DSF * dx;
-		limits.left -= DSF * dx;
-		limits.top += DSF * dy;
-		limits.bottom -= DSF * dy;
-	}
+	// Update limits
+	int dx = newSize.width() - size.width();
+	int dy = newSize.height() - size.height();
+	limits.right += DSF * dx;
+	limits.left -= DSF * dx;
+	limits.top += DSF * dy;
+	limits.bottom -= DSF * dy;
 
 	// Update size
 	size = newSize;

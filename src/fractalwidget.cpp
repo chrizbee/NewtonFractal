@@ -184,7 +184,7 @@ void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
 void FractalWidget::resizeEvent(QResizeEvent *event)
 {
 	// Change resolution on resize
-	params_.resize(event->size(), true);
+	params_.resize(event->size());
 	updateParams(params_);
 }
 

@@ -50,7 +50,7 @@ struct Limits {
 struct Parameters {
 	Parameters(quint8 rootCount = DRC);
 	bool operator==(const Parameters &other) const;
-	void resize(QSize newSize, bool resizeLimits = false);
+	void resize(QSize newSize);
 	void reset();
 	RootVector roots;
 	Limits limits;
