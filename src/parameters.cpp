@@ -1,61 +1,9 @@
 // This file is part of the NewtonFractal project.
-// Copyright (C) 2019 Christian Bauer and Timon Föehl
+// Copyright (C) 2019 Christian Bauer and Timon Foehl
 // License: GNU General Public License version 3 or later,
 // see the file LICENSE in the main directory.
 
 #include "parameters.h"
-
-Limits::Limits() :
-	left(-1.0),
-	right(1.0),
-	top(1.0),
-	bottom(-1.0),
-	zoomFactor(DZM)
-{
-}
-
-bool Limits::operator==(const Limits &other) const
-{
-	// Check if limits are the same
-	return (
-		left == other.left &&
-		right == other.right &&
-		top == other.top &&
-		bottom == other.bottom
-	);
-}
-
-void Limits::move(QPoint distance, const QSize &ref)
-{
-	// Move limits by distance
-	double dx = distance.x() * (right - left) / (ref.width() - 1);
-	double dy = distance.y() * (bottom - top) / (ref.height() - 1);
-	left += dx;
-	right += dx;
-	top += dy;
-	bottom += dy;
-}
-
-void Limits::zoom(bool in, double xw, double yw)
-{
-	// Zoom limits in / out
-	double zoom = in ? -zoomFactor : zoomFactor;
-	double wZoom = (right - left) * zoom;
-	double hZoom = (top - bottom) * zoom;
-	left -= xw * wZoom;
-	right += (1.0 - xw) * wZoom;
-	top += yw * hZoom;
-	bottom -= (1.0 - yw) * hZoom;
-}
-
-void Limits::reset(QSize size)
-{
-	// Reset limits
-	right = DSF * size.width();
-	left = -DSF * size.width();
-	top = DSF * size.height();
-	bottom = -DSF * size.height();
-}
 
 Parameters::Parameters(quint8 rootCount) :
 	roots(equidistantRoots(rootCount)),
@@ -96,15 +44,8 @@ bool Parameters::operator==(const Parameters &other) const
 
 void Parameters::resize(QSize newSize)
 {
-	// Update limits
-	int dx = newSize.width() - size.width();
-	int dy = newSize.height() - size.height();
-	limits.right += DSF * dx;
-	limits.left -= DSF * dx;
-	limits.top += DSF * dy;
-	limits.bottom -= DSF * dy;
-
-	// Update size
+	// Update limits and size
+	limits.resize(newSize - size);
 	size = newSize;
 }
 
@@ -120,24 +61,24 @@ void Parameters::reset()
 QPoint complex2point(complex z, const Parameters &params)
 {
 	// Convert complex to point
-	int x = (z.real() - params.limits.left) * (params.size.width() - 1) / (params.limits.right - params.limits.left);
-	int y = (z.imag() - params.limits.top) * (params.size.height() - 1) / (params.limits.bottom - params.limits.top);
+	int x = (z.real() - params.limits.left()) * (params.size.width() - 1) / params.limits.width();
+	int y = (z.imag() - params.limits.top()) * (params.size.height() - 1) / -params.limits.height();
 	return QPoint(x, y);
 }
 
 complex point2complex(QPoint p, const Parameters &params)
 {
 	// Convert point to complex
-	double real = p.x() * (params.limits.right - params.limits.left) / (params.size.width() - 1) + params.limits.left;
-	double imag = p.y() * (params.limits.bottom - params.limits.top) / (params.size.height() - 1) + params.limits.top;
+	double real = p.x() * params.limits.width() / (params.size.width() - 1) + params.limits.left();
+	double imag = p.y() * -params.limits.height() / (params.size.height() - 1) + params.limits.top();
 	return complex(real, imag);
 }
 
 complex distance2complex(QPoint d, const Parameters &params)
 {
 	// Convert distance to complex
-	double real = d.x() * (params.limits.right - params.limits.left) / (params.size.width() - 1);
-	double imag = d.y() * (params.limits.bottom - params.limits.top) / (params.size.height() - 1);
+	double real = d.x() * params.limits.width()  / (params.size.width() - 1);
+	double imag = d.y() * -params.limits.height() / (params.size.height() - 1);
 	return complex(real, imag);
 }
 

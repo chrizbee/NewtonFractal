@@ -1,5 +1,5 @@
 // This file is part of the NewtonFractal project.
-// Copyright (C) 2019 Christian Bauer and Timon Föehl
+// Copyright (C) 2019 Christian Bauer and Timon Foehl
 // License: GNU General Public License version 3 or later,
 // see the file LICENSE in the main directory.
 
@@ -8,7 +8,6 @@
 #include <QMouseEvent>
 #include <QDateTime>
 #include <QPainter>
-#include <QDebug>
 
 Dragger::Dragger() :
 	mode(NoDragging),
@@ -154,7 +153,7 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 
 	// Else move fractal if dragging
 	} else if (dragger_.mode == DraggingFractal) {
-		params_.limits.move(dragger_.previousPos - event->pos(), params_.size);
+		params_.limits.move(dragger_.previousPos - pos, params_.size);
 		dragger_.previousPos = event->pos();
 		updateParams(params_);
 

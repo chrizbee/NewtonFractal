@@ -29,14 +29,17 @@ SOURCES += \
     src/fractalwidget.cpp \
     src/renderthread.cpp \
     src/parameters.cpp \
-    src/rootedit.cpp
+    src/rootedit.cpp \
+    src/limits.cpp
 
 HEADERS += \
     src/mainwindow.h \
     src/fractalwidget.h \
     src/renderthread.h \
     src/parameters.h \
-    src/rootedit.h
+    src/rootedit.h \
+    src/defaults.h \
+    src/limits.h
 
 FORMS += \
     src/mainwindow.ui

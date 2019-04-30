@@ -1,5 +1,5 @@
 // This file is part of the NewtonFractal project.
-// Copyright (C) 2019 Christian Bauer and Timon Föehl
+// Copyright (C) 2019 Christian Bauer and Timon Foehl
 // License: GNU General Public License version 3 or later,
 // see the file LICENSE in the main directory.
 
@@ -79,7 +79,7 @@ void RenderThread::run()
 		// Iterate y-pixels
 		for (int y = 0; y < height; ++y) {
 			ImageLine il((QRgb*)(image.scanLine(y)), y, image.width(), currentParams_);
-			il.zy = y * (limits.bottom - limits.top) / (height - 1) + limits.top;
+			il.zy = -y * limits.height() / (height - 1) + limits.top();
 			lineList.append(il);
 		}
 
@@ -109,7 +109,7 @@ void iterateX(ImageLine &il)
 	for (int x = 0; x < il.lineSize; ++x) {
 
 		// Create complex number from current pixel
-		il.zx = x * (limits.right - limits.left) / (il.lineSize - 1) + limits.left;
+		il.zx = x * limits.width() / (il.lineSize - 1) + limits.left();
 		complex z(il.zx, il.zy);
 		QColor color(Qt::black);
 

@@ -1,5 +1,5 @@
 // This file is part of the NewtonFractal project.
-// Copyright (C) 2019 Christian Bauer and Timon Föehl
+// Copyright (C) 2019 Christian Bauer and Timon Foehl
 // License: GNU General Public License version 3 or later,
 // see the file LICENSE in the main directory.
 
@@ -58,9 +58,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	Parameters defaults = ui_->fractalWidget->params();
 	ui_->spinScale->setValue(defaults.scaleDownFactor * 100);
 	ui_->spinIterations->setValue(defaults.maxIterations);
-	ui_->spinDegree->setValue(defaults.roots.count());
+	ui_->spinDegree->setValue(defaults.roots.size());
 	ui_->cbThreading->setCurrentIndex(defaults.multiThreaded);
-	ui_->spinZoom->setValue(defaults.limits.zoomFactor * 100);
+	ui_->spinZoom->setValue(defaults.limits.zoomFactor() * 100);
 	ui_->btnZoom->setChecked(defaults.zoomToCursor);
 	ui_->fractalWidget->updateParams(defaults);
 	ui_->fractalWidget->reset();
@@ -84,7 +84,7 @@ void MainWindow::on_settingsChanged()
 	params.zoomToCursor = ui_->btnZoom->isChecked();
 	params.limits = ui_->fractalWidget->params().limits;
 	params.size = ui_->fractalWidget->params().size;
-	params.limits.zoomFactor = ui_->spinZoom->value() / 100.0;
+	params.limits.setZoomFactor(ui_->spinZoom->value() / 100.0);
 
 	// Update rootEdit visibility
 	for (quint8 i = 0; i < NRT; ++i) {
