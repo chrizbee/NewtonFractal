@@ -24,6 +24,7 @@ public:
 private slots:
 	void on_settingsChanged();
 	void on_btnExportClicked();
+	void on_zoomChanged(double factor);
 	void on_rootMoved(quint8 index, complex value);
 
 private:

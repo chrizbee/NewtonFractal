@@ -65,6 +65,7 @@ void FractalWidget::reset()
 	for (quint8 i = 0; i < rootCount; ++i) {
 		emit rootMoved(i, params_.roots[i]);
 	}
+	emit zoomChanged(params_.limits.zoomFactor());
 }
 
 void FractalWidget::updateFractal(const QPixmap &pixmap, double fps)
@@ -190,11 +191,8 @@ void FractalWidget::resizeEvent(QResizeEvent *event)
 void FractalWidget::wheelEvent(QWheelEvent *event)
 {
 	// Calculate weight
-	double xw = 0.5, yw = 0.5;
-	if (params_.zoomToCursor) {
-		xw = (double)event->pos().x() / width();
-		yw = (double)event->pos().y() / height();
-	}
+	double xw = (double)event->pos().x() / width();
+	double yw = (double)event->pos().y() / height();
 
 	// Overwrite size with scaleSize for smooth moving
 	if (!timer_.isActive()) {
@@ -206,4 +204,5 @@ void FractalWidget::wheelEvent(QWheelEvent *event)
 	bool in = event->angleDelta().y() > 0;
 	params_.limits.zoom(in, xw, yw);
 	updateParams(params_);
+	emit zoomChanged(params_.limits.zoomFactor());
 }

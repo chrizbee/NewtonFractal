@@ -22,7 +22,6 @@ struct Parameters {
 	double scaleDownFactor;
 	bool scaleDown;
 	bool multiThreaded;
-	bool zoomToCursor;
 };
 
 QPoint  complex2point(complex z, const Parameters &params);

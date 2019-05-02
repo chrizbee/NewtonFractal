@@ -30,12 +30,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	// Connect fractal signals to slots
 	connect(ui_->fractalWidget, &FractalWidget::rootMoved, this, &MainWindow::on_rootMoved);
+	connect(ui_->fractalWidget, &FractalWidget::zoomChanged, this, &MainWindow::on_zoomChanged);
 	connect(ui_->spinScale, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->spinDegree, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
-	connect(ui_->spinZoom, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
+	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_settingsChanged);
 	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_settingsChanged);
-	connect(ui_->btnZoom, &QPushButton::clicked, this, &MainWindow::on_settingsChanged);
 	connect(ui_->btnExport, &QPushButton::clicked, this, &MainWindow::on_btnExportClicked);
 	connect(ui_->btnReset, &QPushButton::clicked, ui_->fractalWidget, &FractalWidget::reset);
 	for (RootEdit *rootEdit : rootEdits) {
@@ -61,7 +61,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui_->spinDegree->setValue(defaults.roots.size());
 	ui_->cbThreading->setCurrentIndex(defaults.multiThreaded);
 	ui_->spinZoom->setValue(defaults.limits.zoomFactor() * 100);
-	ui_->btnZoom->setChecked(defaults.zoomToCursor);
 	ui_->fractalWidget->updateParams(defaults);
 	ui_->fractalWidget->reset();
 }
@@ -81,7 +80,6 @@ void MainWindow::on_settingsChanged()
 	params.scaleDownFactor = ui_->spinScale->value() / 100.0;
 	params.maxIterations = ui_->spinIterations->value();
 	params.multiThreaded = ui_->cbThreading->currentIndex();
-	params.zoomToCursor = ui_->btnZoom->isChecked();
 	params.limits = ui_->fractalWidget->params().limits;
 	params.size = ui_->fractalWidget->params().size;
 	params.limits.setZoomFactor(ui_->spinZoom->value() / 100.0);
@@ -108,6 +106,12 @@ void MainWindow::on_btnExportClicked()
 		settings.setValue("exportdir", exportDir);
 		ui_->fractalWidget->exportTo(exportDir);
 	}
+}
+
+void MainWindow::on_zoomChanged(double factor)
+{
+	// Update settings
+	ui_->spinZoom->setValue(factor * 100);
 }
 
 void MainWindow::on_rootMoved(quint8 index, complex value)

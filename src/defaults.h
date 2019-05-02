@@ -19,9 +19,9 @@ static constexpr double  EPS = 1e-3;					// Max error allowed
 static constexpr quint8  NRT = 6;						// Number of roots
 static constexpr quint8  RAD = 5;						// Root indicator radius
 static constexpr double  MOD = 0.2;						// Root drag speed modifier
+static constexpr double  ZMF = 0.05;					// Zoom factor
 
 static constexpr quint8  DRC = 5;						// Default root count
-static constexpr double  DZM = 0.05;					// Default zoom factor
 static constexpr double  DSC = 0.5;						// Default zoom factor
 static constexpr quint16 DTI = 400;						// Default timer interval
 static constexpr quint16 DMI = 160;						// Default max. iterations

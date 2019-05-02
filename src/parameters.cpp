@@ -12,8 +12,7 @@ Parameters::Parameters(quint8 rootCount) :
 	maxIterations(DMI),
 	scaleDownFactor(DSC),
 	scaleDown(false),
-	multiThreaded(true),
-	zoomToCursor(true)
+	multiThreaded(true)
 {
 }
 
@@ -37,8 +36,7 @@ bool Parameters::operator==(const Parameters &other) const
 		maxIterations == other.maxIterations &&
 		scaleDownFactor == other.scaleDownFactor &&
 		scaleDown == other.scaleDown &&
-		multiThreaded == other.multiThreaded &&
-		zoomToCursor == other.zoomToCursor
+		multiThreaded == other.multiThreaded
 	);
 }
 

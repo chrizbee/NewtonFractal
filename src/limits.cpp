@@ -6,13 +6,17 @@
 #include "limits.h"
 #include "defaults.h"
 
-Limits::Limits() :
+Limits::Limits(bool original) :
 	left_(-1.0),
 	right_(1.0),
 	top_(1.0),
 	bottom_(-1.0),
-	zoomFactor_(DZM)
+	original_(nullptr)
 {
+	// Create original
+	if (!original) {
+		original_ = new Limits(true);
+	}
 }
 
 bool Limits::operator==(const Limits &other) const
@@ -29,18 +33,23 @@ bool Limits::operator==(const Limits &other) const
 void Limits::move(QPoint distance, const QSize &ref)
 {
 	// Move limits by distance
-	double dx = distance.x() * (right_ - left_)/ (ref.width() - 1);
+	double dx = distance.x() * (right_ - left_) / (ref.width() - 1);
 	double dy = distance.y() * (bottom_ - top_) / (ref.height() - 1);
 	left_ += dx;
 	right_ += dx;
 	top_ += dy;
 	bottom_ += dy;
+
+	// Move original limits
+	if (original_ != nullptr) {
+		original_->move(distance, ref);
+	}
 }
 
 void Limits::zoom(bool in, double xw, double yw)
 {
 	// Zoom limits in / out
-	double zoom = in ? -zoomFactor_ : zoomFactor_;
+	double zoom = in ? -ZMF : ZMF;
 	double wZoom = (right_ - left_) * zoom;
 	double hZoom = (top_ - bottom_) * zoom;
 	left_ -= xw * wZoom;
@@ -56,15 +65,25 @@ void Limits::reset(QSize size)
 	right_ = DSF * size.width();
 	top_ = DSF * size.height();
 	bottom_ = -DSF * size.height();
+
+	// Reset original limits
+	if (original_ != nullptr) {
+		original_->reset(size);
+	}
 }
 
 void Limits::resize(QSize delta)
 {
-	// Resiz limits
+	// Resize limits
 	right_ += DSF * delta.width();
 	left_ -= DSF * delta.width();
 	top_ += DSF * delta.height();
 	bottom_ -= DSF * delta.height();
+
+	// Resize original limits
+	if (original_ != nullptr) {
+		original_->resize(delta);
+	}
 }
 
 double Limits::width() const
@@ -106,11 +125,18 @@ double Limits::bottom() const
 double Limits::zoomFactor() const
 {
 	// Return zoomFactor
-	return zoomFactor_;
+	return original_->width() / width();
 }
 
 void Limits::setZoomFactor(double zoomFactor)
 {
 	// Set zoomFactor
-	zoomFactor_ = zoomFactor;
+	double w2 = 0.5 * original_->width() / zoomFactor;
+	double h2 = 0.5 * original_->height() / zoomFactor;
+	double xMid = 0.5 * right_ + 0.5 * left_;
+	double yMid = 0.5 * top_ + 0.5 * bottom_;
+	right_ = xMid + w2;
+	left_ = xMid - w2;
+	top_ = yMid + h2;
+	bottom_ = yMid - h2;
 }
