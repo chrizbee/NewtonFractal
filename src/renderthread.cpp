@@ -63,28 +63,28 @@ void RenderThread::run()
 		// Get new parameters and return if same as before
 		bool keepRunning = true;
 		mutex_.lock();
-		if (nextParams_ == currentParams_) {
+		if (nextParams_ == curParams_) {
 			keepRunning = false;
-		} else currentParams_ = nextParams_;
+		} else curParams_ = nextParams_;
 		mutex_.unlock();
 		if (!keepRunning && first_) return;
 
 		// Create image for fast pixel IO
 		QList<ImageLine> lineList;
-		QSize size = currentParams_.size * (currentParams_.scaleDown ? currentParams_.scaleDownFactor : 1);
+		QSize size = curParams_.size * (curParams_.scaleDown ? curParams_.scaleDownFactor : 1);
 		QImage image(size, QImage::Format_RGB32);
 		qint32 height = size.height();
-		Limits limits = currentParams_.limits;
+		Limits limits = curParams_.limits;
 
 		// Iterate y-pixels
 		for (int y = 0; y < height; ++y) {
-			ImageLine il((QRgb*)(image.scanLine(y)), y, image.width(), currentParams_);
+			ImageLine il((QRgb*)(image.scanLine(y)), y, image.width(), curParams_);
 			il.zy = -y * limits.height() / (height - 1) + limits.top();
 			lineList.append(il);
 		}
 
 		// Iterate x-pixels with one threads
-		if (!currentParams_.multiThreaded) {
+		if (!curParams_.multiThreaded) {
 			for (ImageLine &il : lineList) {
 				iterateX(il);
 			}
@@ -116,21 +116,20 @@ void iterateX(ImageLine &il)
 		// Newton iteration
 		for (quint16 i = 0; i < il.params.maxIterations; ++i) {
 			complex dz = (func(z + STEP, il.params.roots) - func(z, il.params.roots)) * INV_STEP;
-			complex z0 = z - func(z, il.params.roots) / dz;
+			complex z0 = z - 0.1 * func(z, il.params.roots) / dz;
 
 			// If root has been found set color and break
 			if (abs(z0 - z) < EPS) {
 				for (quint8 r = 0; r < rootCount; ++r) {
 					if (abs(z0 - il.params.roots[r]) < EPS) {
 						color = colors[r].darker(50 + i * 8);
-						break;
+						goto DONE;
 					}
 				}
-				break;
-
-			// Else next iteration
-			} else z = z0;
+			}
+			z = z0;
 		}
+		DONE:;
 
 		// Color the pixel
 		il.scanLine[x] = color.rgb();
@@ -140,9 +139,9 @@ void iterateX(ImageLine &il)
 complex func(complex z, const RootVector &roots)
 {
 	// Calculate function with given roots
-	complex result(1, 0);
 	quint8 rootCount = roots.length();
-	for (quint8 i = 0; i < rootCount; ++i) {
+	complex result = z - roots[0];
+	for (quint8 i = 1; i < rootCount; ++i) {
 		result = result * (z - roots[i]);
 	}
 	return result;

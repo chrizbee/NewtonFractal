@@ -42,7 +42,7 @@ private:
 	bool abort_;
 	QMutex mutex_;
 	QWaitCondition condition_;
-	Parameters currentParams_;
+	Parameters curParams_;
 	Parameters nextParams_;
 };
 
