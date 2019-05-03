@@ -22,5 +22,8 @@
         <file>resources/icons/ohm.png</file>
         <file>resources/icons/degree.png</file>
         <file>resources/icons/quit.png</file>
+        <file>resources/icons/damp.png</file>
+        <file>resources/icons/size.png</file>
+        <file>resources/icons/coordinate.png</file>
     </qresource>
 </RCC>

@@ -80,8 +80,10 @@ void FractalWidget::paintEvent(QPaintEvent *)
 {
 	// Static colors
 	static const QPen whitePen(Qt::white);
-	static const QPen rootPen(Qt::white, 2);
+	static const QPen circlePen(Qt::white, 2);
 	static const QBrush opaqueBrush(QColor(0, 0, 0, 128));
+	static const QBrush blackBrush(Qt::black);
+	static const QString pointStr("%1,%2");
 
 	// Paint fractal
 	QPainter painter(this);
@@ -97,7 +99,7 @@ void FractalWidget::paintEvent(QPaintEvent *)
 
 		// Draw roots
 		rootPoints_.clear();
-		painter.setPen(rootPen);
+		painter.setPen(circlePen);
 		quint8 rootCount = params_.roots.size();
 		for (quint8 i = 0; i < rootCount; ++i) {
 			QPoint point = complex2point(params_.roots[i], params_);
@@ -186,6 +188,7 @@ void FractalWidget::resizeEvent(QResizeEvent *event)
 	// Change resolution on resize
 	params_.resize(event->size());
 	updateParams(params_);
+	emit sizeChanged(event->size());
 }
 
 void FractalWidget::wheelEvent(QWheelEvent *event)

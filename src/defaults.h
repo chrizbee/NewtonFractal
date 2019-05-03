@@ -23,9 +23,10 @@ static constexpr double  ZMF = 0.05;					// Zoom factor
 
 static constexpr quint8  DRC = 5;						// Default root count
 static constexpr double  DSC = 0.5;						// Default zoom factor
+static constexpr double  DDP = 1.0;						// Default damping factor
 static constexpr quint16 DTI = 400;						// Default timer interval
 static constexpr quint16 DMI = 160;						// Default max. iterations
-static constexpr quint16 DSI = 600;						// Default size
+static constexpr quint16 DSI = 660;						// Default size
 static constexpr quint16 DZS = 2;						// Default complex size [-DZS -> +DZS]
 
 static constexpr double  DSF = 0.5 * DZS / DSI;			// Resulting size factor

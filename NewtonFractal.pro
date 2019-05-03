@@ -30,7 +30,8 @@ SOURCES += \
     src/renderthread.cpp \
     src/parameters.cpp \
     src/rootedit.cpp \
-    src/limits.cpp
+    src/limits.cpp \
+    src/sizeedit.cpp
 
 HEADERS += \
     src/mainwindow.h \
@@ -39,7 +40,8 @@ HEADERS += \
     src/parameters.h \
     src/rootedit.h \
     src/defaults.h \
-    src/limits.h
+    src/limits.h \
+    src/sizeedit.h
 
 FORMS += \
     src/mainwindow.ui

@@ -116,7 +116,7 @@ void iterateX(ImageLine &il)
 		// Newton iteration
 		for (quint16 i = 0; i < il.params.maxIterations; ++i) {
 			complex dz = (func(z + STEP, il.params.roots) - func(z, il.params.roots)) * INV_STEP;
-			complex z0 = z - 0.1 * func(z, il.params.roots) / dz;
+			complex z0 = z - il.params.damping * func(z, il.params.roots) / dz;
 
 			// If root has been found set color and break
 			if (abs(z0 - z) < EPS) {

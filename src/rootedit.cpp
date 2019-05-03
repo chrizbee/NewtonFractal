@@ -12,25 +12,25 @@ RootEdit::RootEdit(QWidget *parent) :
 	connect(this, &RootEdit::editingFinished, this, &RootEdit::on_editingFinished);
 }
 
-complex RootEdit::root() const
+complex RootEdit::value() const
 {
 	// Get root
 	return root_;
 }
 
-void RootEdit::setRoot(complex root)
+void RootEdit::setValue(complex value)
 {
 	// Static string format
 	static QString complexFormat("%1 %2 i%3");
 
 	// Create string from complex number
-	QString real = QString::number(root.real(), 'f', 2);
-	QString imag = QString::number(abs(root.imag()), 'f', 2);
-	QString sign = root.imag() >= 0 ? "+" : "-";
+	QString real = QString::number(value.real(), 'f', 2);
+	QString imag = QString::number(abs(value.imag()), 'f', 2);
+	QString sign = value.imag() >= 0 ? "+" : "-";
 	QString zstr = complexFormat.arg(real, sign, imag);
 
 	// Set root and text
-	root_ = root;
+	root_ = value;
 	setText(zstr);
 }
 
@@ -59,6 +59,6 @@ void RootEdit::on_editingFinished()
 	}
 
 	// Set new root
-	setRoot(complex(real, imag));
+	setValue(complex(real, imag));
 	emit rootChanged();
 }

@@ -45,6 +45,7 @@ protected:
 signals:
 	void rootMoved(quint8 index, complex value);
 	void zoomChanged(double factor);
+	void sizeChanged(QSize size);
 
 private:
 	QTimer timer_;

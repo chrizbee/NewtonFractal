@@ -10,6 +10,7 @@ Parameters::Parameters(quint8 rootCount) :
 	limits(Limits()),
 	size(DSI, DSI),
 	maxIterations(DMI),
+	damping(DDP),
 	scaleDownFactor(DSC),
 	scaleDown(false),
 	multiThreaded(true)
@@ -34,6 +35,7 @@ bool Parameters::operator==(const Parameters &other) const
 		limits == other.limits &&
 		size == other.size &&
 		maxIterations == other.maxIterations &&
+		damping == other.damping &&
 		scaleDownFactor == other.scaleDownFactor &&
 		scaleDown == other.scaleDown &&
 		multiThreaded == other.multiThreaded
