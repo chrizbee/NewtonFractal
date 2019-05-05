@@ -11,6 +11,17 @@
 
 static const QColor colors[NRT] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
 
+inline complex func(complex z, const RootVector &roots)
+{
+	// Calculate function with given roots
+	quint8 rootCount = roots.length();
+	complex result = z - roots[0];
+	for (quint8 i = 1; i < rootCount; ++i) {
+			result = result * (z - roots[i]);
+	}
+	return result;
+}
+
 ImageLine::ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters &params) :
 	scanLine(scanLine),
 	lineIndex(lineIndex),
@@ -73,13 +84,15 @@ void RenderThread::run()
 		QList<ImageLine> lineList;
 		QSize size = curParams_.size * (curParams_.scaleDown ? curParams_.scaleDownFactor : 1);
 		QImage image(size, QImage::Format_RGB32);
-		qint32 height = size.height();
-		Limits limits = curParams_.limits;
+		image.fill(Qt::black);
+		const qint32 height = size.height();
+		const Limits limits = curParams_.limits;
+		const double yFactor = -limits.height() / (height - 1);
 
 		// Iterate y-pixels
 		for (int y = 0; y < height; ++y) {
 			ImageLine il((QRgb*)(image.scanLine(y)), y, image.width(), curParams_);
-			il.zy = -y * limits.height() / (height - 1) + limits.top();
+			il.zy = y * yFactor + limits.top();
 			lineList.append(il);
 		}
 
@@ -103,46 +116,33 @@ void RenderThread::run()
 void iterateX(ImageLine &il)
 {
 	// Iterate x-pixels
-	quint8 rootCount = il.params.roots.size();
-	Limits limits = il.params.limits;
+	const quint8 rootCount = il.params.roots.size();
+	const Limits limits = il.params.limits;
+	const double xFactor = limits.width() / (il.lineSize - 1);
 
 	for (int x = 0; x < il.lineSize; ++x) {
 
 		// Create complex number from current pixel
-		il.zx = x * limits.width() / (il.lineSize - 1) + limits.left();
+		il.zx = x * xFactor + limits.left();
 		complex z(il.zx, il.zy);
-		QColor color(Qt::black);
 
 		// Newton iteration
 		for (quint16 i = 0; i < il.params.maxIterations; ++i) {
-			complex dz = (func(z + STEP, il.params.roots) - func(z, il.params.roots)) * INV_STEP;
-			complex z0 = z - il.params.damping * func(z, il.params.roots) / dz;
+			const complex fz = func(z, il.params.roots);
+			const complex dz = (func(z + STEP, il.params.roots) - fz) * INV_STEP;
+			const complex z0 = z - il.params.damping * fz / dz;
 
 			// If root has been found set color and break
 			if (abs(z0 - z) < EPS) {
 				for (quint8 r = 0; r < rootCount; ++r) {
 					if (abs(z0 - il.params.roots[r]) < EPS) {
-						color = colors[r].darker(50 + i * 8);
-						goto DONE;
+						il.scanLine[x] = colors[r].darker(50 + i * 8).rgb();
+						goto POINT_DONE;
 					}
 				}
 			}
 			z = z0;
 		}
-		DONE:;
-
-		// Color the pixel
-		il.scanLine[x] = color.rgb();
+		POINT_DONE:;
 	}
-}
-
-complex func(complex z, const RootVector &roots)
-{
-	// Calculate function with given roots
-	quint8 rootCount = roots.length();
-	complex result = z - roots[0];
-	for (quint8 i = 1; i < rootCount; ++i) {
-		result = result * (z - roots[i]);
-	}
-	return result;
 }

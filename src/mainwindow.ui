@@ -87,7 +87,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>174</width>
+            <width>166</width>
             <height>698</height>
            </rect>
           </property>
@@ -524,7 +524,7 @@
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="decimals">
-                   <number>1</number>
+                   <number>2</number>
                   </property>
                   <property name="minimum">
                    <double>0.100000000000000</double>
@@ -533,7 +533,7 @@
                    <double>1.900000000000000</double>
                   </property>
                   <property name="singleStep">
-                   <double>0.100000000000000</double>
+                   <double>0.010000000000000</double>
                   </property>
                   <property name="value">
                    <double>1.000000000000000</double>

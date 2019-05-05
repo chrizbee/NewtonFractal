@@ -47,6 +47,5 @@ private:
 };
 
 void iterateX(ImageLine &il);
-complex func(complex z, const RootVector &roots);
 
 #endif // RENDERTHREAD_H
