@@ -130,7 +130,9 @@ void iterateX(ImageLine &il)
 		for (quint16 i = 0; i < il.params.maxIterations; ++i) {
 			const complex fz = func(z, il.params.roots);
 			const complex dz = (func(z + STEP, il.params.roots) - fz) * INV_STEP;
-			const complex z0 = z - il.params.damping * fz / dz;
+			const complex dz1 = 1.0 / dz;
+			complex z0 = z - il.params.damping * fz * dz1;
+//			z0 = z0 - il.params.damping * func(z0, il.params.roots) * dz1;  // extra step re-using derivative
 
 			// If root has been found set color and break
 			if (abs(z0 - z) < EPS) {
