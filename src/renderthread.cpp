@@ -11,30 +11,56 @@
 
 static const QColor colors[NRT] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
 
-inline void func(complex z, const RootVector &roots, complex &f, complex &df)
+inline void func(complex z, complex &f, complex &df, const RootVector &roots)
 {
-	// Calculate derivative with given roots
+	// Calculate f and derivative with given roots
 	quint8 rootCount = roots.length();
+	if (rootCount < 2) return;
+
+	// TODO: algorithm documentation
 	complex r = (z - roots[0]);
 	complex l = (z - roots[1]);
 	for (quint8 i = 1; i < rootCount - 1; ++i) {
 		l = (z - roots[i + 1]) * (l + r);
 		r *= (z - roots[i]);
 	}
-
 	df = l + r;
 	f = r * (z - roots[rootCount - 1]);
 }
 
-inline complex func(complex z, const RootVector &roots)
+inline void iterateX(ImageLine &il)
 {
-	// Calculate function with given roots
-	quint8 rootCount = roots.length();
-	complex result = z - roots[0];
-	for (quint8 i = 1; i < rootCount; ++i) {
-			result = result * (z - roots[i]);
+	// Iterate x-pixels
+	const quint8 rootCount = il.params.roots.size();
+	const Limits limits = il.params.limits;
+	const double xFactor = limits.width() / (il.lineSize - 1);
+	const double d = il.params.damping;
+
+	for (int x = 0; x < il.lineSize; ++x) {
+
+		// Create complex number from current pixel
+		il.zx = x * xFactor + limits.left();
+		complex z(il.zx, il.zy);
+
+		// Newton iteration
+		for (quint16 i = 0; i < il.params.maxIterations; ++i) {
+			complex f, df;
+			func(z, f, df, il.params.roots);
+			complex z0 = z - d * f / df; // <- expensive division
+
+			// If root has been found set color and break
+			if (abs(z0 - z) < EPS) {
+				for (quint8 r = 0; r < rootCount; ++r) {
+					if (abs(z0 - il.params.roots[r]) < EPS) {
+						il.scanLine[x] = colors[r].darker(50 + i * 8).rgb();
+						goto POINT_DONE;
+					}
+				}
+			}
+			z = z0;
+		}
+		POINT_DONE:;
 	}
-	return result;
 }
 
 ImageLine::ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters &params) :
@@ -125,45 +151,5 @@ void RenderThread::run()
 		first_ = true;
 		if (abort_) return;
 		emit fractalRendered(QPixmap::fromImage(image), 1000.0 / timer.elapsed());
-	}
-}
-
-void iterateX(ImageLine &il)
-{
-	// Iterate x-pixels
-	const quint8 rootCount = il.params.roots.size();
-	const Limits limits = il.params.limits;
-	const double xFactor = limits.width() / (il.lineSize - 1);
-
-	for (int x = 0; x < il.lineSize; ++x) {
-
-		// Create complex number from current pixel
-		il.zx = x * xFactor + limits.left();
-		complex z(il.zx, il.zy);
-
-		// Newton iteration
-		for (quint16 i = 0; i < il.params.maxIterations; ++i) {
-//			const complex fz = func(z, il.params.roots);
-//			const complex dz = (func(z + STEP, il.params.roots) - fz) * INV_STEP;
-//			const complex dz1 = 1.0 / dz;
-//			complex z0 = z - il.params.damping * fz * dz1;
-//			z0 = z0 - il.params.damping * func(z0, il.params.roots) * dz1;  // extra step re-using derivative
-
-			complex f, df;
-			func(z, il.params.roots, f, df);
-			complex z0 = z - il.params.damping * f / df;
-
-			// If root has been found set color and break
-			if (abs(z0 - z) < EPS) {
-				for (quint8 r = 0; r < rootCount; ++r) {
-					if (abs(z0 - il.params.roots[r]) < EPS) {
-						il.scanLine[x] = colors[r].darker(50 + i * 8).rgb();
-						goto POINT_DONE;
-					}
-				}
-			}
-			z = z0;
-		}
-		POINT_DONE:;
 	}
 }

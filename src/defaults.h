@@ -14,7 +14,6 @@ typedef QVector<std::complex<double>> RootVector;
 
 static constexpr double  PI  = 3.141592653589793238463;	// Pi as a constexpr
 
-static constexpr double  HST = 1e-6;					// Step size for numerical derivative
 static constexpr double  EPS = 1e-3;					// Max error allowed
 static constexpr quint8  NRT = 6;						// Number of roots
 static constexpr quint8  RAD = 5;						// Root indicator radius
@@ -28,9 +27,6 @@ static constexpr quint16 DTI = 400;						// Default timer interval
 static constexpr quint16 DMI = 160;						// Default max. iterations
 static constexpr quint16 DSI = 660;						// Default size
 static constexpr quint16 DZS = 2;						// Default complex size [-DZS -> +DZS]
-
 static constexpr double  DSF = 0.5 * DZS / DSI;			// Resulting size factor
-static constexpr complex STEP(HST, HST);				// Step size for numerical derivative
-static constexpr complex INV_STEP(0.5/HST, -0.5/HST);	// Inv step size to avoid division in loop
 
 #endif // DEFAULTS_H

@@ -46,6 +46,4 @@ private:
 	Parameters nextParams_;
 };
 
-void iterateX(ImageLine &il);
-
 #endif // RENDERTHREAD_H
