@@ -74,7 +74,7 @@ complex point2complex(QPoint p, const Parameters &params)
 	return complex(real, imag);
 }
 
-complex distance2complex(QPoint d, const Parameters &params)
+complex distance2complex(QPointF d, const Parameters &params)
 {
 	// Convert distance to complex
 	double real = d.x() * params.limits.width()  / (params.size.width() - 1);

@@ -147,7 +147,7 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 	QPoint pos = event->pos();
 	if (dragger_.mode == DraggingRoot && dragger_.index >= 0 && dragger_.index < rootPoints_.length()) {
 		if (event->modifiers() == Qt::KeyboardModifier::ShiftModifier) {
-			QPoint distance = pos - dragger_.previousPos;
+			QPointF distance = pos - dragger_.previousPos;
 			params_.roots[dragger_.index] += distance2complex(distance * MOD, params_);
 			dragger_.previousPos = pos;
 		} else params_.roots[dragger_.index] = point2complex(pos, params_);

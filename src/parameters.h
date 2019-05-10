@@ -27,7 +27,7 @@ struct Parameters {
 
 QPoint  complex2point(complex z, const Parameters &params);
 complex point2complex(QPoint p, const Parameters &params);
-complex distance2complex(QPoint d, const Parameters &params);
+complex distance2complex(QPointF d, const Parameters &params);
 
 RootVector equidistantRoots(quint8 rootCount);
 bool rootContainsPoint(QPoint root, QPoint point);
