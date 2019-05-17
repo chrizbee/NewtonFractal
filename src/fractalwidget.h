@@ -7,9 +7,11 @@
 #define FRACTALWIDGET_H
 
 #include "renderthread.h"
-#include "parameters.h"
 #include <QTimer>
 #include <QWidget>
+
+struct Parameters;
+class SettingsWidget;
 
 enum DraggingMode : quint8 { NoDragging, DraggingRoot, DraggingFractal };
 
@@ -26,13 +28,13 @@ class FractalWidget : public QWidget
 
 public:
 	FractalWidget(QWidget *parent = nullptr);
-	Parameters params() const;
-	void updateParams(Parameters params);
+	void updateParams();
 	void exportTo(const QString &exportDir);
 	void reset();
 
 public slots:
 	void updateFractal(const QPixmap &pixmap, double fps);
+	void updateOrbit(const QVector<QPoint> &orbit, double fps);
 
 protected:
 	void paintEvent(QPaintEvent *) override;
@@ -50,11 +52,14 @@ signals:
 private:
 	QTimer timer_;
 	QPixmap pixmap_;
-	Parameters params_;
+	QVector<QPoint> orbit_;
+	Parameters *params_;
+	SettingsWidget *settingsWidget_;
 	RenderThread renderThread_;
 	QList<QPoint> rootPoints_;
 	Dragger dragger_;
 	double fps_;
+	bool legend_;
 };
 
 #endif // FRACTALWIDGET_H

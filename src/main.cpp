@@ -3,11 +3,14 @@
 // License: GNU General Public License version 3 or later,
 // see the file LICENSE in the main directory.
 
-#include "mainwindow.h"
+#include "fractalwidget.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
+	// Register metatype
+	qRegisterMetaType<QVector<QPoint>>("QVector<QPoint>");
+
 	// Initialize application
 	QApplication app(argc, argv);
 	app.setOrganizationName("inf4");
@@ -17,8 +20,8 @@ int main(int argc, char *argv[])
 	app.setStyle("Fusion");
 	app.setFont(QFont("Consolas", 10));
 
-	// Create window
-	MainWindow window;
-	window.show();
+	// Create widget
+	FractalWidget widget;
+	widget.show();
 	return app.exec();
 }

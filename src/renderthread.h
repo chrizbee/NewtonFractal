@@ -10,6 +10,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include <QElapsedTimer>
 #include <QColor>
 
 struct ImageLine {
@@ -33,15 +34,18 @@ public:
 
 protected:
 	void run() override;
+	void renderPixmap();
+	void renderOrbit();
 
 signals:
 	void fractalRendered(const QPixmap &pixmap, double fps);
+	void orbitRendered(const QVector<QPoint> &orbit, double fps);
 
 private:
 	bool first_;
-	bool abort_;
 	QMutex mutex_;
 	QWaitCondition condition_;
+	QElapsedTimer timer_;
 	Parameters curParams_;
 	Parameters nextParams_;
 };

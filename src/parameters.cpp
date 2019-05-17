@@ -13,7 +13,9 @@ Parameters::Parameters(quint8 rootCount) :
 	damping(DDP),
 	scaleDownFactor(DSC),
 	scaleDown(false),
-	multiThreaded(true)
+	multiThreaded(true),
+	orbitMode(false),
+	orbitStart(0, 0)
 {
 }
 
@@ -38,7 +40,9 @@ bool Parameters::operator==(const Parameters &other) const
 		damping == other.damping &&
 		scaleDownFactor == other.scaleDownFactor &&
 		scaleDown == other.scaleDown &&
-		multiThreaded == other.multiThreaded
+		multiThreaded == other.multiThreaded &&
+		orbitMode == other.orbitMode &&
+		orbitStart == other.orbitStart
 	);
 }
 
@@ -97,5 +101,5 @@ bool rootContainsPoint(QPoint root, QPoint point)
 {
 	// Check if root contains point
 	QPoint dist = root - point;
-	return (abs(dist.x()) < RAD && abs(dist.y()) < RAD);
+	return (abs(dist.x()) < RIR && abs(dist.y()) < RIR);
 }

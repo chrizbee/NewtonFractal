@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/icons/settings.png</file>
         <file>resources/icons/iteration.png</file>
         <file>resources/icons/blue.png</file>
         <file>resources/icons/cyan.png</file>
@@ -16,14 +15,15 @@
         <file>resources/icons/icon.ico</file>
         <file>resources/icons/icon.png</file>
         <file>resources/icons/zoom.png</file>
-        <file>resources/icons/cursor.png</file>
         <file>resources/icons/downscale.png</file>
         <file>resources/icons/icons8.png</file>
         <file>resources/icons/ohm.png</file>
         <file>resources/icons/degree.png</file>
-        <file>resources/icons/quit.png</file>
         <file>resources/icons/damp.png</file>
         <file>resources/icons/size.png</file>
-        <file>resources/icons/coordinate.png</file>
+        <file>resources/icons/settings.png</file>
+        <file>resources/icons/orbit.png</file>
+        <file>resources/icons/fps.png</file>
+        <file>resources/icons/hide.png</file>
     </qresource>
 </RCC>

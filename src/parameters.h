@@ -23,6 +23,8 @@ struct Parameters {
 	double scaleDownFactor;
 	bool scaleDown;
 	bool multiThreaded;
+	bool orbitMode;
+	QPoint orbitStart;
 };
 
 QPoint  complex2point(complex z, const Parameters &params);

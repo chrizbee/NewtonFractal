@@ -25,26 +25,26 @@ DESTDIR = build
 
 SOURCES += \
     src/main.cpp \
-    src/mainwindow.cpp \
     src/fractalwidget.cpp \
     src/renderthread.cpp \
     src/parameters.cpp \
     src/rootedit.cpp \
     src/limits.cpp \
-    src/sizeedit.cpp
+    src/sizeedit.cpp \
+    src/settingswidget.cpp
 
 HEADERS += \
-    src/mainwindow.h \
     src/fractalwidget.h \
     src/renderthread.h \
     src/parameters.h \
     src/rootedit.h \
     src/defaults.h \
     src/limits.h \
-    src/sizeedit.h
+    src/sizeedit.h \
+    src/settingswidget.h
 
 FORMS += \
-    src/mainwindow.ui
+    src/settingswidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

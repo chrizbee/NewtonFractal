@@ -16,7 +16,8 @@ static constexpr double  PI  = 3.141592653589793238463;	// Pi as a constexpr
 
 static constexpr double  EPS = 1e-3;					// Max error allowed
 static constexpr quint8  NRT = 6;						// Number of roots
-static constexpr quint8  RAD = 5;						// Root indicator radius
+static constexpr quint8  RIR = 5;						// Root indicator radius
+static constexpr quint8  OIR = 3;						// Orbit point indicator radius
 static constexpr double  MOD = 0.2;						// Root drag speed modifier
 static constexpr double  ZMF = 0.05;					// Zoom factor
 
@@ -25,7 +26,8 @@ static constexpr double  DSC = 0.5;						// Default zoom factor
 static constexpr double  DDP = 1.0;						// Default damping factor
 static constexpr quint16 DTI = 400;						// Default timer interval
 static constexpr quint16 DMI = 160;						// Default max. iterations
-static constexpr quint16 DSI = 660;						// Default size
+static constexpr quint16 DSI = 700;						// Default size
+static constexpr quint16 MSI = 128;						// Minimum size
 static constexpr quint16 DZS = 2;						// Default complex size [-DZS -> +DZS]
 static constexpr double  DSF = 0.5 * DZS / DSI;			// Resulting size factor
 

@@ -7,7 +7,6 @@
 #include <QtConcurrent>
 #include <QImage>
 #include <QPixmap>
-#include <QElapsedTimer>
 
 static const QColor colors[NRT] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
 
@@ -73,8 +72,7 @@ ImageLine::ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Paramete
 
 RenderThread::RenderThread(QObject *parent) :
 	QThread(parent),
-	first_(false),
-	abort_(false)
+	first_(false)
 {
 }
 
@@ -82,7 +80,6 @@ RenderThread::~RenderThread()
 {
 	// Abort and wait for thread
 	mutex_.lock();
-	abort_ = true;
 	condition_.wakeOne();
 	mutex_.unlock();
 	wait();
@@ -107,10 +104,8 @@ void RenderThread::run()
 {
 	// Run forever
 	while (1) {
-
 		// Start timer to measure fps
-		QElapsedTimer timer;
-		timer.start();
+		timer_.start();
 
 		// Get new parameters and return if same as before
 		bool keepRunning = true;
@@ -121,35 +116,70 @@ void RenderThread::run()
 		mutex_.unlock();
 		if (!keepRunning && first_) return;
 
-		// Create image for fast pixel IO
-		QList<ImageLine> lineList;
-		QSize size = curParams_.size * (curParams_.scaleDown ? curParams_.scaleDownFactor : 1);
-		QImage image(size, QImage::Format_RGB32);
-		image.fill(Qt::black);
-		const qint32 height = size.height();
-		const Limits limits = curParams_.limits;
-		const double yFactor = -limits.height() / (height - 1);
+		// Don't rerender if orbitMode
+		curParams_.orbitMode ? renderOrbit() : renderPixmap();
+	}
+}
 
-		// Iterate y-pixels
-		for (int y = 0; y < height; ++y) {
-			ImageLine il((QRgb*)(image.scanLine(y)), y, image.width(), curParams_);
-			il.zy = y * yFactor + limits.top();
-			lineList.append(il);
+void RenderThread::renderPixmap()
+{
+	// Render whole pixmap
+	QList<ImageLine> lineList;
+	QSize size = curParams_.size * (curParams_.scaleDown ? curParams_.scaleDownFactor : 1);
+
+	// Create image for fast pixel IO
+	QImage image(size, QImage::Format_RGB32);
+	image.fill(Qt::black);
+	const qint32 height = size.height();
+	const Limits limits = curParams_.limits;
+	const double yFactor = -limits.height() / (height - 1);
+
+	// Iterate y-pixels
+	for (int y = 0; y < height; ++y) {
+		ImageLine il((QRgb*)(image.scanLine(y)), y, image.width(), curParams_);
+		il.zy = y * yFactor + limits.top();
+		lineList.append(il);
+	}
+
+	// Iterate x-pixels with one threads
+	if (!curParams_.multiThreaded) {
+		for (ImageLine &il : lineList) {
+			iterateX(il);
 		}
 
-		// Iterate x-pixels with one threads
-		if (!curParams_.multiThreaded) {
-			for (ImageLine &il : lineList) {
-				iterateX(il);
-			}
+	// Iterate x-pixels with multiple threads
+	// TODO: use map to report progress with QFuture
+	} else QtConcurrent::blockingMap(lineList, iterateX);
 
-		// Iterate x-pixels with multiple threads
-		// TODO: use map to report progress with QFuture
-		} else QtConcurrent::blockingMap(lineList, iterateX);
+	// Return if aborted, else emit signal
+	first_ = true;
+	emit fractalRendered(QPixmap::fromImage(image), 1000.0 / timer_.elapsed());
+}
 
-		// Return if aborted, else emit signal
-		first_ = true;
-		if (abort_) return;
-		emit fractalRendered(QPixmap::fromImage(image), 1000.0 / timer.elapsed());
+void RenderThread::renderOrbit()
+{
+	// Create vector of points
+	QVector<QPoint> orbit;
+	const double d = curParams_.damping;
+
+	// Create complex number from current pixel
+	complex z = point2complex(curParams_.orbitStart, curParams_);
+	orbit.append(complex2point(z, curParams_));
+
+	// Newton iteration
+	for (quint16 i = 0; i < curParams_.maxIterations; ++i) {
+		complex f, df;
+		func(z, f, df, curParams_.roots);
+		complex z0 = z - d * f / df;
+
+		// Append point to vector
+		orbit.append(complex2point(z0, curParams_));
+
+		// Break if root has been found
+		if (abs(z0 - z) < EPS) break;
+		z = z0;
 	}
+
+	// Emit signal
+	emit orbitRendered(orbit, 1000.0 / timer_.elapsed());
 }
