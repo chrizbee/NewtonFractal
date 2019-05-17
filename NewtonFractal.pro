@@ -3,7 +3,7 @@ QT += core gui widgets concurrent
 TARGET = NewtonFractal
 TEMPLATE = app
 CONFIG += c++14 debug_and_release
-VERSION = 1.2.0
+VERSION = 1.3.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 CONFIG(release, debug|release) {
