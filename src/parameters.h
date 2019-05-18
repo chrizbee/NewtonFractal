@@ -12,7 +12,8 @@
 
 struct Parameters {
 	Parameters(quint8 rootCount = DRC);
-	bool operator==(const Parameters &other) const;
+	bool paramsChanged(const Parameters &other) const;
+	bool orbitChanged(const Parameters &other) const;
 	void resize(QSize newSize);
 	void reset();
 	RootVector roots;

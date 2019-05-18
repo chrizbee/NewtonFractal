@@ -13,16 +13,6 @@
 #include <QElapsedTimer>
 #include <QColor>
 
-struct ImageLine {
-	ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters &params);
-	QRgb *scanLine;
-	int lineIndex;
-	int lineSize;
-	double zx;
-	double zy;
-	const Parameters &params;
-};
-
 class RenderThread : public QThread
 {
 	Q_OBJECT
@@ -42,7 +32,7 @@ signals:
 	void orbitRendered(const QVector<QPoint> &orbit, double fps);
 
 private:
-	bool first_;
+	bool abort_;
 	QMutex mutex_;
 	QWaitCondition condition_;
 	QElapsedTimer timer_;

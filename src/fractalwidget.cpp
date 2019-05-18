@@ -13,9 +13,6 @@
 #include <QPainter>
 #include <QAction>
 #include <QIcon>
-#include <QDebug>
-
-static bool wasOrbit = false;
 
 Dragger::Dragger() :
 	mode(NoDragging),
@@ -77,7 +74,6 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	connect(&renderThread_, &RenderThread::fractalRendered, this, &FractalWidget::updateFractal);
 	connect(&renderThread_, &RenderThread::orbitRendered, this, &FractalWidget::updateOrbit);
 	connect(&timer_, &QTimer::timeout, [this]() {
-		params_->orbitMode = wasOrbit;
 		params_->scaleDown = false;
 		updateParams();
 	});
@@ -207,8 +203,6 @@ void FractalWidget::mousePressEvent(QMouseEvent *event)
 {
 	// Set scaleDown, previousPos and orbit
 	QPoint pos = event->pos();
-	wasOrbit = params_->orbitMode;
-	params_->orbitMode = false;
 	params_->scaleDown = true;
 	dragger_.previousPos = pos;
 
@@ -247,11 +241,6 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 		dragger_.previousPos = event->pos();
 		updateParams();
 
-	// Render orbit if enabled
-	} else if (params_->orbitMode) {
-		params_->orbitStart = pos;
-		updateParams();
-
 	// Else if event over root change cursor
 	} else {
 		quint8 rootCount = rootPoints_.length();
@@ -263,6 +252,12 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 		}
 		setCursor(Qt::ArrowCursor);
 	}
+
+	// Render orbit if enabled
+	if (params_->orbitMode) {
+		params_->orbitStart = pos;
+		updateParams();
+	}
 }
 
 void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -270,7 +265,6 @@ void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
 	// Reset dragging and render actual size
 	Q_UNUSED(event);
 	params_->scaleDown = false;
-	params_->orbitMode = wasOrbit;
 	dragger_.mode = NoDragging;
 	dragger_.index = -1;
 	updateParams();
@@ -279,11 +273,10 @@ void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
 void FractalWidget::resizeEvent(QResizeEvent *event)
 {
 	// Overwrite size with scaleSize for smooth resizing
-	if (!timer_.isActive()) {
+	if (!timer_.isActive())
 		params_->scaleDown = true;
-		wasOrbit = params_->orbitMode;
-		params_->orbitMode = false;
-	}
+
+	// Restart timer
 	timer_.start();
 
 	// Change resolution on resize
@@ -299,11 +292,10 @@ void FractalWidget::wheelEvent(QWheelEvent *event)
 	double yw = (double)event->pos().y() / height();
 
 	// Overwrite size with scaleSize for smooth moving
-	if (!timer_.isActive()) {
+	if (!timer_.isActive())
 		params_->scaleDown = true;
-		wasOrbit = params_->orbitMode;
-		params_->orbitMode = false;
-	}
+
+	// Restart timer
 	timer_.start();
 
 	// Zoom fractal in / out

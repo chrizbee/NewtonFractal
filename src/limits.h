@@ -14,6 +14,7 @@ class Limits
 public:
 	Limits(bool original = false);
 	bool operator==(const Limits &other) const;
+	bool operator!=(const Limits &other) const;
 	void move(QPoint distance, const QSize &ref);
 	void zoom(bool in, double xw, double yw);
 	void reset(QSize size);

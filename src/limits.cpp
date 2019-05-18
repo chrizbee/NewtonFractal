@@ -30,6 +30,17 @@ bool Limits::operator==(const Limits &other) const
 	);
 }
 
+bool Limits::operator!=(const Limits &other) const
+{
+	// Check if limits are not the same
+	return (
+		left_ != other.left() ||
+		right_ != other.right() ||
+		top_ != other.top() ||
+		bottom_ != other.bottom()
+	);
+}
+
 void Limits::move(QPoint distance, const QSize &ref)
 {
 	// Move limits by distance

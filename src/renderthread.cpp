@@ -4,6 +4,7 @@
 // see the file LICENSE in the main directory.
 
 #include "renderthread.h"
+#include "imageline.h"
 #include <QtConcurrent>
 #include <QImage>
 #include <QPixmap>
@@ -62,17 +63,9 @@ inline void iterateX(ImageLine &il)
 	}
 }
 
-ImageLine::ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters &params) :
-	scanLine(scanLine),
-	lineIndex(lineIndex),
-	lineSize(lineSize),
-	params(params)
-{
-}
-
 RenderThread::RenderThread(QObject *parent) :
 	QThread(parent),
-	first_(false)
+	abort_(false)
 {
 }
 
@@ -80,6 +73,7 @@ RenderThread::~RenderThread()
 {
 	// Abort and wait for thread
 	mutex_.lock();
+	abort_ = true;
 	condition_.wakeOne();
 	mutex_.unlock();
 	wait();
@@ -102,29 +96,46 @@ void RenderThread::render(Parameters params)
 
 void RenderThread::run()
 {
+	// Static var, to test if for first render
+	static bool firstRender = false;
+
 	// Run forever
 	while (1) {
+
 		// Start timer to measure fps
 		timer_.start();
+		bool paramsChanged = true;
+		bool orbitChanged = true;
 
 		// Get new parameters and return if same as before
-		bool keepRunning = true;
 		mutex_.lock();
-		if (nextParams_ == curParams_) {
-			keepRunning = false;
-		} else curParams_ = nextParams_;
+		orbitChanged = nextParams_.orbitChanged(curParams_);
+		paramsChanged = nextParams_.paramsChanged(curParams_);
+		if (paramsChanged || orbitChanged) curParams_ = nextParams_;
 		mutex_.unlock();
-		if (!keepRunning && first_) return;
 
-		// Don't rerender if orbitMode
-		curParams_.orbitMode ? renderOrbit() : renderPixmap();
+		// Stop if nothing changed
+		if (!paramsChanged && !orbitChanged && firstRender)
+			return;
+
+		// Rerender pixmap
+		if (paramsChanged || !firstRender)
+			renderPixmap();
+
+		// Rerender orbit
+		if (orbitChanged)
+			renderOrbit();
+
+		// Abort if wanted
+		if (abort_) return;
+		firstRender = true;
 	}
 }
 
 void RenderThread::renderPixmap()
 {
 	// Render whole pixmap
-	QList<ImageLine> lineList;
+	QList<ImageLine> lines;
 	QSize size = curParams_.size * (curParams_.scaleDown ? curParams_.scaleDownFactor : 1);
 
 	// Create image for fast pixel IO
@@ -138,21 +149,20 @@ void RenderThread::renderPixmap()
 	for (int y = 0; y < height; ++y) {
 		ImageLine il((QRgb*)(image.scanLine(y)), y, image.width(), curParams_);
 		il.zy = y * yFactor + limits.top();
-		lineList.append(il);
+		lines.append(il);
 	}
 
 	// Iterate x-pixels with one threads
 	if (!curParams_.multiThreaded) {
-		for (ImageLine &il : lineList) {
+		for (ImageLine &il : lines) {
 			iterateX(il);
 		}
 
 	// Iterate x-pixels with multiple threads
 	// TODO: use map to report progress with QFuture
-	} else QtConcurrent::blockingMap(lineList, iterateX);
+	} else QtConcurrent::blockingMap(lines, iterateX);
 
-	// Return if aborted, else emit signal
-	first_ = true;
+	// Emit signal
 	emit fractalRendered(QPixmap::fromImage(image), 1000.0 / timer_.elapsed());
 }
 

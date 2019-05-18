@@ -19,30 +19,38 @@ Parameters::Parameters(quint8 rootCount) :
 {
 }
 
-bool Parameters::operator==(const Parameters &other) const
+bool Parameters::paramsChanged(const Parameters &other) const
 {
 	// Check for same root count
 	if (roots.size() != other.roots.size())
-		return false;
+		return true;
 
 	// Check for same roots
 	for (quint8 i = 0; i < roots.size(); ++i) {
 		if (roots[i] != other.roots[i]) {
-			return false;
+			return true;
 		}
 	}
 
 	// Check for remaining parameters
 	return (
-		limits == other.limits &&
-		size == other.size &&
-		maxIterations == other.maxIterations &&
-		damping == other.damping &&
-		scaleDownFactor == other.scaleDownFactor &&
-		scaleDown == other.scaleDown &&
-		multiThreaded == other.multiThreaded &&
-		orbitMode == other.orbitMode &&
-		orbitStart == other.orbitStart
+		limits != other.limits ||
+		size != other.size ||
+		maxIterations != other.maxIterations ||
+		damping != other.damping ||
+		scaleDownFactor != other.scaleDownFactor ||
+		scaleDown != other.scaleDown ||
+		multiThreaded != other.multiThreaded
+	);
+}
+
+bool Parameters::orbitChanged(const Parameters &other) const
+{
+	// Check for orbit
+	return (
+		orbitStart != other.orbitStart ||
+		orbitMode != other.orbitMode ||
+		orbitMode && paramsChanged(other)
 	);
 }
 
