@@ -12,7 +12,6 @@
 #include <QStandardPaths>
 #include <QFileDialog>
 #include <QSettings>
-#include <QDebug>
 #include <QUrl>
 
 SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :

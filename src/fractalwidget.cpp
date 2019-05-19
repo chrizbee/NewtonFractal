@@ -13,7 +13,6 @@
 #include <QPainter>
 #include <QAction>
 #include <QIcon>
-#include <QDebug>
 
 static QPoint mousePosition;
 
