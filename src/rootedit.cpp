@@ -4,6 +4,7 @@
 // see the file LICENSE in the main directory.
 
 #include "rootedit.h"
+#include "parameters.h"
 
 RootEdit::RootEdit(QWidget *parent) :
 	QLineEdit(parent)
@@ -20,18 +21,9 @@ complex RootEdit::value() const
 
 void RootEdit::setValue(complex value)
 {
-	// Static string format
-	static QString complexFormat("%1 %2 i%3");
-
-	// Create string from complex number
-	QString real = QString::number(value.real(), 'f', 2);
-	QString imag = QString::number(abs(value.imag()), 'f', 2);
-	QString sign = value.imag() >= 0 ? "+" : "-";
-	QString zstr = complexFormat.arg(real, sign, imag);
-
 	// Set root and text
 	root_ = value;
-	setText(zstr);
+	setText(complex2string(value));
 }
 
 void RootEdit::on_editingFinished()

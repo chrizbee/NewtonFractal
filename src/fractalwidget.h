@@ -60,6 +60,7 @@ private:
 	Dragger dragger_;
 	double fps_;
 	bool legend_;
+	bool position_;
 };
 
 #endif // FRACTALWIDGET_H

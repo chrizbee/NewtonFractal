@@ -13,6 +13,9 @@
 #include <QPainter>
 #include <QAction>
 #include <QIcon>
+#include <QDebug>
+
+static QPoint mousePosition;
 
 Dragger::Dragger() :
 	mode(NoDragging),
@@ -25,7 +28,8 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	params_(new Parameters(DRC)),
 	settingsWidget_(new SettingsWidget(params_, this)),
 	fps_(0),
-	legend_(true)
+	legend_(true),
+	position_(false)
 {
 	// Initialize layout
 	QSpacerItem *spacer = new QSpacerItem(DSI / 2.0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -40,15 +44,18 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	QAction *quit = new QAction(this);
 	QAction *hide = new QAction(this);
 	QAction *orbit = new QAction(this);
+	QAction *position = new QAction(this);
 	QAction *settings = new QAction(this);
 	quit->setShortcut(QKeySequence("Ctrl+Q"));
 	hide->setShortcut(Qt::Key_Escape);
 	orbit->setShortcut(Qt::Key_F2);
+	position->setShortcut(Qt::Key_F3);
 	settings->setShortcut(Qt::Key_F1);
-	addActions(QList<QAction*>() << quit << hide << orbit << settings);
+	addActions(QList<QAction*>() << quit << hide << orbit << position << settings);
 	connect(quit, &QAction::triggered, QApplication::instance(), &QCoreApplication::quit);
 	connect(hide, &QAction::triggered, [this]() { legend_ = !legend_; update(); });
 	connect(orbit, &QAction::triggered, [this]() { params_->orbitMode = !params_->orbitMode; updateParams(); });
+	connect(position, &QAction::triggered, [this]() { position_ = !position_; update(); });
 	connect(settings, &QAction::triggered, settingsWidget_, &SettingsWidget::toggle);
 
 	// Initialize general stuff
@@ -138,6 +145,7 @@ void FractalWidget::paintEvent(QPaintEvent *)
 	static const QPixmap pixHide("://resources/icons/hide.png");
 	static const QPixmap pixSettings("://resources/icons/settings.png");
 	static const QPixmap pixOrbit("://resources/icons/orbit.png");
+	static const QPixmap pixPosition("://resources/icons/position.png");
 	static const QPixmap pixFps("://resources/icons/fps.png");
 
 	// Static legend geometry
@@ -145,15 +153,17 @@ void FractalWidget::paintEvent(QPaintEvent *)
 	static const QFont consolas("Consolas", 12);
 	static const QFontMetrics metrics(consolas);
 	static const int textWidth = 3 * spacing + pixFps.width() + metrics.width("999.99");
-	static const int textHeight = spacing + 4 * (pixFps.height() + spacing);
+	static const int textHeight = spacing + 5 * (pixFps.height() + spacing);
 	static const QRect legendRect(spacing, spacing, textWidth, textHeight);
 	static const QPoint ptHide(legendRect.topLeft() + QPoint(spacing, spacing));
 	static const QPoint ptSettings(ptHide + QPoint(0, pixHide.height() + spacing));
 	static const QPoint ptOrbit(ptSettings + QPoint(0, pixSettings.height() + spacing));
-	static const QPoint ptFps(ptOrbit + QPoint(0, pixOrbit.height() + spacing));
+	static const QPoint ptPosition(ptOrbit + QPoint(0, pixOrbit.height() + spacing));
+	static const QPoint ptFps(ptPosition + QPoint(0, pixPosition.height() + spacing));
 
 	// Paint fractal
 	QPainter painter(this);
+	painter.setFont(consolas);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	// Draw pixmap if rendered yet
@@ -173,16 +183,25 @@ void FractalWidget::paintEvent(QPaintEvent *)
 
 		// Draw legend if enabled
 		if (legend_) {
-			painter.setFont(consolas);
 			painter.drawRoundedRect(legendRect, 10, 10);
 			painter.drawPixmap(ptHide, pixHide);
 			painter.drawPixmap(ptSettings, pixSettings);
 			painter.drawPixmap(ptOrbit, pixOrbit);
+			painter.drawPixmap(ptPosition, pixPosition);
 			painter.drawPixmap(ptFps, pixFps);
 			painter.drawText(ptHide + QPoint(pixHide.width() + spacing, metrics.height() - 4), "ESC");
 			painter.drawText(ptSettings + QPoint(pixSettings.width() + spacing, metrics.height() - 4), "F1");
 			painter.drawText(ptOrbit + QPoint(pixOrbit.width() + spacing, metrics.height() - 4), "F2");
+			painter.drawText(ptPosition + QPoint(pixPosition.width() + spacing, metrics.height() - 4), "F3");
 			painter.drawText(ptFps + QPoint(pixFps.width() + spacing, metrics.height() - 4), QString::number(fps_, 'f', 2));
+		}
+
+		// Draw position if enabled
+		if (position_) {
+			QString zstr = complex2string(point2complex(mousePosition, *params_));
+			QRect posRect(mousePosition, QSize(metrics.width(zstr) + spacing, metrics.height() + spacing));
+			painter.drawRoundedRect(posRect, 6, 6);
+			painter.drawText(posRect, Qt::AlignCenter, zstr);
 		}
 
 		// Draw orbit if enabled
@@ -225,19 +244,19 @@ void FractalWidget::mousePressEvent(QMouseEvent *event)
 void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 {
 	// Move root if dragging
-	QPoint pos = event->pos();
+	mousePosition = event->pos();
 	if (dragger_.mode == DraggingRoot && dragger_.index >= 0 && dragger_.index < rootPoints_.length()) {
 		if (event->modifiers() == Qt::KeyboardModifier::ShiftModifier) {
-			QPointF distance = pos - dragger_.previousPos;
+			QPointF distance = mousePosition - dragger_.previousPos;
 			params_->roots[dragger_.index] += distance2complex(distance * MOD, *params_);
-			dragger_.previousPos = pos;
-		} else params_->roots[dragger_.index] = point2complex(pos, *params_);
+			dragger_.previousPos = mousePosition;
+		} else params_->roots[dragger_.index] = point2complex(mousePosition, *params_);
 		updateParams();
 		emit rootMoved(dragger_.index, params_->roots[dragger_.index]);
 
 	// Else move fractal if dragging
 	} else if (dragger_.mode == DraggingFractal) {
-		params_->limits.move(dragger_.previousPos - pos, params_->size);
+		params_->limits.move(dragger_.previousPos - mousePosition, params_->size);
 		dragger_.previousPos = event->pos();
 		updateParams();
 
@@ -245,7 +264,7 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 	} else {
 		quint8 rootCount = rootPoints_.length();
 		for (quint8 i = 0; i < rootCount; ++i) {
-			if (rootContainsPoint(rootPoints_[i], pos)) {
+			if (rootContainsPoint(rootPoints_[i], mousePosition)) {
 				setCursor(Qt::OpenHandCursor);
 				return;
 			}
@@ -253,9 +272,14 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 		setCursor(Qt::ArrowCursor);
 	}
 
+	// Update position if enabled
+	if (position_) {
+		update();
+	}
+
 	// Render orbit if enabled
 	if (params_->orbitMode) {
-		params_->orbitStart = pos;
+		params_->orbitStart = mousePosition;
 		updateParams();
 	}
 }

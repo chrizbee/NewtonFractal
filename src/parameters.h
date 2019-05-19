@@ -28,6 +28,7 @@ struct Parameters {
 	QPoint orbitStart;
 };
 
+QString complex2string(complex z);
 QPoint  complex2point(complex z, const Parameters &params);
 complex point2complex(QPoint p, const Parameters &params);
 complex distance2complex(QPointF d, const Parameters &params);

@@ -25,5 +25,6 @@
         <file>resources/icons/orbit.png</file>
         <file>resources/icons/fps.png</file>
         <file>resources/icons/hide.png</file>
+        <file>resources/icons/position.png</file>
     </qresource>
 </RCC>

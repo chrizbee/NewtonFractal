@@ -70,6 +70,16 @@ void Parameters::reset()
 	scaleDown = false;
 }
 
+QString complex2string(complex z)
+{
+	// Convert complex to string
+	static QString complexFormat("%1 %2 i%3");
+	QString real = QString::number(z.real(), 'f', 2);
+	QString imag = QString::number(abs(z.imag()), 'f', 2);
+	QString sign = z.imag() >= 0 ? "+" : "-";
+	return complexFormat.arg(real, sign, imag);
+}
+
 QPoint complex2point(complex z, const Parameters &params)
 {
 	// Convert complex to point
