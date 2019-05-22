@@ -41,6 +41,7 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	}
 
 	// Connect ui signals to slots
+	connect(ui_->btnExport, &QPushButton::clicked, this, &SettingsWidget::on_btnExportClicked);
 	connect(ui_->lineSize, &SizeEdit::sizeChanged, this, &SettingsWidget::sizeChanged);
 	connect(ui_->btnReset, &QPushButton::clicked, this, &SettingsWidget::reset);
 	connect(ui_->spinScale, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);

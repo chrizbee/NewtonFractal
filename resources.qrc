@@ -12,8 +12,6 @@
         <file>resources/icons/user2.png</file>
         <file>resources/icons/reset.png</file>
         <file>resources/icons/thread.png</file>
-        <file>resources/icons/icon.ico</file>
-        <file>resources/icons/icon.png</file>
         <file>resources/icons/zoom.png</file>
         <file>resources/icons/downscale.png</file>
         <file>resources/icons/icons8.png</file>
@@ -26,5 +24,7 @@
         <file>resources/icons/fps.png</file>
         <file>resources/icons/hide.png</file>
         <file>resources/icons/position.png</file>
+        <file>resources/icons/icon.ico</file>
+        <file>resources/icons/icon.png</file>
     </qresource>
 </RCC>

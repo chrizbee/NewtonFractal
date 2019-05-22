@@ -1,15 +1,22 @@
-# NewtonFractal
+![Icon](resources/icons/Illustrator/icon64.png) ![Name](resources/icons/Illustrator/name64.png)
 
-**NewtonFractal** is a *Qt5-Application* that renders fractals based on **Newton's method**.
+[![built with](https://img.shields.io/badge/built%20with-Qt-41cd52.svg)](https://www.qt.io/) [![contributors](https://img.shields.io/github/contributors/chrizbee/NewtonFractal.svg)](https://GitHub.com/chrizbee/NewtonFractal/graphs/contributors/) [![release](https://img.shields.io/github/release/chrizbee/NewtonFractal.svg)](https://GitHub.com/chrizbee/NewtonFractal/releases/)  [![license](https://img.shields.io/github/license/chrizbee/NewtonFractal.svg)](https://github.com/chrizbee/NewtonFractal/blob/master/LICENSE) [![stars](https://img.shields.io/github/stars/chrizbee/NewtonFractal.svg?color=ffdd00)](https://GitHub.com/chrizbee/NewtonFractal/stargazers/)
 
-- Move up to *6* roots with drag & drop
+## Basic Overview
+**NewtonFractal** is a *Qt5-Application* that renders fractals based on [*Newton's method*](https://en.wikipedia.org/wiki/Newton%27s_method). The application provides the following features:
+
+![roots](resources/images/roots.gif) ![move](resources/images/move.gif) ![zoom](resources/images/zoom.gif) ![orbit](resources/images/orbit.gif) ![position](resources/images/position.gif) 
+
+- Move up to 6 roots with drag & drop
 - Move fractal
 - Zoom in and out
-- Export fractal as *png*
+- Orbit mode to visualize iterations
+- Show the current cursor position as a complex number
+- Set fractal size and downscaling factor (smooth rendering while moving)
+- Change maximum number of newton iterations
+- Change damping factor of newton's method
 - Multi- or singlethreading
-- Change maximum number of newton iterations, ...
-
-![Image](resources/images/fractal_190427_114136_5roots_596x596.png "Newton fractal with 5 roots and size 596x596")
+- Export fractal as png
 
 ## Getting Started
 
@@ -55,8 +62,8 @@ We use [SemVer](http://semver.org/) for versioning. The current version is store
 
 ## Authors
 
-- **Christian Bauer** - [chrizbee](https://github.com/chrizbee)
-- **Timon Föhl** - [opit7](https://github.com/opit7)
+- [chrizbee](https://github.com/chrizbee)
+- [opit7](https://github.com/opit7)
 
 See also the list of [contributors](https://github.com/chrizbee/NewtonFractal/contributors) who participated in this project.
 
