@@ -14,7 +14,7 @@ class RootEdit : public QLineEdit
 	Q_OBJECT
 
 public:
-	RootEdit(QWidget *parent = nullptr);
+	RootEdit(complex value, QWidget *parent = nullptr);
 	complex value() const;
 	void setValue(complex value);
 

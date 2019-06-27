@@ -11,6 +11,7 @@
 #include <QMouseEvent>
 
 class RootEdit;
+class RootIcon;
 struct Parameters;
 
 namespace Ui {
@@ -29,9 +30,12 @@ public slots:
 	void toggle();
 	void changeSize(QSize size);
 	void changeZoom(double factor);
+	void addRoot();
+	void removeLastRoot();
 	void moveRoot(quint8 index, complex value);
 
 private slots:
+	void changeRootColor();
 	void on_settingsChanged();
 	void on_btnExportClicked();
 
@@ -53,6 +57,7 @@ private:
 	Ui::SettingsWidget *ui_;
 	Parameters *params_;
 	QList<RootEdit*> rootEdits_;
+	QList<RootIcon*> rootIcons_;
 };
 
 #endif // SETTINGSWIDGET_H

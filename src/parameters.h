@@ -8,15 +8,17 @@
 
 #include "defaults.h"
 #include "limits.h"
+#include "root.h"
 #include <QSize>
+#include <QVector>
 
 struct Parameters {
-	Parameters(quint8 rootCount = DRC);
+	Parameters();
 	bool paramsChanged(const Parameters &other) const;
 	bool orbitChanged(const Parameters &other) const;
 	void resize(QSize newSize);
 	void reset();
-	RootVector roots;
+	QVector<Root> roots;
 	Limits limits;
 	QSize size;
 	quint16 maxIterations;
@@ -32,8 +34,6 @@ QString complex2string(complex z);
 QPoint  complex2point(complex z, const Parameters &params);
 complex point2complex(QPoint p, const Parameters &params);
 complex distance2complex(QPointF d, const Parameters &params);
-
-RootVector equidistantRoots(quint8 rootCount);
 bool rootContainsPoint(QPoint root, QPoint point);
 
 #endif // PARAMETERS_H

@@ -3,7 +3,7 @@ QT += core gui widgets concurrent
 TARGET = NewtonFractal
 TEMPLATE = app
 CONFIG += c++14 debug_and_release
-VERSION = 1.3.3
+VERSION = 1.4.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 CONFIG(release, debug|release) {
@@ -32,7 +32,9 @@ SOURCES += \
     src/limits.cpp \
     src/sizeedit.cpp \
     src/settingswidget.cpp \
-    src/imageline.cpp
+    src/imageline.cpp \
+    src/root.cpp \
+    src/rooticon.cpp
 
 HEADERS += \
     src/fractalwidget.h \
@@ -43,7 +45,9 @@ HEADERS += \
     src/limits.h \
     src/sizeedit.h \
     src/settingswidget.h \
-    src/imageline.h
+    src/imageline.h \
+    src/root.h \
+    src/rooticon.h
 
 FORMS += \
     src/settingswidget.ui

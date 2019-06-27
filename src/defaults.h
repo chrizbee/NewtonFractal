@@ -10,12 +10,10 @@
 #include <QVector>
 
 typedef std::complex<double> complex;
-typedef QVector<std::complex<double>> RootVector;
 
 static constexpr double  PI  = 3.141592653589793238463;	// Pi as a constexpr
 
 static constexpr double  EPS = 1e-3;					// Max error allowed
-static constexpr quint8  NRT = 6;						// Number of roots
 static constexpr quint8  RIR = 5;						// Root indicator radius
 static constexpr quint8  OIR = 3;						// Orbit point indicator radius
 static constexpr double  MOD = 0.2;						// Root drag speed modifier

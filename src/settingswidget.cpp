@@ -8,8 +8,10 @@
 #include "fractalwidget.h"
 #include "parameters.h"
 #include "rootedit.h"
+#include "rooticon.h"
 #include <QDesktopServices>
 #include <QStandardPaths>
+#include <QColorDialog>
 #include <QFileDialog>
 #include <QSettings>
 #include <QUrl>
@@ -19,26 +21,18 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	ui_(new Ui::SettingsWidget),
 	params_(params)
 {
-	// Initialize
+	// Initialize ui
 	ui_->setupUi(this);
 	ui_->cbThreading->setEditable(true);
 	ui_->cbThreading->lineEdit()->setReadOnly(true);
 	ui_->cbThreading->lineEdit()->setAlignment(Qt::AlignCenter);
-	quint8 degree = params_->roots.size();
 	ui_->lineSize->setValue(params_->size);
 	ui_->spinScale->setValue(params_->scaleDownFactor * 100);
 	ui_->spinIterations->setValue(params_->maxIterations);
-	ui_->spinDegree->setValue(degree);
+	ui_->spinDegree->setValue(params_->roots.size());
 	ui_->spinDamping->setValue(params_->damping);
 	ui_->cbThreading->setCurrentIndex(params_->multiThreaded);
 	ui_->spinZoom->setValue(params_->limits.zoomFactor() * 100);
-	rootEdits_.append(QList<RootEdit*>() << ui_->lineRoot0 << ui_->lineRoot1 << ui_->lineRoot2 << ui_->lineRoot3 << ui_->lineRoot4 << ui_->lineRoot5);
-	for (quint8 i = 0; i < rootEdits_.size(); ++i) {
-		rootEdits_[i]->setEnabled(i < degree);
-		if (i < degree) {
-			rootEdits_[i]->setValue(params_->roots[i]);
-		}
-	}
 
 	// Connect ui signals to slots
 	connect(ui_->btnExport, &QPushButton::clicked, this, &SettingsWidget::on_btnExportClicked);
@@ -50,15 +44,15 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	connect(ui_->spinDamping, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsWidget::on_settingsChanged);
-	for (RootEdit *rootEdit : rootEdits_) {
-		connect(rootEdit, &RootEdit::rootChanged, this, &SettingsWidget::on_settingsChanged);
-	}
 
 	// Connect external links
 	connect(ui_->btnOpit7, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://github.com/opit7"));});
 	connect(ui_->btnChrizbee, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://github.com/chrizbee"));});
 	connect(ui_->btnOhm, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://www.th-nuernberg.de/fakultaeten/efi"));});
 	connect(ui_->btnIcons8, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://icons8.com"));});
+
+	// Initialize roots
+	ui_->spinDegree->setValue(DRC);
 }
 
 SettingsWidget::~SettingsWidget()
@@ -85,6 +79,37 @@ void SettingsWidget::changeZoom(double factor)
 	ui_->spinZoom->setValue(factor * 100);
 }
 
+void SettingsWidget::addRoot()
+{
+	// Create new root and apend it to parameters
+	Root root;
+	params_->roots.append(root);
+
+	// Create RootEdit, add it to list and layout and connect its signal
+	RootEdit *edit = new RootEdit(root.value(), this);
+	rootEdits_.append(edit);
+	ui_->gridRoots->addWidget(edit, params_->roots.size(), 1);
+	connect(edit, &RootEdit::rootChanged, this, &SettingsWidget::on_settingsChanged);
+
+	// Create label icon
+	RootIcon *icon = new RootIcon(root.color(), this);
+	rootIcons_.append(icon);
+	ui_->gridRoots->addWidget(icon, params_->roots.size(), 0);
+	connect(icon, &RootIcon::clicked, this, &SettingsWidget::changeRootColor);
+}
+
+void SettingsWidget::removeLastRoot()
+{
+	// Remove last rootedit and icon
+	RootEdit *edit = rootEdits_.takeLast();
+	RootIcon *icon = rootIcons_.takeLast();
+	ui_->gridRoots->removeWidget(edit);
+	ui_->gridRoots->removeWidget(icon);
+	params_->roots.removeLast();
+	delete edit;
+	delete icon;
+}
+
 void SettingsWidget::moveRoot(quint8 index, complex value)
 {
 	// Update settings
@@ -93,26 +118,44 @@ void SettingsWidget::moveRoot(quint8 index, complex value)
 	}
 }
 
+void SettingsWidget::changeRootColor()
+{
+	// Change root color
+	RootIcon *icon = static_cast<RootIcon*>(sender());
+	if (icon) {
+		QColor color = QColorDialog::getColor(Qt::red, this);
+		if (color.isValid()) {
+			icon->setColor(color);
+			params_->roots[rootIcons_.indexOf(icon)].setColor(color);
+		}
+	}
+
+	// Re-render
+	emit paramsChanged();
+}
+
 void SettingsWidget::on_settingsChanged()
 {
+	// Add / remove roots
+	int degree = ui_->spinDegree->value();
+	while (params_->roots.size() < degree) { addRoot(); }
+	while (params_->roots.size() > degree) { removeLastRoot(); }
+
 	// Update fractal with new settings
-	quint8 degree = ui_->spinDegree->value();
-	params_->roots.clear();
 	params_->limits.setZoomFactor(ui_->spinZoom->value() / 100.0);
 	params_->maxIterations = ui_->spinIterations->value();
 	params_->damping = ui_->spinDamping->value();
 	params_->scaleDownFactor = ui_->spinScale->value() / 100.0;
 	params_->multiThreaded = ui_->cbThreading->currentIndex();
 
-	// Update rootEdit visibility
-	for (quint8 i = 0; i < rootEdits_.size(); ++i) {
-		rootEdits_[i]->setEnabled(i < degree);
-		if (i < degree) {
-			params_->roots.append(rootEdits_[i]->value());
+	// Update rootEdit value
+	if (rootEdits_.size() == params_->roots.size()) {
+		for (quint8 i = 0; i < rootEdits_.size(); ++i) {
+			params_->roots[i].setValue(rootEdits_[i]->value());
 		}
 	}
 
-	// Render
+	// Re-render
 	emit paramsChanged();
 }
 

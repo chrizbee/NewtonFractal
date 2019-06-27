@@ -5,8 +5,7 @@
 
 #include "parameters.h"
 
-Parameters::Parameters(quint8 rootCount) :
-	roots(equidistantRoots(rootCount)),
+Parameters::Parameters() :
 	limits(Limits()),
 	size(DSI, DSI),
 	maxIterations(DMI),
@@ -63,9 +62,14 @@ void Parameters::resize(QSize newSize)
 
 void Parameters::reset()
 {
-	// Reset roots and limits
+	// Equidistant points on a circle
 	quint8 rootCount = roots.size();
-	roots = equidistantRoots(rootCount);
+	for (quint8 i = 0; i < rootCount; ++i) {
+		double angle = 2 * PI * i / rootCount;
+		roots[i].setValue(complex(cos(angle), sin(angle)));
+	}
+
+	// Reset limits and scaledown
 	limits.reset(size);
 	scaleDown = false;
 }
@@ -102,17 +106,6 @@ complex distance2complex(QPointF d, const Parameters &params)
 	double real = d.x() * params.limits.width()  / (params.size.width() - 1);
 	double imag = d.y() * -params.limits.height() / (params.size.height() - 1);
 	return complex(real, imag);
-}
-
-RootVector equidistantRoots(quint8 rootCount)
-{
-	// Return equidistant points on a circle
-	RootVector roots;
-	for (quint8 i = 0; i < rootCount; ++i) {
-		double angle = 2 * PI * i / rootCount;
-		roots.append(complex(cos(angle), sin(angle)));
-	}
-	return roots;
 }
 
 bool rootContainsPoint(QPoint root, QPoint point)

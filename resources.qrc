@@ -26,5 +26,7 @@
         <file>resources/icons/position.png</file>
         <file>resources/icons/icon.ico</file>
         <file>resources/icons/icon.png</file>
+        <file>resources/icons/add.png</file>
+        <file>resources/icons/remove.png</file>
     </qresource>
 </RCC>

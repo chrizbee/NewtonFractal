@@ -24,7 +24,7 @@ Dragger::Dragger() :
 
 FractalWidget::FractalWidget(QWidget *parent) :
 	QWidget(parent),
-	params_(new Parameters(DRC)),
+	params_(new Parameters()),
 	settingsWidget_(new SettingsWidget(params_, this)),
 	fps_(0),
 	legend_(true),
@@ -113,7 +113,7 @@ void FractalWidget::reset()
 	updateParams();
 	quint8 rootCount = params_->roots.size();
 	for (quint8 i = 0; i < rootCount; ++i) {
-		emit rootMoved(i, params_->roots[i]);
+		emit rootMoved(i, params_->roots[i].value());
 	}
 	emit zoomChanged(params_->limits.zoomFactor());
 }
@@ -170,12 +170,12 @@ void FractalWidget::paintEvent(QPaintEvent *)
 		painter.drawPixmap(rect(), pixmap_);
 
 		// Draw roots
-		rootPoints_.clear();
+		rootPoints_.clear(); // TODO: not needed
 		painter.setPen(circlePen);
 		painter.setBrush(opaqueBrush);
 		quint8 rootCount = params_->roots.size();
 		for (quint8 i = 0; i < rootCount; ++i) {
-			QPoint point = complex2point(params_->roots[i], *params_);
+			QPoint point = complex2point(params_->roots[i].value(), *params_);
 			painter.drawEllipse(point, RIR, RIR);
 			rootPoints_.append(point);
 		}
@@ -251,7 +251,7 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 			dragger_.previousPos = mousePosition;
 		} else params_->roots[dragger_.index] = point2complex(mousePosition, *params_);
 		updateParams();
-		emit rootMoved(dragger_.index, params_->roots[dragger_.index]);
+		emit rootMoved(dragger_.index, params_->roots[dragger_.index].value());
 
 	// Else move fractal if dragging
 	} else if (dragger_.mode == DraggingFractal) {

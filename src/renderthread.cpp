@@ -9,23 +9,21 @@
 #include <QImage>
 #include <QPixmap>
 
-static const QColor colors[NRT] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
-
-inline void func(complex z, complex &f, complex &df, const RootVector &roots)
+inline void func(complex z, complex &f, complex &df, const QVector<Root> &roots)
 {
 	// Calculate f and derivative with given roots
 	quint8 rootCount = roots.length();
 	if (rootCount < 2) return;
 
 	// TODO: algorithm documentation
-	complex r = (z - roots[0]);
-	complex l = (z - roots[1]);
+	complex r = (z - roots[0].value());
+	complex l = (z - roots[1].value());
 	for (quint8 i = 1; i < rootCount - 1; ++i) {
-		l = (z - roots[i + 1]) * (l + r);
-		r *= (z - roots[i]);
+		l = (z - roots[i + 1].value()) * (l + r);
+		r *= (z - roots[i].value());
 	}
 	df = l + r;
-	f = r * (z - roots[rootCount - 1]);
+	f = r * (z - roots[rootCount - 1].value());
 }
 
 inline void iterateX(ImageLine &il)
@@ -51,8 +49,8 @@ inline void iterateX(ImageLine &il)
 			// If root has been found set color and break
 			if (abs(z0 - z) < EPS) {
 				for (quint8 r = 0; r < rootCount; ++r) {
-					if (abs(z0 - il.params.roots[r]) < EPS) {
-						il.scanLine[x] = colors[r].darker(50 + i * 8).rgb();
+					if (abs(z0 - il.params.roots[r].value()) < EPS) {
+						il.scanLine[x] = il.params.roots[r].color().darker(50 + i * 8).rgb();
 						goto POINT_DONE;
 					}
 				}
@@ -84,9 +82,6 @@ void RenderThread::render(Parameters params)
 	// Lock mutex
 	QMutexLocker locker(&mutex_);
 	nextParams_ = params;
-	if (nextParams_.roots.length() > NRT) {
-		nextParams_.roots.resize(NRT);
-	}
 
 	// Start working
 	if (!isRunning()) {
