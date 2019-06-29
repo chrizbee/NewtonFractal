@@ -30,14 +30,16 @@ public slots:
 	void toggle();
 	void changeSize(QSize size);
 	void changeZoom(double factor);
-	void addRoot();
-	void removeLastRoot();
+	void addRoot(complex value = complex(0, 0));
+	void removeRoot(qint8 index = -1);
 	void moveRoot(quint8 index, complex value);
 
 private slots:
-	void changeRootColor();
+	void openRootContextMenu();
 	void on_settingsChanged();
-	void on_btnExportClicked();
+	void on_btnExportImageClicked();
+	void on_btnExportRootsClicked();
+	void on_btnImportRootsClicked();
 
 protected:
 	// Don't pass any events to parent while settings are shown
@@ -50,7 +52,9 @@ protected:
 signals:
 	void paramsChanged();
 	void sizeChanged(QSize size);
-	void exportTo(const QString &path);
+	void exportImage(const QString &dir);
+	void exportRoots(const QString &dir);
+	void importRoots(const QString &file);
 	void reset();
 
 private:
@@ -58,6 +62,7 @@ private:
 	Parameters *params_;
 	QList<RootEdit*> rootEdits_;
 	QList<RootIcon*> rootIcons_;
+	QList<QAction*> rootActions_;
 };
 
 #endif // SETTINGSWIDGET_H

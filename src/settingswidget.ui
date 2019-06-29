@@ -83,9 +83,6 @@
           </sizepolicy>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="spacing">
-           <number>5</number>
-          </property>
           <property name="leftMargin">
            <number>0</number>
           </property>
@@ -99,39 +96,7 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QGridLayout" name="gridSettings">
-            <item row="6" column="1">
-             <widget class="QComboBox" name="cbThreading">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>24</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>110</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <item>
-               <property name="text">
-                <string>Single</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Multi</string>
-               </property>
-              </item>
-             </widget>
-            </item>
+           <layout class="QGridLayout" name="gridLayout">
             <item row="7" column="0">
              <widget class="QLabel" name="lblExport">
               <property name="sizePolicy">
@@ -206,6 +171,77 @@
               </property>
              </widget>
             </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="lblDamping">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>damping factor</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="pixmap">
+               <pixmap resource="../resources.qrc">:/resources/icons/damp.png</pixmap>
+              </property>
+              <property name="scaledContents">
+               <bool>true</bool>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QDoubleSpinBox" name="spinDamping">
+              <property name="minimumSize">
+               <size>
+                <width>30</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>110</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="decimals">
+               <number>2</number>
+              </property>
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1.900000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="1">
              <widget class="SizeEdit" name="lineSize">
               <property name="minimumSize">
@@ -231,8 +267,42 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="lblThreading">
+            <item row="2" column="1">
+             <widget class="QDoubleSpinBox" name="spinZoom">
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>110</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="suffix">
+               <string>%</string>
+              </property>
+              <property name="decimals">
+               <number>2</number>
+              </property>
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>2147483647.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>100.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="lblZoom">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -252,13 +322,13 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>single or multithreading</string>
+               <string>current zoom factor</string>
               </property>
               <property name="text">
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="../resources.qrc">:/resources/icons/thread.png</pixmap>
+               <pixmap resource="../resources.qrc">:/resources/icons/zoom.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -305,82 +375,14 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="lblDegree">
+            <item row="6" column="1">
+             <widget class="QComboBox" name="cbThreading">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>30</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>30</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>degree of the polynomial / number of roots</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="pixmap">
-               <pixmap resource="../resources.qrc">:/resources/icons/degree.png</pixmap>
-              </property>
-              <property name="scaledContents">
-               <bool>true</bool>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="lblDamping">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>30</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>30</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>damping factor</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="pixmap">
-               <pixmap resource="../resources.qrc">:/resources/icons/damp.png</pixmap>
-              </property>
-              <property name="scaledContents">
-               <bool>true</bool>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1">
-             <widget class="QPushButton" name="btnExport">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -393,11 +395,46 @@
                 <height>16777215</height>
                </size>
               </property>
+              <item>
+               <property name="text">
+                <string>Single</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Multi</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QSpinBox" name="spinIterations">
+              <property name="minimumSize">
+               <size>
+                <width>30</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>110</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="toolTip">
                <string/>
               </property>
-              <property name="text">
-               <string>Export</string>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="minimum">
+               <number>5</number>
+              </property>
+              <property name="maximum">
+               <number>65535</number>
+              </property>
+              <property name="value">
+               <number>20</number>
               </property>
              </widget>
             </item>
@@ -435,68 +472,40 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
-             <widget class="QSpinBox" name="spinDegree">
+            <item row="6" column="0">
+             <widget class="QLabel" name="lblThreading">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>30</width>
-                <height>25</height>
+                <height>30</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>110</width>
-                <height>16777215</height>
+                <width>30</width>
+                <height>30</height>
                </size>
               </property>
               <property name="toolTip">
+               <string>single or multithreading</string>
+              </property>
+              <property name="text">
                <string/>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <property name="pixmap">
+               <pixmap resource="../resources.qrc">:/resources/icons/thread.png</pixmap>
               </property>
-              <property name="minimum">
-               <number>2</number>
-              </property>
-              <property name="maximum">
-               <number>100</number>
-              </property>
-              <property name="value">
-               <number>3</number>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QDoubleSpinBox" name="spinDamping">
-              <property name="minimumSize">
-               <size>
-                <width>30</width>
-                <height>25</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>110</width>
-                <height>16777215</height>
-               </size>
+              <property name="scaledContents">
+               <bool>true</bool>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="decimals">
-               <number>2</number>
-              </property>
-              <property name="minimum">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>1.900000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.010000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -537,8 +546,8 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
-             <widget class="QSpinBox" name="spinIterations">
+            <item row="4" column="1">
+             <widget class="QSpinBox" name="spinDegree">
               <property name="minimumSize">
                <size>
                 <width>30</width>
@@ -558,18 +567,18 @@
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="minimum">
-               <number>5</number>
+               <number>2</number>
               </property>
               <property name="maximum">
-               <number>65535</number>
+               <number>100</number>
               </property>
               <property name="value">
-               <number>20</number>
+               <number>3</number>
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="lblZoom">
+            <item row="4" column="0">
+             <widget class="QLabel" name="lblDegree">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -589,13 +598,13 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>current zoom factor</string>
+               <string>degree of the polynomial / number of roots</string>
               </property>
               <property name="text">
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="../resources.qrc">:/resources/icons/zoom.png</pixmap>
+               <pixmap resource="../resources.qrc">:/resources/icons/degree.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -605,12 +614,12 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QDoubleSpinBox" name="spinZoom">
+            <item row="7" column="1">
+             <widget class="QPushButton" name="btnExportImage">
               <property name="minimumSize">
                <size>
-                <width>20</width>
-                <height>25</height>
+                <width>0</width>
+                <height>24</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -619,23 +628,11 @@
                 <height>16777215</height>
                </size>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <property name="toolTip">
+               <string/>
               </property>
-              <property name="suffix">
-               <string>%</string>
-              </property>
-              <property name="decimals">
-               <number>2</number>
-              </property>
-              <property name="minimum">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>2147483647.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>100.000000000000000</double>
+              <property name="text">
+               <string>Export PNG</string>
               </property>
              </widget>
             </item>
@@ -703,28 +700,6 @@
           </item>
           <item>
            <layout class="QGridLayout" name="gridRoots">
-            <item row="0" column="1">
-             <widget class="QPushButton" name="btnReset">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>24</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>110</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string/>
-              </property>
-              <property name="text">
-               <string>Reset</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="lblReset">
               <property name="sizePolicy">
@@ -746,13 +721,13 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>change to default zoom and equidistant roots</string>
+               <string/>
               </property>
               <property name="text">
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="../resources.qrc">:/resources/icons/reset.png</pixmap>
+               <pixmap resource="../resources.qrc">:/resources/icons/root.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -761,6 +736,109 @@
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
+            </item>
+            <item row="0" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <property name="spacing">
+               <number>4</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="btnImportRoots">
+                <property name="minimumSize">
+                 <size>
+                  <width>34</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>34</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>import roots from file</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/resources/icons/import.png</normaloff>:/resources/icons/import.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnExportRoots">
+                <property name="minimumSize">
+                 <size>
+                  <width>34</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>34</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>export roots to file</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/resources/icons/save.png</normaloff>:/resources/icons/save.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnReset">
+                <property name="minimumSize">
+                 <size>
+                  <width>34</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>34</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>change to default zoom and equidistant roots</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/resources/icons/reset.png</normaloff>:/resources/icons/reset.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>
@@ -839,6 +917,9 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="layoutSources">
+            <property name="spacing">
+             <number>6</number>
+            </property>
             <item>
              <widget class="QPushButton" name="btnOpit7">
               <property name="sizePolicy">

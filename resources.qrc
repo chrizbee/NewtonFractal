@@ -1,12 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>resources/icons/iteration.png</file>
-        <file>resources/icons/blue.png</file>
-        <file>resources/icons/cyan.png</file>
-        <file>resources/icons/green.png</file>
-        <file>resources/icons/magenta.png</file>
-        <file>resources/icons/red.png</file>
-        <file>resources/icons/yellow.png</file>
         <file>resources/icons/save.png</file>
         <file>resources/icons/user1.png</file>
         <file>resources/icons/user2.png</file>
@@ -26,7 +20,11 @@
         <file>resources/icons/position.png</file>
         <file>resources/icons/icon.ico</file>
         <file>resources/icons/icon.png</file>
-        <file>resources/icons/add.png</file>
+        <file>resources/icons/mirrorx.png</file>
+        <file>resources/icons/mirrory.png</file>
         <file>resources/icons/remove.png</file>
+        <file>resources/icons/color.png</file>
+        <file>resources/icons/import.png</file>
+        <file>resources/icons/root.png</file>
     </qresource>
 </RCC>

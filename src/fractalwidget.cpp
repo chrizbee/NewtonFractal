@@ -10,6 +10,7 @@
 #include <QMouseEvent>
 #include <QHBoxLayout>
 #include <QDateTime>
+#include <QSettings>
 #include <QPainter>
 #include <QAction>
 #include <QIcon>
@@ -70,7 +71,9 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	// Connect settingswidget signals
 	connect(settingsWidget_, &SettingsWidget::paramsChanged, this, &FractalWidget::updateParams);
 	connect(settingsWidget_, &SettingsWidget::sizeChanged, this, QOverload<const QSize &>::of(&FractalWidget::resize));
-	connect(settingsWidget_, &SettingsWidget::exportTo, this, &FractalWidget::exportTo);
+	connect(settingsWidget_, &SettingsWidget::exportImage, this, &FractalWidget::exportImage);
+	connect(settingsWidget_, &SettingsWidget::exportRoots, this, &FractalWidget::exportRoots);
+	connect(settingsWidget_, &SettingsWidget::importRoots, this, &FractalWidget::importRoots);
 	connect(settingsWidget_, &SettingsWidget::reset, this, &FractalWidget::reset);
 	connect(this, &FractalWidget::rootMoved, settingsWidget_, &SettingsWidget::moveRoot);
 	connect(this, &FractalWidget::zoomChanged, settingsWidget_, &SettingsWidget::changeZoom);
@@ -94,16 +97,51 @@ void FractalWidget::updateParams()
 	renderThread_.render(*params_);
 }
 
-void FractalWidget::exportTo(const QString &exportDir)
+void FractalWidget::exportImage(const QString &dir)
 {
 	// Export fractal to file
-	QString filePath = exportDir + "/fractal_" +
+	QString filePath = dir + "/fractal_" +
 		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
 		QString::number(params_->roots.size()) + "roots_" +
 		QString::number(params_->size.width()) + "x" + QString::number(params_->size.width()) + ".png";
 	QFile f(filePath);
 	f.open(QIODevice::WriteOnly | QIODevice::Truncate);
 	pixmap_.save(&f, "png");
+}
+
+void FractalWidget::exportRoots(const QString &dir)
+{
+	// Export roots to file
+	quint8 rootCount = params_->roots.size();
+	QString filePath = dir + "/fractal_" +
+		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
+		QString::number(rootCount) + "roots_" +
+		QString::number(params_->size.width()) + "x" + QString::number(params_->size.width()) + ".roots";
+	QSettings rootsIni(filePath, QSettings::IniFormat, this);
+	rootsIni.beginGroup("Roots");
+	for (quint8 i = 0; i < rootCount; ++i) {
+		rootsIni.setValue("root" + QString::number(i), complex2string(params_->roots[i].value(), 16));
+	}
+}
+
+bool FractalWidget::importRoots(const QString &file)
+{
+	// Remove old roots
+	quint8 rootCount = params_->roots.size();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		settingsWidget_->removeRoot();
+	}
+
+	// Import roots from file
+	quint8 i = 0;
+	QSettings rootsIni(file, QSettings::IniFormat, this);
+	for (QString key : rootsIni.allKeys()) {
+		settingsWidget_->addRoot(string2complex(rootsIni.value(key).toString()));
+		++i;
+	}
+
+	// Return true if more than 1 roots were added
+	return i >= 2;
 }
 
 void FractalWidget::reset()

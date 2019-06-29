@@ -29,7 +29,9 @@ class FractalWidget : public QWidget
 public:
 	FractalWidget(QWidget *parent = nullptr);
 	void updateParams();
-	void exportTo(const QString &exportDir);
+	void exportImage(const QString &dir);
+	void exportRoots(const QString &dir);
+	bool importRoots(const QString &file);
 	void reset();
 
 public slots:

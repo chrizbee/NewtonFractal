@@ -8,8 +8,11 @@
 
 #include <complex>
 #include <QVector>
+#include <QColor>
 
 typedef std::complex<double> complex;
+
+static const QColor colors[6] = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
 
 static constexpr double  PI  = 3.141592653589793238463;	// Pi as a constexpr
 
@@ -28,5 +31,6 @@ static constexpr quint16 DSI = 700;						// Default size
 static constexpr quint16 MSI = 128;						// Minimum size
 static constexpr quint16 DZS = 2;						// Default complex size [-DZS -> +DZS]
 static constexpr double  DSF = 0.5 * DZS / DSI;			// Resulting size factor
+
 
 #endif // DEFAULTS_H

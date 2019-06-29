@@ -74,12 +74,40 @@ void Parameters::reset()
 	scaleDown = false;
 }
 
-QString complex2string(complex z)
+complex string2complex(const QString &text)
+{
+	// Convert string to complex
+	bool sign = false;
+	double real = 0, imag = 0;
+	QStringList parts = text.split('i');
+	QString rstr = parts.first().simplified();
+
+	// Get imag sign from first part
+	int si = rstr.indexOf('-', 1);
+	if (si > 0) {
+		sign = true;
+		rstr.replace(si, 1, ' ');
+	} else rstr.replace('+', ' ');
+
+	// Get real
+	real = rstr.simplified().toDouble();
+
+	// Get imag
+	if (parts.length() >= 2) {
+		imag = parts[1].simplified().toDouble();
+		if (sign) imag = -imag;
+	}
+
+	// Return complex number
+	return (complex(real, imag));
+}
+
+QString complex2string(complex z, quint8 precision)
 {
 	// Convert complex to string
 	static QString complexFormat("%1 %2 i%3");
-	QString real = QString::number(z.real(), 'f', 2);
-	QString imag = QString::number(abs(z.imag()), 'f', 2);
+	QString real = QString::number(z.real(), 'f', precision);
+	QString imag = QString::number(abs(z.imag()), 'f', precision);
 	QString sign = z.imag() >= 0 ? "+" : "-";
 	return complexFormat.arg(real, sign, imag);
 }

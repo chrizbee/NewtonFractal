@@ -31,29 +31,7 @@ void RootEdit::setValue(complex value)
 
 void RootEdit::on_editingFinished()
 {
-	// Create complex number from string
-	bool sign = false;
-	double real = 0, imag = 0;
-	QStringList parts = text().split('i');
-	QString rstr = parts.first().simplified();
-
-	// Get imag sign from first part
-	int si = rstr.indexOf('-', 1);
-	if (si > 0) {
-		sign = true;
-		rstr.replace(si, 1, ' ');
-	} else rstr.replace('+', ' ');
-
-	// Get real
-	real = rstr.simplified().toDouble();
-
-	// Get imag
-	if (parts.length() >= 2) {
-		imag = parts[1].simplified().toDouble();
-		if (sign) imag = -imag;
-	}
-
 	// Set new root value
-	setValue(complex(real, imag));
+	setValue(string2complex(text()));
 	emit rootChanged();
 }
