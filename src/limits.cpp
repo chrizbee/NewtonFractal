@@ -97,6 +97,15 @@ void Limits::resize(QSize delta)
 	}
 }
 
+void Limits::set(double left, double right, double top, double bottom)
+{
+	// Set limits
+	left_ = left;
+	right_ = right;
+	top_ = top;
+	bottom_ = bottom;
+}
+
 double Limits::width() const
 {
 	// Return width
@@ -131,6 +140,12 @@ double Limits::bottom() const
 {
 	// Return bottom limit
 	return bottom_;
+}
+
+Limits *Limits::original()
+{
+	// Return pointer to original limits
+	return original_;
 }
 
 double Limits::zoomFactor() const

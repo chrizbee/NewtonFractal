@@ -14,6 +14,7 @@
 #include <QPainter>
 #include <QAction>
 #include <QIcon>
+#include <QDebug>
 
 static QPoint mousePosition;
 
@@ -116,32 +117,94 @@ void FractalWidget::exportRoots(const QString &dir)
 	QString filePath = dir + "/fractal_" +
 		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
 		QString::number(rootCount) + "roots_" +
-		QString::number(params_->size.width()) + "x" + QString::number(params_->size.width()) + ".roots";
-	QSettings rootsIni(filePath, QSettings::IniFormat, this);
-	rootsIni.beginGroup("Roots");
+		QString::number(params_->size.width()) + "x" + QString::number(params_->size.width()) + ".ini";
+
+	// Create ini file
+	QSettings ini(filePath, QSettings::IniFormat, this);
+
+	// General parameters
+	ini.beginGroup("Parameters");
+	ini.setValue("size", params_->size);
+	ini.setValue("maxIterations", params_->maxIterations);
+	ini.setValue("damping", complex2string(params_->damping));
+	ini.setValue("scaleDownFactor", params_->scaleDownFactor);
+	ini.setValue("scaleDown", params_->scaleDown);
+	ini.setValue("multiThreaded", params_->multiThreaded);
+	ini.setValue("orbitMode", params_->orbitMode);
+	ini.setValue("orbitStart", params_->orbitStart);
+	ini.endGroup();
+
+	// Limits
+	ini.beginGroup("Limits");
+	ini.setValue("left", params_->limits.left());
+	ini.setValue("right", params_->limits.right());
+	ini.setValue("top", params_->limits.top());
+	ini.setValue("bottom", params_->limits.bottom());
+	ini.setValue("left_original", params_->limits.original()->left());
+	ini.setValue("right_original", params_->limits.original()->right());
+	ini.setValue("top_original", params_->limits.original()->top());
+	ini.setValue("bottom_original", params_->limits.original()->bottom());
+	ini.endGroup();
+
+	// Roots
+	ini.beginGroup("Roots");
 	for (quint8 i = 0; i < rootCount; ++i) {
-		rootsIni.setValue("root" + QString::number(i), complex2string(params_->roots[i].value(), 16));
+		ini.setValue(
+			"root" + QString::number(i),
+			complex2string(params_->roots[i].value(), 10) + " : " + params_->roots[i].color().name()
+		);
 	}
+	ini.endGroup();
 }
 
-bool FractalWidget::importRoots(const QString &file)
+void FractalWidget::importRoots(const QString &file)
 {
+	// Open ini file
+	QSettings ini(file, QSettings::IniFormat, this);
+
+	// General parameters
+	ini.beginGroup("Parameters");
+	params_->size = ini.value("size", QSize(DSI, DSI)).toSize();
+	params_->maxIterations = ini.value("maxIterations", DMI).toUInt();
+	params_->damping = string2complex(ini.value("damping", complex2string(DDP)).toString());
+	params_->scaleDownFactor = ini.value("scaleDownFactor", DSC).toDouble();
+	params_->scaleDown = ini.value("scaleDown", false).toBool();
+	params_->multiThreaded = ini.value("multiThreaded", true).toBool();
+	params_->orbitMode = ini.value("orbitMode", false).toBool();
+	params_->orbitStart = ini.value("orbitStart").toPoint();
+	ini.endGroup();
+
+
+	// Limits
+	ini.beginGroup("Limits");
+	params_->limits.set(
+		ini.value("left", 1).toDouble(), ini.value("right", 1).toDouble(),
+		ini.value("top", 1).toDouble(), ini.value("bottom", 1).toDouble());
+	params_->limits.original()->set(
+		ini.value("left_original", 1).toDouble(), ini.value("right_original", 1).toDouble(),
+		ini.value("top_original", 1).toDouble(), ini.value("bottom_original", 1).toDouble());
+	ini.endGroup();
+
+	// Update settings
+	resize(params_->size);
+	settingsWidget_->updateSettings();
+
 	// Remove old roots
 	quint8 rootCount = params_->roots.size();
 	for (quint8 i = 0; i < rootCount; ++i) {
 		settingsWidget_->removeRoot();
 	}
 
-	// Import roots from file
-	quint8 i = 0;
-	QSettings rootsIni(file, QSettings::IniFormat, this);
-	for (QString key : rootsIni.allKeys()) {
-		settingsWidget_->addRoot(string2complex(rootsIni.value(key).toString()));
-		++i;
+	// Add Roots
+	ini.beginGroup("Roots");
+	for (QString key : ini.childKeys()) {
+		QStringList str = ini.value(key).toString().split(":");
+		if (str.length() >= 2) {
+			settingsWidget_->addRoot(string2complex(str.first()), QColor(str.last().simplified()));
+		}
 	}
+	ini.endGroup();
 
-	// Return true if more than 1 roots were added
-	return i >= 2;
 }
 
 void FractalWidget::reset()
@@ -149,11 +212,7 @@ void FractalWidget::reset()
 	// Reset roots to be equidistant
 	params_->reset();
 	updateParams();
-	quint8 rootCount = params_->roots.size();
-	for (quint8 i = 0; i < rootCount; ++i) {
-		emit rootMoved(i, params_->roots[i].value());
-	}
-	emit zoomChanged(params_->limits.zoomFactor());
+	settingsWidget_->updateSettings();
 }
 
 void FractalWidget::updateFractal(const QPixmap &pixmap, double fps)

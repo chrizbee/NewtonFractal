@@ -6,11 +6,11 @@
 #include "rootedit.h"
 #include "parameters.h"
 
-RootEdit::RootEdit(complex value, QWidget *parent) :
+RootEdit::RootEdit(QWidget *parent) :
 	QLineEdit(parent)
 {
 	// Set geometry and connect signal
-	setValue(value);
+	setValue(complex(0, 0));
 	setMaximumWidth(110);
 	setAlignment(Qt::AlignRight);
 	connect(this, &RootEdit::editingFinished, this, &RootEdit::on_editingFinished);
@@ -33,5 +33,5 @@ void RootEdit::on_editingFinished()
 {
 	// Set new root value
 	setValue(string2complex(text()));
-	emit rootChanged();
+	emit valueChanged();
 }

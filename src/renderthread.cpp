@@ -32,7 +32,7 @@ inline void iterateX(ImageLine &il)
 	const quint8 rootCount = il.params.roots.size();
 	const Limits limits = il.params.limits;
 	const double xFactor = limits.width() / (il.lineSize - 1);
-	const double d = il.params.damping;
+	const complex d = il.params.damping;
 
 	for (int x = 0; x < il.lineSize; ++x) {
 
@@ -165,7 +165,7 @@ void RenderThread::renderOrbit()
 {
 	// Create vector of points
 	QVector<QPoint> orbit;
-	const double d = curParams_.damping;
+	const complex d = curParams_.damping;
 
 	// Create complex number from current pixel
 	complex z = point2complex(curParams_.orbitStart, curParams_);

@@ -31,7 +31,7 @@ public:
 	void updateParams();
 	void exportImage(const QString &dir);
 	void exportRoots(const QString &dir);
-	bool importRoots(const QString &file);
+	void importRoots(const QString &file);
 	void reset();
 
 public slots:

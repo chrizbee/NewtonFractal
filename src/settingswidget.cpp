@@ -17,6 +17,9 @@
 #include <QDateTime>
 #include <QMenu>
 #include <QUrl>
+#include <QDebug>
+
+static bool updateParamsAllowed = true;
 
 SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	QWidget(parent),
@@ -28,13 +31,7 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	ui_->cbThreading->setEditable(true);
 	ui_->cbThreading->lineEdit()->setReadOnly(true);
 	ui_->cbThreading->lineEdit()->setAlignment(Qt::AlignCenter);
-	ui_->lineSize->setValue(params_->size);
-	ui_->spinScale->setValue(params_->scaleDownFactor * 100);
-	ui_->spinIterations->setValue(params_->maxIterations);
-	ui_->spinDegree->setValue(params_->roots.size());
-	ui_->spinDamping->setValue(params_->damping);
-	ui_->cbThreading->setCurrentIndex(params_->multiThreaded);
-	ui_->spinZoom->setValue(params_->limits.zoomFactor() * 100);
+	updateSettings();
 
 	// Create actions for roots
 	QAction *remove = new QAction(QIcon("://resources/icons/remove.png"), tr("Remove root"), this);
@@ -45,14 +42,14 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 
 	// Connect ui signals to slots
 	connect(ui_->btnExportImage, &QPushButton::clicked, this, &SettingsWidget::on_btnExportImageClicked);
-	connect(ui_->btnExportRoots, &QPushButton::clicked, this, &SettingsWidget::on_btnExportRootsClicked);
-	connect(ui_->btnImportRoots, &QPushButton::clicked, this, &SettingsWidget::on_btnImportRootsClicked);
+	connect(ui_->btnExportSettings, &QPushButton::clicked, this, &SettingsWidget::on_btnExportSettingsClicked);
+	connect(ui_->btnImportSettings, &QPushButton::clicked, this, &SettingsWidget::on_btnImportSettingsClicked);
 	connect(ui_->lineSize, &SizeEdit::sizeChanged, this, &SettingsWidget::sizeChanged);
 	connect(ui_->btnReset, &QPushButton::clicked, this, &SettingsWidget::reset);
 	connect(ui_->spinScale, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinDegree, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
-	connect(ui_->spinDamping, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
+	connect(ui_->lineDamping, &RootEdit::valueChanged, this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsWidget::on_settingsChanged);
 
@@ -70,6 +67,24 @@ SettingsWidget::~SettingsWidget()
 {
 	// Clean
 	delete ui_;
+}
+
+void SettingsWidget::updateSettings()
+{
+	updateParamsAllowed = false;
+
+	// Update settings from params
+	ui_->lineSize->setValue(params_->size);
+	ui_->spinScale->setValue(params_->scaleDownFactor * 100);
+	ui_->spinZoom->setValue(params_->limits.zoomFactor() * 100);
+	ui_->spinIterations->setValue(params_->maxIterations);
+	ui_->spinDegree->setValue(params_->roots.size());
+	ui_->lineDamping->setValue(params_->damping);
+	ui_->cbThreading->setCurrentIndex(params_->multiThreaded);
+	for (quint8 i = 0; i < params_->roots.size(); ++i) {
+		moveRoot(i, params_->roots[i].value());
+	}
+	updateParamsAllowed = true;
 }
 
 void SettingsWidget::toggle()
@@ -90,24 +105,28 @@ void SettingsWidget::changeZoom(double factor)
 	ui_->spinZoom->setValue(factor * 100);
 }
 
-void SettingsWidget::addRoot(complex value)
+void SettingsWidget::addRoot(complex value, QColor color)
 {
 	// Create new root and apend it to parameters
 	Root root(value);
 	int rootCount = params_->roots.size();
-	if (params_->roots.size() < 6) root.setColor(colors[rootCount]);
+	if (color != Qt::black)
+		root.setColor(color);
+	else if (params_->roots.size() < 6)
+		root.setColor(colors[rootCount]);
 	params_->roots.append(root);
 
 	// Create RootEdit, add it to list and layout and connect its signal
-	RootEdit *edit = new RootEdit(root.value(), this);
+	RootEdit *edit = new RootEdit(this);
+	edit->setValue(root.value());
 	rootEdits_.append(edit);
-	ui_->gridRoots->addWidget(edit, rootCount + 1, 1);
-	connect(edit, &RootEdit::rootChanged, this, &SettingsWidget::on_settingsChanged);
+	ui_->gridRoots->addWidget(edit, rootCount, 1);
+	connect(edit, &RootEdit::valueChanged, this, &SettingsWidget::on_settingsChanged);
 
 	// Create label icon
 	RootIcon *icon = new RootIcon(root.color(), this);
 	rootIcons_.append(icon);
-	ui_->gridRoots->addWidget(icon, rootCount + 1, 0);
+	ui_->gridRoots->addWidget(icon, rootCount, 0);
 	connect(icon, &RootIcon::clicked, this, &SettingsWidget::openRootContextMenu);
 
 	// Update spinbox
@@ -150,7 +169,7 @@ void SettingsWidget::moveRoot(quint8 index, complex value)
 void SettingsWidget::openRootContextMenu()
 {
 	// Open root context menu
-	RootIcon *icon = static_cast<RootIcon*>(sender());
+	RootIcon *icon = dynamic_cast<RootIcon*>(sender()); // meh
 	if (icon != nullptr) {
 		quint8 index = rootIcons_.indexOf(icon);
 		QAction *clicked = QMenu::exec(rootActions_, icon->mapToGlobal(QPoint(0, 0)), rootActions_.first(), this);
@@ -187,27 +206,31 @@ void SettingsWidget::openRootContextMenu()
 
 void SettingsWidget::on_settingsChanged()
 {
-	// Add / remove roots
-	int degree = ui_->spinDegree->value();
-	while (params_->roots.size() < degree) { addRoot(); }
-	while (params_->roots.size() > degree) { removeRoot(); }
+	// Don't update if edited automatically
+	if (updateParamsAllowed) {
 
-	// Update fractal with new settings
-	params_->limits.setZoomFactor(ui_->spinZoom->value() / 100.0);
-	params_->maxIterations = ui_->spinIterations->value();
-	params_->damping = ui_->spinDamping->value();
-	params_->scaleDownFactor = ui_->spinScale->value() / 100.0;
-	params_->multiThreaded = ui_->cbThreading->currentIndex();
+		// Add / remove roots
+		int degree = ui_->spinDegree->value();
+		while (params_->roots.size() < degree) { addRoot(); }
+		while (params_->roots.size() > degree) { removeRoot(); }
 
-	// Update rootEdit value
-	if (rootEdits_.size() == params_->roots.size()) {
-		for (quint8 i = 0; i < rootEdits_.size(); ++i) {
-			params_->roots[i].setValue(rootEdits_[i]->value());
+		// Update fractal with new settings
+		params_->limits.setZoomFactor(ui_->spinZoom->value() / 100.0);
+		params_->maxIterations = ui_->spinIterations->value();
+		params_->damping = ui_->lineDamping->value();
+		params_->scaleDownFactor = ui_->spinScale->value() / 100.0;
+		params_->multiThreaded = ui_->cbThreading->currentIndex();
+
+		// Update rootEdit value
+		if (rootEdits_.size() == params_->roots.size()) {
+			for (quint8 i = 0; i < rootEdits_.size(); ++i) {
+				params_->roots[i].setValue(rootEdits_[i]->value());
+			}
 		}
-	}
 
-	// Re-render
-	emit paramsChanged();
+		// Re-render
+		emit paramsChanged();
+	}
 }
 
 void SettingsWidget::on_btnExportImageClicked()
@@ -222,26 +245,26 @@ void SettingsWidget::on_btnExportImageClicked()
 	}
 }
 
-void SettingsWidget::on_btnExportRootsClicked()
+void SettingsWidget::on_btnExportSettingsClicked()
 {
 	// Export roots to file
 	QSettings settings;
-	QString dir = settings.value("rootsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
-	dir = QFileDialog::getExistingDirectory(this, tr("Export roots to"), dir);
+	QString dir = settings.value("settingsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
+	dir = QFileDialog::getExistingDirectory(this, tr("Export settings to"), dir);
 	if (!dir.isEmpty()) {
-		settings.setValue("rootsdir", dir);
+		settings.setValue("settingsdir", dir);
 		emit exportRoots(dir);
 	}
 }
 
-void SettingsWidget::on_btnImportRootsClicked()
+void SettingsWidget::on_btnImportSettingsClicked()
 {
 	// Import roots from file
 	QSettings settings;
-	QString dir = settings.value("rootsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
-	QString file = QFileDialog::getOpenFileName(this, tr("Import roots"), dir, tr("Roots-File (*.roots)"));
+	QString dir = settings.value("settingsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
+	QString file = QFileDialog::getOpenFileName(this, tr("Import settings"), dir, tr("Ini-File (*.ini)"));
 	if (!file.isEmpty()) {
-		settings.setValue("rootsdir", dir);
+		settings.setValue("settingsdir", dir);
 		emit importRoots(file);
 	}
 }

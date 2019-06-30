@@ -19,6 +19,7 @@ public:
 	void zoom(bool in, double xw, double yw);
 	void reset(QSize size);
 	void resize(QSize delta);
+	void set(double left, double right, double top, double bottom);
 
 	double width() const;
 	double height() const;
@@ -26,6 +27,7 @@ public:
 	double right() const;
 	double top() const;
 	double bottom() const;
+	Limits *original();
 	double zoomFactor() const;
 	void setZoomFactor(double zoomFactor);
 

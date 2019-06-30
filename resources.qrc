@@ -26,5 +26,7 @@
         <file>resources/icons/color.png</file>
         <file>resources/icons/import.png</file>
         <file>resources/icons/root.png</file>
+        <file>resources/icons/settings2.png</file>
+        <file>resources/icons/image.png</file>
     </qresource>
 </RCC>

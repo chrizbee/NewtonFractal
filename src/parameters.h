@@ -22,7 +22,7 @@ struct Parameters {
 	Limits limits;
 	QSize size;
 	quint16 maxIterations;
-	double damping;
+	complex damping;
 	double scaleDownFactor;
 	bool scaleDown;
 	bool multiThreaded;

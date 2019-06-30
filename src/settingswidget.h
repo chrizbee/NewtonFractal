@@ -25,12 +25,13 @@ class SettingsWidget : public QWidget
 public:
 	SettingsWidget(Parameters *params, QWidget *parent = nullptr);
 	~SettingsWidget();
+	void updateSettings();
 
 public slots:
 	void toggle();
 	void changeSize(QSize size);
 	void changeZoom(double factor);
-	void addRoot(complex value = complex(0, 0));
+	void addRoot(complex value = complex(0, 0), QColor color = Qt::black);
 	void removeRoot(qint8 index = -1);
 	void moveRoot(quint8 index, complex value);
 
@@ -38,8 +39,8 @@ private slots:
 	void openRootContextMenu();
 	void on_settingsChanged();
 	void on_btnExportImageClicked();
-	void on_btnExportRootsClicked();
-	void on_btnImportRootsClicked();
+	void on_btnExportSettingsClicked();
+	void on_btnImportSettingsClicked();
 
 protected:
 	// Don't pass any events to parent while settings are shown

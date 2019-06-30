@@ -118,13 +118,13 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>export fractal as png</string>
+               <string/>
               </property>
               <property name="text">
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="../resources.qrc">:/resources/icons/save.png</pixmap>
+               <pixmap resource="../resources.qrc">:/resources/icons/settings2.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -205,40 +205,6 @@
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QDoubleSpinBox" name="spinDamping">
-              <property name="minimumSize">
-               <size>
-                <width>30</width>
-                <height>25</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>110</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="decimals">
-               <number>2</number>
-              </property>
-              <property name="minimum">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>1.900000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.010000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -614,12 +580,12 @@
               </property>
              </widget>
             </item>
-            <item row="7" column="1">
-             <widget class="QPushButton" name="btnExportImage">
+            <item row="5" column="1">
+             <widget class="RootEdit" name="lineDamping">
               <property name="minimumSize">
                <size>
-                <width>0</width>
-                <height>24</height>
+                <width>30</width>
+                <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -628,13 +594,157 @@
                 <height>16777215</height>
                </size>
               </property>
-              <property name="toolTip">
-               <string/>
-              </property>
-              <property name="text">
-               <string>Export PNG</string>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
+            </item>
+            <item row="7" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <property name="spacing">
+               <number>5</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="btnImportSettings">
+                <property name="minimumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>import roots from file</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/resources/icons/import.png</normaloff>:/resources/icons/import.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnExportSettings">
+                <property name="minimumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>export roots to file</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/resources/icons/save.png</normaloff>:/resources/icons/save.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnReset">
+                <property name="minimumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>change to default zoom and equidistant roots</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/resources/icons/reset.png</normaloff>:/resources/icons/reset.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnExportImage">
+                <property name="minimumSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>24</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>export fractal as png</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources.qrc">
+                  <normaloff>:/resources/icons/image.png</normaloff>:/resources/icons/image.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>
@@ -699,148 +809,7 @@
            </spacer>
           </item>
           <item>
-           <layout class="QGridLayout" name="gridRoots">
-            <item row="0" column="0">
-             <widget class="QLabel" name="lblReset">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>30</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>30</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string/>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="pixmap">
-               <pixmap resource="../resources.qrc">:/resources/icons/root.png</pixmap>
-              </property>
-              <property name="scaledContents">
-               <bool>true</bool>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <property name="spacing">
-               <number>4</number>
-              </property>
-              <item>
-               <widget class="QPushButton" name="btnImportRoots">
-                <property name="minimumSize">
-                 <size>
-                  <width>34</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>34</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>import roots from file</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resources.qrc">
-                  <normaloff>:/resources/icons/import.png</normaloff>:/resources/icons/import.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-                <property name="flat">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnExportRoots">
-                <property name="minimumSize">
-                 <size>
-                  <width>34</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>34</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>export roots to file</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resources.qrc">
-                  <normaloff>:/resources/icons/save.png</normaloff>:/resources/icons/save.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-                <property name="flat">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnReset">
-                <property name="minimumSize">
-                 <size>
-                  <width>34</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>34</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>change to default zoom and equidistant roots</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resources.qrc">
-                  <normaloff>:/resources/icons/reset.png</normaloff>:/resources/icons/reset.png</iconset>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
+           <layout class="QGridLayout" name="gridRoots"/>
           </item>
           <item>
            <spacer name="spacerExpandable">
@@ -1124,6 +1093,11 @@
    <class>SizeEdit</class>
    <extends>QLineEdit</extends>
    <header>src/sizeedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RootEdit</class>
+   <extends>QLineEdit</extends>
+   <header>src/rootedit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

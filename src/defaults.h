@@ -23,8 +23,8 @@ static constexpr double  MOD = 0.2;						// Root drag speed modifier
 static constexpr double  ZMF = 0.05;					// Zoom factor
 
 static constexpr quint8  DRC = 5;						// Default root count
-static constexpr double  DSC = 0.5;						// Default zoom factor
-static constexpr double  DDP = 1.0;						// Default damping factor
+static constexpr double  DSC = 0.5;						// Default scaledown factor
+static constexpr complex DDP = complex(1, 0);			// Default damping factor
 static constexpr quint16 DTI = 400;						// Default timer interval
 static constexpr quint16 DMI = 160;						// Default max. iterations
 static constexpr quint16 DSI = 700;						// Default size
