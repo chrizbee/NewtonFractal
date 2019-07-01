@@ -49,7 +49,7 @@ bool Parameters::orbitChanged(const Parameters &other) const
 	return (
 		orbitStart != other.orbitStart ||
 		orbitMode != other.orbitMode ||
-		orbitMode && paramsChanged(other)
+		(orbitMode && paramsChanged(other))
 	);
 }
 

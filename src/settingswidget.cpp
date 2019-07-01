@@ -35,11 +35,12 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	updateSettings();
 
 	// Create menu with actions for roots
-	rootMenu_->setWindowFlag(1);
-	rootMenu_->addAction(QIcon("://resources/icons/remove.png"), tr("Remove root"));
-	rootMenu_->addAction(QIcon("://resources/icons/color.png"), tr("Change color"));
-	rootMenu_->addAction(QIcon("://resources/icons/mirrorx.png"), tr("Mirror on x-axis"));
-	rootMenu_->addAction(QIcon("://resources/icons/mirrory.png"), tr("Mirror on y-axis"));
+	// Kind of ugly flags, but needed for e.g. KDE's "Focus strictly under mouse"
+	rootMenu_->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
+	rootMenu_->addAction(QIcon("://resources/icons/remove.png"), tr("Remove root"), rootMenu_, &QMenu::hide);
+	rootMenu_->addAction(QIcon("://resources/icons/color.png"), tr("Change color"), rootMenu_, &QMenu::hide);
+	rootMenu_->addAction(QIcon("://resources/icons/mirrorx.png"), tr("Mirror on x-axis"), rootMenu_, &QMenu::hide);
+	rootMenu_->addAction(QIcon("://resources/icons/mirrory.png"), tr("Mirror on y-axis"), rootMenu_, &QMenu::hide);
 
 	// Connect ui signals to slots
 	connect(ui_->btnExportImage, &QPushButton::clicked, this, &SettingsWidget::on_btnExportImageClicked);
