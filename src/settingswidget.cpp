@@ -24,7 +24,8 @@ static bool updateParamsAllowed = true;
 SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	QWidget(parent),
 	ui_(new Ui::SettingsWidget),
-	params_(params)
+	params_(params),
+	rootMenu_(new QMenu(this))
 {
 	// Initialize ui
 	ui_->setupUi(this);
@@ -33,12 +34,12 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	ui_->cbThreading->lineEdit()->setAlignment(Qt::AlignCenter);
 	updateSettings();
 
-	// Create actions for roots
-	QAction *remove = new QAction(QIcon("://resources/icons/remove.png"), tr("Remove root"), this);
-	QAction *changeColor = new QAction(QIcon("://resources/icons/color.png"), tr("Change color"), this);
-	QAction *mirrorX = new QAction(QIcon("://resources/icons/mirrorx.png"), tr("Mirror on x-axis"), this);
-	QAction *mirrorY = new QAction(QIcon("://resources/icons/mirrory.png"), tr("Mirror on y-axis"), this);
-	rootActions_ << remove << changeColor << mirrorX << mirrorY;
+	// Create menu with actions for roots
+	rootMenu_->setWindowFlag(1);
+	rootMenu_->addAction(QIcon("://resources/icons/remove.png"), tr("Remove root"));
+	rootMenu_->addAction(QIcon("://resources/icons/color.png"), tr("Change color"));
+	rootMenu_->addAction(QIcon("://resources/icons/mirrorx.png"), tr("Mirror on x-axis"));
+	rootMenu_->addAction(QIcon("://resources/icons/mirrory.png"), tr("Mirror on y-axis"));
 
 	// Connect ui signals to slots
 	connect(ui_->btnExportImage, &QPushButton::clicked, this, &SettingsWidget::on_btnExportImageClicked);
@@ -172,14 +173,15 @@ void SettingsWidget::openRootContextMenu()
 	RootIcon *icon = dynamic_cast<RootIcon*>(sender()); // meh
 	if (icon != nullptr) {
 		quint8 index = rootIcons_.indexOf(icon);
-		QAction *clicked = QMenu::exec(rootActions_, icon->mapToGlobal(QPoint(0, 0)), rootActions_.first(), this);
+		QList<QAction*> actions = rootMenu_->actions();
+		QAction *clicked = rootMenu_->exec(icon->mapToGlobal(QPoint(0, 0)), actions[0]);
 
 		// Remove root
-		if (clicked == rootActions_[0]) {
+		if (clicked == actions[0]) {
 			removeRoot(index);
 
 		// Open color dialog
-		} else if (clicked == rootActions_[1]) {
+		} else if (clicked == actions[1]) {
 			QColor color = QColorDialog::getColor(params_->roots[index].color(), this);
 			if (color.isValid()) {
 				icon->setColor(color);
@@ -187,13 +189,13 @@ void SettingsWidget::openRootContextMenu()
 			}
 
 		// Mirror root on x-axis
-		} else if (clicked == rootActions_[2]) {
+		} else if (clicked == actions[2]) {
 			complex root = params_->roots[index].value();
 			root.imag(-root.imag());
 			addRoot(root);
 
 		// Mirror root on y-axis
-		} else if (clicked == rootActions_[3]) {
+		} else if (clicked == actions[3]) {
 			complex root = params_->roots[index].value();
 			root.real(-root.real());
 			addRoot(root);

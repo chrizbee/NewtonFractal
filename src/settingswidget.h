@@ -7,6 +7,7 @@
 #define SETTINGSWIDGET_H
 
 #include "defaults.h"
+#include <QMenu>
 #include <QWidget>
 #include <QMouseEvent>
 
@@ -61,9 +62,9 @@ signals:
 private:
 	Ui::SettingsWidget *ui_;
 	Parameters *params_;
+	QMenu *rootMenu_;
 	QList<RootEdit*> rootEdits_;
 	QList<RootIcon*> rootIcons_;
-	QList<QAction*> rootActions_;
 };
 
 #endif // SETTINGSWIDGET_H
