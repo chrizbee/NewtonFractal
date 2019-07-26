@@ -7,7 +7,7 @@
 
 ![roots](resources/images/roots.gif) ![move](resources/images/move.gif) ![zoom](resources/images/zoom.gif) ![orbit](resources/images/orbit.gif) ![position](resources/images/position.gif) 
 
-- Move up to 6 roots with drag & drop
+- Move up to 10 roots with drag & drop
 - Move fractal
 - Zoom in and out
 - Orbit mode to visualize iterations
@@ -15,7 +15,8 @@
 - Set fractal size and downscaling factor (smooth rendering while moving)
 - Change maximum number of newton iterations
 - Change damping factor of newton's method
-- Multi- or singlethreading
+- Single- or multithreading (*cpu*) or OpenGL (*gpu*)
+- Export / import configuration
 - Export fractal as png
 
 ## Getting Started
