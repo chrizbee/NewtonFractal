@@ -20,6 +20,11 @@ int main(int argc, char *argv[])
 	app.setStyle("Fusion");
 	app.setFont(QFont("Consolas", 10));
 
+	// Set format
+	QSurfaceFormat fmt;
+	fmt.setSamples(10);
+	QSurfaceFormat::setDefaultFormat(fmt);
+
 	// Create widget
 	FractalWidget widget;
 	widget.show();

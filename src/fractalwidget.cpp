@@ -285,6 +285,7 @@ void FractalWidget::paintGL()
 	QPainter painter(this);
 	painter.setFont(consolas);
 	painter.setRenderHint(QPainter::Antialiasing);
+	glEnable(GL_MULTISAMPLE);
 
 	// Draw pixmap if rendered yet and cpu mode
 	if (params_->processor != GPU_OPENGL && !pixmap_.isNull()) {
