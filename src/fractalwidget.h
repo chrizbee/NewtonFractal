@@ -8,7 +8,9 @@
 
 #include "renderthread.h"
 #include <QTimer>
-#include <QWidget>
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+#include <QOpenGLShaderProgram>
 
 struct Parameters;
 class SettingsWidget;
@@ -22,7 +24,7 @@ struct Dragger {
 	int index;
 };
 
-class FractalWidget : public QWidget
+class FractalWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
 
@@ -39,11 +41,12 @@ public slots:
 	void updateOrbit(const QVector<QPoint> &orbit, double fps);
 
 protected:
-	void paintEvent(QPaintEvent *) override;
+	void initializeGL() override;
+	void paintGL() override;
+	void resizeGL(int w, int h) override;
 	void mousePressEvent(QMouseEvent *event) override;
 	void mouseMoveEvent(QMouseEvent *event) override;
 	void mouseReleaseEvent(QMouseEvent *event) override;
-	void resizeEvent(QResizeEvent *event) override;
 	void wheelEvent(QWheelEvent *event) override;
 
 signals:
@@ -57,8 +60,8 @@ private:
 	QVector<QPoint> orbit_;
 	Parameters *params_;
 	SettingsWidget *settingsWidget_;
+	QOpenGLShaderProgram *program_;
 	RenderThread renderThread_;
-	QList<QPoint> rootPoints_;
 	Dragger dragger_;
 	double fps_;
 	bool legend_;

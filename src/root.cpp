@@ -4,11 +4,10 @@
 // see the file LICENSE in the main directory.
 
 #include "root.h"
-#include <QRandomGenerator>
 
-Root::Root(complex value) :
+Root::Root(complex value, QColor color) :
 	value_(value),
-	color_(QColor::fromRgb(QRandomGenerator::global()->generate()))
+	color_(color)
 {
 }
 
@@ -22,6 +21,18 @@ QColor Root::color() const
 {
 	// Get root color
 	return color_;
+}
+
+QVector2D Root::valueVec2() const
+{
+	// Get complex number as vec2
+	return QVector2D(value_.real(), value_.imag());
+}
+
+QVector3D Root::colorVec3() const
+{
+	// Get root color as vec3
+	return QVector3D(color_.red() / 255.0, color_.green() / 255.0, color_.blue() / 255.0);
 }
 
 void Root::setColor(QColor color)

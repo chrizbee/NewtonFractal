@@ -7,12 +7,12 @@
 
 Parameters::Parameters() :
 	limits(Limits()),
-	size(DSI, DSI),
-	maxIterations(DMI),
-	damping(DDP),
-	scaleDownFactor(DSC),
+	size(nf::DSI, nf::DSI),
+	maxIterations(nf::DMI),
+	damping(nf::DDP),
+	scaleDownFactor(nf::DSC),
 	scaleDown(false),
-	multiThreaded(true),
+	processor(CPU_MULTI),
 	orbitMode(false),
 	orbitStart(0, 0)
 {
@@ -21,11 +21,11 @@ Parameters::Parameters() :
 bool Parameters::paramsChanged(const Parameters &other) const
 {
 	// Check for same root count
-	if (roots.size() != other.roots.size())
+	if (roots.count() != other.roots.count())
 		return true;
 
 	// Check for same roots
-	for (quint8 i = 0; i < roots.size(); ++i) {
+	for (quint8 i = 0; i < roots.count(); ++i) {
 		if (roots[i] != other.roots[i]) {
 			return true;
 		}
@@ -39,7 +39,7 @@ bool Parameters::paramsChanged(const Parameters &other) const
 		damping != other.damping ||
 		scaleDownFactor != other.scaleDownFactor ||
 		scaleDown != other.scaleDown ||
-		multiThreaded != other.multiThreaded
+		processor != other.processor
 	);
 }
 
@@ -63,9 +63,9 @@ void Parameters::resize(QSize newSize)
 void Parameters::reset()
 {
 	// Equidistant points on a circle
-	quint8 rootCount = roots.size();
+	quint8 rootCount = roots.count();
 	for (quint8 i = 0; i < rootCount; ++i) {
-		double angle = 2 * PI * i / rootCount;
+		double angle = 2 * nf::PI * i / rootCount;
 		roots[i].setValue(complex(cos(angle), sin(angle)));
 	}
 
@@ -112,6 +112,12 @@ QString complex2string(complex z, quint8 precision)
 	return complexFormat.arg(real, sign, imag);
 }
 
+QVector2D complex2vec2(complex z)
+{
+	// Convert complex to vec2
+	return QVector2D(z.real(), z.imag());
+}
+
 QPoint complex2point(complex z, const Parameters &params)
 {
 	// Convert complex to point
@@ -140,5 +146,27 @@ bool rootContainsPoint(QPoint root, QPoint point)
 {
 	// Check if root contains point
 	QPoint dist = root - point;
-	return (abs(dist.x()) < RIR && abs(dist.y()) < RIR);
+	return (abs(dist.x()) < nf::RIR && abs(dist.y()) < nf::RIR);
+}
+
+QVector<QVector2D> rootsVec2(const Parameters &params)
+{
+	// Return vector of root values only
+	QVector<QVector2D> roots;
+	quint8 rootCount = params.roots.count();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		roots.append(params.roots[i].valueVec2());
+	}
+	return roots;
+}
+
+QVector<QVector3D> colorsVec3(const Parameters &params)
+{
+	// Return vector of root colors only
+	QVector<QVector3D> colors;
+	quint8 rootCount = params.roots.count();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		colors.append(params.roots[i].colorVec3());
+	}
+	return colors;
 }

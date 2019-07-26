@@ -3,8 +3,10 @@ QT += core gui widgets concurrent
 TARGET = NewtonFractal
 TEMPLATE = app
 CONFIG += c++14 debug_and_release
-VERSION = 1.4.2
+VERSION = 1.5.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+win32:LIBS += -lOpenGL32
+unix:LIBS += -lOpenGL
 
 CONFIG(release, debug|release) {
     OBJECTS_DIR = release/obj
@@ -59,3 +61,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+
+DISTFILES += \
+    src/fractal.fsh

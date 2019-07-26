@@ -62,7 +62,7 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	connect(ui_->btnIcons8, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://icons8.com"));});
 
 	// Initialize roots
-	ui_->spinDegree->setValue(DRC);
+	ui_->spinDegree->setValue(nf::DRC);
 }
 
 SettingsWidget::~SettingsWidget()
@@ -76,17 +76,24 @@ void SettingsWidget::updateSettings()
 	updateParamsAllowed = false;
 
 	// Update settings from params
+	quint8 rootCount = params_->roots.count();
 	ui_->lineSize->setValue(params_->size);
 	ui_->spinScale->setValue(params_->scaleDownFactor * 100);
 	ui_->spinZoom->setValue(params_->limits.zoomFactor() * 100);
 	ui_->spinIterations->setValue(params_->maxIterations);
-	ui_->spinDegree->setValue(params_->roots.size());
+	ui_->spinDegree->setValue(rootCount);
 	ui_->lineDamping->setValue(params_->damping);
-	ui_->cbThreading->setCurrentIndex(params_->multiThreaded);
-	for (quint8 i = 0; i < params_->roots.size(); ++i) {
+	ui_->cbThreading->setCurrentIndex(static_cast<quint8>(params_->processor));
+	for (quint8 i = 0; i < rootCount; ++i) {
 		moveRoot(i, params_->roots[i].value());
 	}
 	updateParamsAllowed = true;
+}
+
+void SettingsWidget::disableOpenGL()
+{
+	// Disable combobox entry
+	ui_->cbThreading->setItemData(2, 0, Qt::UserRole - 1);
 }
 
 void SettingsWidget::toggle()
@@ -110,35 +117,33 @@ void SettingsWidget::changeZoom(double factor)
 void SettingsWidget::addRoot(complex value, QColor color)
 {
 	// Create new root and apend it to parameters
-	Root root(value);
-	int rootCount = params_->roots.size();
-	if (color != Qt::black)
-		root.setColor(color);
-	else if (params_->roots.size() < 6)
-		root.setColor(colors[rootCount]);
-	params_->roots.append(root);
+	int rootCount = params_->roots.count();
+	if (rootCount < nf::MRC) {
+		Root root(value, color == Qt::black ? nf::predefColors[rootCount] : color);
+		params_->roots.append(root);
 
-	// Create RootEdit, add it to list and layout and connect its signal
-	RootEdit *edit = new RootEdit(this);
-	edit->setValue(root.value());
-	rootEdits_.append(edit);
-	ui_->gridRoots->addWidget(edit, rootCount, 1);
-	connect(edit, &RootEdit::valueChanged, this, &SettingsWidget::on_settingsChanged);
+		// Create RootEdit, add it to list and layout and connect its signal
+		RootEdit *edit = new RootEdit(this);
+		edit->setValue(root.value());
+		rootEdits_.append(edit);
+		ui_->gridRoots->addWidget(edit, rootCount, 1);
+		connect(edit, &RootEdit::valueChanged, this, &SettingsWidget::on_settingsChanged);
 
-	// Create label icon
-	RootIcon *icon = new RootIcon(root.color(), this);
-	rootIcons_.append(icon);
-	ui_->gridRoots->addWidget(icon, rootCount, 0);
-	connect(icon, &RootIcon::clicked, this, &SettingsWidget::openRootContextMenu);
+		// Create label icon
+		RootIcon *icon = new RootIcon(root.color(), this);
+		rootIcons_.append(icon);
+		ui_->gridRoots->addWidget(icon, rootCount, 0);
+		connect(icon, &RootIcon::clicked, this, &SettingsWidget::openRootContextMenu);
 
-	// Update spinbox
-	ui_->spinDegree->setValue(params_->roots.size());
+		// Update spinbox
+		ui_->spinDegree->setValue(params_->roots.count());
+	}
 }
 
 void SettingsWidget::removeRoot(qint8 index)
 {
 	// Remove rootedit and icon
-	quint8 rootCount = params_->roots.size();
+	quint8 rootCount = params_->roots.count();
 	index = index < 0 ? rootCount - 1 : index;
 	RootEdit *edit = rootEdits_.takeAt(index);
 	RootIcon *icon = rootIcons_.takeAt(index);
@@ -157,7 +162,7 @@ void SettingsWidget::removeRoot(qint8 index)
 	}
 
 	// Update spinbox
-	ui_->spinDegree->setValue(params_->roots.size());
+	ui_->spinDegree->setValue(params_->roots.count());
 }
 
 void SettingsWidget::moveRoot(quint8 index, complex value)
@@ -214,18 +219,18 @@ void SettingsWidget::on_settingsChanged()
 
 		// Add / remove roots
 		int degree = ui_->spinDegree->value();
-		while (params_->roots.size() < degree) { addRoot(); }
-		while (params_->roots.size() > degree) { removeRoot(); }
+		while (params_->roots.count() < degree) { addRoot(); }
+		while (params_->roots.count() > degree) { removeRoot(); }
 
 		// Update fractal with new settings
 		params_->limits.setZoomFactor(ui_->spinZoom->value() / 100.0);
 		params_->maxIterations = ui_->spinIterations->value();
 		params_->damping = ui_->lineDamping->value();
 		params_->scaleDownFactor = ui_->spinScale->value() / 100.0;
-		params_->multiThreaded = ui_->cbThreading->currentIndex();
+		params_->processor = static_cast<Processor>(ui_->cbThreading->currentIndex());
 
 		// Update rootEdit value
-		if (rootEdits_.size() == params_->roots.size()) {
+		if (rootEdits_.size() == params_->roots.count()) {
 			for (quint8 i = 0; i < rootEdits_.size(); ++i) {
 				params_->roots[i].setValue(rootEdits_[i]->value());
 			}

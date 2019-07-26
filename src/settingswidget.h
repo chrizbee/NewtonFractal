@@ -27,6 +27,7 @@ public:
 	SettingsWidget(Parameters *params, QWidget *parent = nullptr);
 	~SettingsWidget();
 	void updateSettings();
+	void disableOpenGL();
 
 public slots:
 	void toggle();

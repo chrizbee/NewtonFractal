@@ -17,6 +17,8 @@
 #include <QDebug>
 
 static QPoint mousePosition;
+static const QVector<QVector3D> vertices = QVector<QVector3D>() <<
+	QVector3D(-1, -1, 0) << QVector3D(1, -1, 0) << QVector3D(1, 1, 0) << QVector3D(-1, 1, 0);
 
 Dragger::Dragger() :
 	mode(NoDragging),
@@ -25,7 +27,7 @@ Dragger::Dragger() :
 }
 
 FractalWidget::FractalWidget(QWidget *parent) :
-	QWidget(parent),
+	QOpenGLWidget(parent),
 	params_(new Parameters()),
 	settingsWidget_(new SettingsWidget(params_, this)),
 	fps_(0),
@@ -33,7 +35,7 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	position_(false)
 {
 	// Initialize layout
-	QSpacerItem *spacer = new QSpacerItem(DSI / 2.0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	QSpacerItem *spacer = new QSpacerItem(nf::DSI / 2.0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 	QHBoxLayout *centralLayout = new QHBoxLayout(this);
 	centralLayout->setSpacing(0);
 	centralLayout->setContentsMargins(0, 0, 0, 0);
@@ -60,11 +62,11 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	connect(settings, &QAction::triggered, settingsWidget_, &SettingsWidget::toggle);
 
 	// Initialize general stuff
-	setMinimumSize(MSI, MSI);
+	setMinimumSize(nf::MSI, nf::MSI);
 	setMouseTracking(true);
 	setWindowTitle(QApplication::applicationName());
 	setWindowIcon(QIcon("://resources/icons/icon.png"));
-	timer_.setInterval(DTI);
+	timer_.setInterval(nf::DTI);
 	timer_.setSingleShot(true);
 	resize(params_->size);
 	settingsWidget_->hide();
@@ -103,7 +105,7 @@ void FractalWidget::exportImage(const QString &dir)
 	// Export fractal to file
 	QString filePath = dir + "/fractal_" +
 		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
-		QString::number(params_->roots.size()) + "roots_" +
+		QString::number(params_->roots.count()) + "roots_" +
 		QString::number(params_->size.width()) + "x" + QString::number(params_->size.width()) + ".png";
 	QFile f(filePath);
 	f.open(QIODevice::WriteOnly | QIODevice::Truncate);
@@ -113,7 +115,7 @@ void FractalWidget::exportImage(const QString &dir)
 void FractalWidget::exportRoots(const QString &dir)
 {
 	// Export roots to file
-	quint8 rootCount = params_->roots.size();
+	quint8 rootCount = params_->roots.count();
 	QString filePath = dir + "/fractal_" +
 		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
 		QString::number(rootCount) + "roots_" +
@@ -129,7 +131,7 @@ void FractalWidget::exportRoots(const QString &dir)
 	ini.setValue("damping", complex2string(params_->damping));
 	ini.setValue("scaleDownFactor", params_->scaleDownFactor);
 	ini.setValue("scaleDown", params_->scaleDown);
-	ini.setValue("multiThreaded", params_->multiThreaded);
+	ini.setValue("processor", static_cast<quint8>(params_->processor));
 	ini.setValue("orbitMode", params_->orbitMode);
 	ini.setValue("orbitStart", params_->orbitStart);
 	ini.endGroup();
@@ -164,12 +166,12 @@ void FractalWidget::importRoots(const QString &file)
 
 	// General parameters
 	ini.beginGroup("Parameters");
-	params_->size = ini.value("size", QSize(DSI, DSI)).toSize();
-	params_->maxIterations = ini.value("maxIterations", DMI).toUInt();
-	params_->damping = string2complex(ini.value("damping", complex2string(DDP)).toString());
-	params_->scaleDownFactor = ini.value("scaleDownFactor", DSC).toDouble();
+	params_->size = ini.value("size", QSize(nf::DSI, nf::DSI)).toSize();
+	params_->maxIterations = ini.value("maxIterations", nf::DMI).toUInt();
+	params_->damping = string2complex(ini.value("damping", complex2string(nf::DDP)).toString());
+	params_->scaleDownFactor = ini.value("scaleDownFactor", nf::DSC).toDouble();
 	params_->scaleDown = ini.value("scaleDown", false).toBool();
-	params_->multiThreaded = ini.value("multiThreaded", true).toBool();
+	params_->processor = static_cast<Processor>(ini.value("processor", 1).toUInt());
 	params_->orbitMode = ini.value("orbitMode", false).toBool();
 	params_->orbitStart = ini.value("orbitStart").toPoint();
 	ini.endGroup();
@@ -190,7 +192,7 @@ void FractalWidget::importRoots(const QString &file)
 	settingsWidget_->updateSettings();
 
 	// Remove old roots
-	quint8 rootCount = params_->roots.size();
+	quint8 rootCount = params_->roots.count();
 	for (quint8 i = 0; i < rootCount; ++i) {
 		settingsWidget_->removeRoot();
 	}
@@ -231,7 +233,25 @@ void FractalWidget::updateOrbit(const QVector<QPoint> &orbit, double fps)
 	update();
 }
 
-void FractalWidget::paintEvent(QPaintEvent *)
+void FractalWidget::initializeGL()
+{
+	// Check for support
+	initializeOpenGLFunctions();
+	if (glGetString(GL_VERSION) == 0) {
+		settingsWidget_->disableOpenGL();
+	}
+
+	// Initialize OpenGL and shader program
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_DEPTH_TEST);
+	program_ = new QOpenGLShaderProgram(this);
+	program_->addShaderFromSourceFile(QOpenGLShader::Fragment, "://src/fractal.fsh");
+	program_->link();
+	program_->bind();
+	program_->setUniformValue("EPS", float(nf::EPS));
+}
+
+void FractalWidget::paintGL()
 {
 	// Static pens and brushes
 	static const QPen circlePen(Qt::white, 2);
@@ -248,7 +268,11 @@ void FractalWidget::paintEvent(QPaintEvent *)
 	static const int spacing = 10;
 	static const QFont consolas("Consolas", 12);
 	static const QFontMetrics metrics(consolas);
+#if QT_VERSION >= 0x050B00 // For any Qt Version >= 5.11.0 metrics.width() is deprecated
+	static const int textWidth = 3 * spacing + pixFps.width() + metrics.horizontalAdvance("999.99");
+#else
 	static const int textWidth = 3 * spacing + pixFps.width() + metrics.width("999.99");
+#endif
 	static const int textHeight = spacing + 5 * (pixFps.height() + spacing);
 	static const QRect legendRect(spacing, spacing, textWidth, textHeight);
 	static const QPoint ptHide(legendRect.topLeft() + QPoint(spacing, spacing));
@@ -262,69 +286,106 @@ void FractalWidget::paintEvent(QPaintEvent *)
 	painter.setFont(consolas);
 	painter.setRenderHint(QPainter::Antialiasing);
 
-	// Draw pixmap if rendered yet
-	if (!pixmap_.isNull()) {
+	// Draw pixmap if rendered yet and cpu mode
+	if (params_->processor != GPU_OPENGL && !pixmap_.isNull()) {
 		painter.drawPixmap(rect(), pixmap_);
+	} else {
+		// Clear to black
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Draw roots
-		rootPoints_.clear(); // TODO: not needed
-		painter.setPen(circlePen);
-		painter.setBrush(opaqueBrush);
-		quint8 rootCount = params_->roots.size();
-		for (quint8 i = 0; i < rootCount; ++i) {
-			QPoint point = complex2point(params_->roots[i].value(), *params_);
-			painter.drawEllipse(point, RIR, RIR);
-			rootPoints_.append(point);
-		}
+		// Update params and draw
+		quint8 rootCount = params_->roots.count();
+		program_->bind();
+		program_->enableAttributeArray(0);
+		program_->setAttributeArray(0, vertices.constData());
+		program_->setUniformValue("rootCount", rootCount);
+		program_->setUniformValue("limits", params_->limits.vec4());
+		program_->setUniformValue("maxIterations", params_->maxIterations);
+		program_->setUniformValue("damping", complex2vec2(params_->damping));
+		program_->setUniformValue("size", QVector2D(size().width(), size().height()));
+		program_->setUniformValueArray("roots", rootsVec2(*params_).constData(), rootCount);
+		program_->setUniformValueArray("colors", colorsVec3(*params_).constData(), rootCount);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	}
 
-		// Draw legend if enabled
-		if (legend_) {
-			painter.drawRoundedRect(legendRect, 10, 10);
-			painter.drawPixmap(ptHide, pixHide);
-			painter.drawPixmap(ptSettings, pixSettings);
-			painter.drawPixmap(ptOrbit, pixOrbit);
-			painter.drawPixmap(ptPosition, pixPosition);
-			painter.drawPixmap(ptFps, pixFps);
-			painter.drawText(ptHide + QPoint(pixHide.width() + spacing, metrics.height() - 4), "ESC");
-			painter.drawText(ptSettings + QPoint(pixSettings.width() + spacing, metrics.height() - 4), "F1");
-			painter.drawText(ptOrbit + QPoint(pixOrbit.width() + spacing, metrics.height() - 4), "F2");
-			painter.drawText(ptPosition + QPoint(pixPosition.width() + spacing, metrics.height() - 4), "F3");
-			painter.drawText(ptFps + QPoint(pixFps.width() + spacing, metrics.height() - 4), QString::number(fps_, 'f', 2));
-		}
+	// Draw roots
+	painter.setPen(circlePen);
+	painter.setBrush(opaqueBrush);
+	quint8 rootCount = params_->roots.count();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		QPoint point = complex2point(params_->roots[i].value(), *params_);
+		painter.drawEllipse(point, nf::RIR, nf::RIR);
+	}
 
-		// Draw position if enabled
-		if (position_) {
-			QString zstr = complex2string(point2complex(mousePosition, *params_));
-			QRect posRect(mousePosition, QSize(metrics.width(zstr) + spacing, metrics.height() + spacing));
-			painter.drawRoundedRect(posRect, 6, 6);
-			painter.drawText(posRect, Qt::AlignCenter, zstr);
-		}
+	// Draw legend if enabled
+	if (legend_) {
+		painter.drawRoundedRect(legendRect, 10, 10);
+		painter.drawPixmap(ptHide, pixHide);
+		painter.drawPixmap(ptSettings, pixSettings);
+		painter.drawPixmap(ptOrbit, pixOrbit);
+		painter.drawPixmap(ptPosition, pixPosition);
+		painter.drawPixmap(ptFps, pixFps);
+		painter.drawText(ptHide + QPoint(pixHide.width() + spacing, metrics.height() - 4), "ESC");
+		painter.drawText(ptSettings + QPoint(pixSettings.width() + spacing, metrics.height() - 4), "F1");
+		painter.drawText(ptOrbit + QPoint(pixOrbit.width() + spacing, metrics.height() - 4), "F2");
+		painter.drawText(ptPosition + QPoint(pixPosition.width() + spacing, metrics.height() - 4), "F3");
+		painter.drawText(ptFps + QPoint(pixFps.width() + spacing, metrics.height() - 4), QString::number(fps_, 'f', 2));
+	}
 
-		// Draw orbit if enabled
-		if (params_->orbitMode) {
-			quint32 orbitSize = orbit_.size();
-			if (orbitSize >= 1) {
-				painter.drawEllipse(orbit_[0], OIR, OIR);
-				for (quint32 i = 1; i < orbitSize; ++i) {
-					painter.drawLine(orbit_[i - 1], orbit_[i]);
-					painter.drawEllipse(orbit_[i], OIR, OIR);
-				}
+	// Draw position if enabled
+	if (position_) {
+		QString zstr = complex2string(point2complex(mousePosition, *params_));
+#if QT_VERSION >= 0x050B00 // For any Qt Version >= 5.11.0 metrics.width() is deprecated
+		QRect posRect(mousePosition, QSize(metrics.horizontalAdvance(zstr) + spacing, metrics.height() + spacing));
+#else
+		QRect posRect(mousePosition, QSize(metrics.width(zstr) + spacing, metrics.height() + spacing));
+#endif
+		painter.drawRoundedRect(posRect, 6, 6);
+		painter.drawText(posRect, Qt::AlignCenter, zstr);
+	}
+
+	// Draw orbit if enabled
+	if (params_->orbitMode) {
+		quint32 orbitSize = orbit_.size();
+		if (orbitSize >= 1) {
+			painter.drawEllipse(orbit_[0], nf::OIR, nf::OIR);
+			for (quint32 i = 1; i < orbitSize; ++i) {
+				painter.drawLine(orbit_[i - 1], orbit_[i]);
+				painter.drawEllipse(orbit_[i], nf::OIR, nf::OIR);
 			}
 		}
 	}
+}
+
+void FractalWidget::resizeGL(int w, int h)
+{
+	// Overwrite size with scaleSize for smooth resizing
+	if (!timer_.isActive() && params_->processor != GPU_OPENGL)
+		params_->scaleDown = true;
+
+	// Restart timer
+	timer_.start();
+
+	// Change resolution on resize
+	QSize newSize(w, h);
+	params_->resize(newSize);
+	updateParams();
+	emit sizeChanged(newSize);
 }
 
 void FractalWidget::mousePressEvent(QMouseEvent *event)
 {
 	// Set scaleDown, previousPos and orbit
 	QPoint pos = event->pos();
-	params_->scaleDown = true;
 	dragger_.previousPos = pos;
+	if (params_->processor != GPU_OPENGL)
+		params_->scaleDown = true;
 
 	// Check if mouse press is on root
-	quint8 rootCount = rootPoints_.length();
+	quint8 rootCount = params_->roots.length();
 	for (quint8 i = 0; i < rootCount; ++i) {
-		if (rootContainsPoint(rootPoints_[i], pos)) {
+		if (rootContainsPoint(complex2point(params_->roots[i].value(), *params_), pos)) {
 			setCursor(Qt::ClosedHandCursor);
 			dragger_.mode = DraggingRoot;
 			dragger_.index = i;
@@ -341,10 +402,10 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 {
 	// Move root if dragging
 	mousePosition = event->pos();
-	if (dragger_.mode == DraggingRoot && dragger_.index >= 0 && dragger_.index < rootPoints_.length()) {
+	if (dragger_.mode == DraggingRoot && dragger_.index >= 0 && dragger_.index < params_->roots.count()) {
 		if (event->modifiers() == Qt::KeyboardModifier::ShiftModifier) {
 			QPointF distance = mousePosition - dragger_.previousPos;
-			params_->roots[dragger_.index] += distance2complex(distance * MOD, *params_);
+			params_->roots[dragger_.index] += distance2complex(distance * nf::MOD, *params_);
 			dragger_.previousPos = mousePosition;
 		} else params_->roots[dragger_.index] = point2complex(mousePosition, *params_);
 		updateParams();
@@ -358,9 +419,9 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 
 	// Else if event over root change cursor
 	} else {
-		quint8 rootCount = rootPoints_.length();
+		quint8 rootCount = params_->roots.count();
 		for (quint8 i = 0; i < rootCount; ++i) {
-			if (rootContainsPoint(rootPoints_[i], mousePosition)) {
+			if (rootContainsPoint(complex2point(params_->roots[i].value(), *params_), mousePosition)) {
 				setCursor(Qt::OpenHandCursor);
 				return;
 			}
@@ -390,21 +451,6 @@ void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
 	updateParams();
 }
 
-void FractalWidget::resizeEvent(QResizeEvent *event)
-{
-	// Overwrite size with scaleSize for smooth resizing
-	if (!timer_.isActive())
-		params_->scaleDown = true;
-
-	// Restart timer
-	timer_.start();
-
-	// Change resolution on resize
-	params_->resize(event->size());
-	updateParams();
-	emit sizeChanged(event->size());
-}
-
 void FractalWidget::wheelEvent(QWheelEvent *event)
 {
 	// Calculate weight
@@ -412,7 +458,7 @@ void FractalWidget::wheelEvent(QWheelEvent *event)
 	double yw = (double)event->pos().y() / height();
 
 	// Overwrite size with scaleSize for smooth moving
-	if (!timer_.isActive())
+	if (!timer_.isActive() && params_->processor != GPU_OPENGL)
 		params_->scaleDown = true;
 
 	// Restart timer

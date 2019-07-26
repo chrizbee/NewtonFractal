@@ -60,7 +60,7 @@ void Limits::move(QPoint distance, const QSize &ref)
 void Limits::zoom(bool in, double xw, double yw)
 {
 	// Zoom limits in / out
-	double zoom = in ? -ZMF : ZMF;
+	double zoom = in ? -nf::ZMF : nf::ZMF;
 	double wZoom = (right_ - left_) * zoom;
 	double hZoom = (top_ - bottom_) * zoom;
 	left_ -= xw * wZoom;
@@ -72,10 +72,10 @@ void Limits::zoom(bool in, double xw, double yw)
 void Limits::reset(QSize size)
 {
 	// Reset limits
-	left_ = -DSF * size.width();
-	right_ = DSF * size.width();
-	top_ = DSF * size.height();
-	bottom_ = -DSF * size.height();
+	left_ = -nf::DSF * size.width();
+	right_ = nf::DSF * size.width();
+	top_ = nf::DSF * size.height();
+	bottom_ = -nf::DSF * size.height();
 
 	// Reset original limits
 	if (original_ != nullptr) {
@@ -86,10 +86,10 @@ void Limits::reset(QSize size)
 void Limits::resize(QSize delta)
 {
 	// Resize limits
-	right_ += DSF * delta.width();
-	left_ -= DSF * delta.width();
-	top_ += DSF * delta.height();
-	bottom_ -= DSF * delta.height();
+	right_ += nf::DSF * delta.width();
+	left_ -= nf::DSF * delta.width();
+	top_ += nf::DSF * delta.height();
+	bottom_ -= nf::DSF * delta.height();
 
 	// Resize original limits
 	if (original_ != nullptr) {
@@ -140,6 +140,12 @@ double Limits::bottom() const
 {
 	// Return bottom limit
 	return bottom_;
+}
+
+QVector4D Limits::vec4() const
+{
+	// Return limits as vec4
+	return QVector4D(top_, right_, bottom_, left_);
 }
 
 Limits *Limits::original()

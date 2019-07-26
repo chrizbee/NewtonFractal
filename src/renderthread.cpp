@@ -29,7 +29,7 @@ inline void func(complex z, complex &f, complex &df, const QVector<Root> &roots)
 inline void iterateX(ImageLine &il)
 {
 	// Iterate x-pixels
-	const quint8 rootCount = il.params.roots.size();
+	const quint8 rootCount = il.params.roots.count();
 	const Limits limits = il.params.limits;
 	const double xFactor = limits.width() / (il.lineSize - 1);
 	const complex d = il.params.damping;
@@ -47,9 +47,9 @@ inline void iterateX(ImageLine &il)
 			complex z0 = z - d * f / df; // <- expensive division
 
 			// If root has been found set color and break
-			if (abs(z0 - z) < EPS) {
+			if (abs(z0 - z) < nf::EPS) {
 				for (quint8 r = 0; r < rootCount; ++r) {
-					if (abs(z0 - il.params.roots[r].value()) < EPS) {
+					if (abs(z0 - il.params.roots[r].value()) < nf::EPS) {
 						il.scanLine[x] = il.params.roots[r].color().darker(50 + i * 8).rgb();
 						goto POINT_DONE;
 					}
@@ -131,9 +131,10 @@ void RenderThread::renderPixmap()
 {
 	// Render whole pixmap
 	QList<ImageLine> lines;
-	QSize size = curParams_.size * (curParams_.scaleDown ? curParams_.scaleDownFactor : 1);
+	QSize size = curParams_.size * ((curParams_.scaleDown && curParams_.processor != GPU_OPENGL) ? curParams_.scaleDownFactor : 1);
 
 	// Create image for fast pixel IO
+	QPixmap pixmap;
 	QImage image(size, QImage::Format_RGB32);
 	image.fill(Qt::black);
 	const qint32 height = size.height();
@@ -148,17 +149,23 @@ void RenderThread::renderPixmap()
 	}
 
 	// Iterate x-pixels with one threads
-	if (!curParams_.multiThreaded) {
+	if (curParams_.processor == CPU_SINGLE) {
 		for (ImageLine &il : lines) {
 			iterateX(il);
 		}
+		pixmap = QPixmap::fromImage(image);
 
 	// Iterate x-pixels with multiple threads
 	// TODO: use map to report progress with QFuture
-	} else QtConcurrent::blockingMap(lines, iterateX);
+	} else if (curParams_.processor == CPU_MULTI) {
+		QtConcurrent::blockingMap(lines, iterateX);
+		pixmap = QPixmap::fromImage(image);
+
+	// Use OpenGL in FractalWidget because OpenGL is NOT threadsafe
+	}
 
 	// Emit signal
-	emit fractalRendered(QPixmap::fromImage(image), 1000.0 / timer_.elapsed());
+	emit fractalRendered(pixmap, 1000.0 / timer_.elapsed());
 }
 
 void RenderThread::renderOrbit()
@@ -181,7 +188,7 @@ void RenderThread::renderOrbit()
 		orbit.append(complex2point(z0, curParams_));
 
 		// Break if root has been found
-		if (abs(z0 - z) < EPS) break;
+		if (abs(z0 - z) < nf::EPS) break;
 		z = z0;
 	}
 

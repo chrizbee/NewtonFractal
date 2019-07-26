@@ -325,7 +325,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>downscaling factor when moving</string>
+               <string>downscaling factor when moving (cpu only)</string>
               </property>
               <property name="text">
                <string/>
@@ -369,6 +369,11 @@
               <item>
                <property name="text">
                 <string>Multi</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Gpu</string>
                </property>
               </item>
              </widget>
@@ -459,7 +464,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>single or multithreading</string>
+               <string>single or multithreading (cpu) or openGL (gpu)</string>
               </property>
               <property name="text">
                <string/>

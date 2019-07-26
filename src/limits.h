@@ -8,6 +8,7 @@
 
 #include <QSize>
 #include <QPoint>
+#include <QVector4D>
 
 class Limits
 {
@@ -27,6 +28,7 @@ public:
 	double right() const;
 	double top() const;
 	double bottom() const;
+	QVector4D vec4() const;
 	Limits *original();
 	double zoomFactor() const;
 	void setZoomFactor(double zoomFactor);

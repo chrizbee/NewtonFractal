@@ -28,5 +28,6 @@
         <file>resources/icons/root.png</file>
         <file>resources/icons/settings2.png</file>
         <file>resources/icons/image.png</file>
+        <file>src/fractal.fsh</file>
     </qresource>
 </RCC>

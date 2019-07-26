@@ -8,13 +8,17 @@
 
 #include "defaults.h"
 #include <QColor>
+#include <QVector2D>
+#include <QVector3D>
 
 class Root
 {
 public:
-	Root(complex value = complex(0, 0));
+	Root(complex value, QColor color);
 	complex value() const;
 	QColor color() const;
+	QVector2D valueVec2() const;
+	QVector3D colorVec3() const;
 	void setColor(QColor color);
 	void setValue(complex value);
 	Root& operator=(const Root& other);
