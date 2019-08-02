@@ -22,6 +22,14 @@ struct Parameters {
 	bool orbitChanged(const Parameters &other) const;
 	void resize(QSize newSize);
 	void reset();
+
+	complex point2complex(QPoint p);
+	QPoint  complex2point(complex z);
+	complex distance2complex(QPointF d);
+	int rootContainsPoint(QPoint point);
+	QVector<QVector2D> rootsVec2();
+	QVector<QVector3D> colorsVec3();
+
 	QVector<Root> roots;
 	Limits limits;
 	QSize size;
@@ -37,11 +45,5 @@ struct Parameters {
 complex string2complex(const QString &text);
 QString complex2string(complex z, quint8 precision = 2);
 QVector2D complex2vec2(complex z);
-complex point2complex(QPoint p, const Parameters &params);
-QPoint  complex2point(complex z, const Parameters &params);
-complex distance2complex(QPointF d, const Parameters &params);
-bool rootContainsPoint(QPoint root, QPoint point);
-QVector<QVector2D> rootsVec2(const Parameters &params);
-QVector<QVector3D> colorsVec3(const Parameters &params);
 
 #endif // PARAMETERS_H

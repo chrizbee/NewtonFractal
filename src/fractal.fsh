@@ -3,7 +3,6 @@
 // License: GNU General Public License version 3 or later,
 // see the file LICENSE in the main directory.
 
-in vec4 gl_FragCoord;       // Fragment position = pixel position
 uniform float EPS;          // Max error allowed
 uniform int rootCount;      // Number of roots <= 10
 uniform int maxIterations;  // Maximum number of iterations
@@ -13,19 +12,19 @@ uniform vec4 limits;        // Top = x, right = y, bottom = z, left = w
 uniform vec2 roots[10];     // Real = x, imaginary = y
 uniform vec3 colors[10];    // Rgba
 
-vec2 cmpxcjg(in vec2 c)
+vec2 cmpxcjg(vec2 c)
 {
     // Complex conjugate
     return vec2(c.x, -c.y);
 }
 
-vec2 cmpxmul(in vec2 a, in vec2 b)
+vec2 cmpxmul(vec2 a, vec2 b)
 {
     // Complex multiplication
     return vec2(a.x * b.x - a.y * b.y, a.y * b.x + a.x * b.y);
 }
 
-vec2 cmpxdiv(in vec2 a, in vec2 b)
+vec2 cmpxdiv(vec2 a, vec2 b)
 {
     // Complex division
     return cmpxmul(a, cmpxcjg(b)) / dot(b, b);

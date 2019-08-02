@@ -291,10 +291,6 @@ void FractalWidget::paintGL()
 	if (params_->processor != GPU_OPENGL && !pixmap_.isNull()) {
 		painter.drawPixmap(rect(), pixmap_);
 	} else {
-		// Clear to black
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		// Update params and draw
 		quint8 rootCount = params_->roots.count();
 		program_->bind();
@@ -305,8 +301,8 @@ void FractalWidget::paintGL()
 		program_->setUniformValue("maxIterations", params_->maxIterations);
 		program_->setUniformValue("damping", complex2vec2(params_->damping));
 		program_->setUniformValue("size", QVector2D(size().width(), size().height()));
-		program_->setUniformValueArray("roots", rootsVec2(*params_).constData(), rootCount);
-		program_->setUniformValueArray("colors", colorsVec3(*params_).constData(), rootCount);
+		program_->setUniformValueArray("roots", params_->rootsVec2().constData(), rootCount);
+		program_->setUniformValueArray("colors", params_->colorsVec3().constData(), rootCount);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
@@ -315,7 +311,7 @@ void FractalWidget::paintGL()
 	painter.setBrush(opaqueBrush);
 	quint8 rootCount = params_->roots.count();
 	for (quint8 i = 0; i < rootCount; ++i) {
-		QPoint point = complex2point(params_->roots[i].value(), *params_);
+		QPoint point = params_->complex2point(params_->roots[i].value());
 		painter.drawEllipse(point, nf::RIR, nf::RIR);
 	}
 
@@ -336,7 +332,7 @@ void FractalWidget::paintGL()
 
 	// Draw position if enabled
 	if (position_) {
-		QString zstr = complex2string(point2complex(mousePosition, *params_));
+		QString zstr = complex2string(params_->point2complex(mousePosition));
 #if QT_VERSION >= 0x050B00 // For any Qt Version >= 5.11.0 metrics.width() is deprecated
 		QRect posRect(mousePosition, QSize(metrics.horizontalAdvance(zstr) + spacing, metrics.height() + spacing));
 #else
@@ -371,6 +367,7 @@ void FractalWidget::resizeGL(int w, int h)
 	// Change resolution on resize
 	QSize newSize(w, h);
 	params_->resize(newSize);
+	glViewport(0, 0, w, h);
 	updateParams();
 	emit sizeChanged(newSize);
 }
@@ -384,14 +381,12 @@ void FractalWidget::mousePressEvent(QMouseEvent *event)
 		params_->scaleDown = true;
 
 	// Check if mouse press is on root
-	quint8 rootCount = params_->roots.length();
-	for (quint8 i = 0; i < rootCount; ++i) {
-		if (rootContainsPoint(complex2point(params_->roots[i].value(), *params_), pos)) {
-			setCursor(Qt::ClosedHandCursor);
-			dragger_.mode = DraggingRoot;
-			dragger_.index = i;
-			return;
-		}
+	int i = params_->rootContainsPoint(pos);
+	if (i >= 0) {
+		setCursor(Qt::ClosedHandCursor);
+		dragger_.mode = DraggingRoot;
+		dragger_.index = i;
+		return;
 	}
 
 	// Else dragging fractal
@@ -406,9 +401,9 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 	if (dragger_.mode == DraggingRoot && dragger_.index >= 0 && dragger_.index < params_->roots.count()) {
 		if (event->modifiers() == Qt::KeyboardModifier::ShiftModifier) {
 			QPointF distance = mousePosition - dragger_.previousPos;
-			params_->roots[dragger_.index] += distance2complex(distance * nf::MOD, *params_);
+			params_->roots[dragger_.index] += params_->distance2complex(distance * nf::MOD);
 			dragger_.previousPos = mousePosition;
-		} else params_->roots[dragger_.index] = point2complex(mousePosition, *params_);
+		} else params_->roots[dragger_.index] = params_->point2complex(mousePosition);
 		updateParams();
 		emit rootMoved(dragger_.index, params_->roots[dragger_.index].value());
 
@@ -420,14 +415,9 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 
 	// Else if event over root change cursor
 	} else {
-		quint8 rootCount = params_->roots.count();
-		for (quint8 i = 0; i < rootCount; ++i) {
-			if (rootContainsPoint(complex2point(params_->roots[i].value(), *params_), mousePosition)) {
-				setCursor(Qt::OpenHandCursor);
-				return;
-			}
-		}
-		setCursor(Qt::ArrowCursor);
+		if (params_->rootContainsPoint(mousePosition) >= 0) {
+			setCursor(Qt::OpenHandCursor);
+		} else setCursor(Qt::ArrowCursor);
 	}
 
 	// Update position if enabled

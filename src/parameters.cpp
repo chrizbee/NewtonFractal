@@ -74,6 +74,65 @@ void Parameters::reset()
 	scaleDown = false;
 }
 
+QPoint Parameters::complex2point(complex z)
+{
+	// Convert complex to point
+	int x = (z.real() - limits.left()) * (size.width() - 1) / limits.width();
+	int y = (z.imag() - limits.top()) * (size.height() - 1) / -limits.height();
+	return QPoint(x, y);
+}
+
+complex Parameters::point2complex(QPoint p)
+{
+	// Convert point to complex
+	double real = p.x() * limits.width() / (size.width() - 1) + limits.left();
+	double imag = p.y() * -limits.height() / (size.height() - 1) + limits.top();
+	return complex(real, imag);
+}
+
+complex Parameters::distance2complex(QPointF d)
+{
+	// Convert distance to complex
+	double real = d.x() * limits.width() / (size.width() - 1);
+	double imag = d.y() * -limits.height() / (size.height() - 1);
+	return complex(real, imag);
+}
+
+int Parameters::rootContainsPoint(QPoint point)
+{
+	// Check if root contains point
+	quint8 rootCount = roots.count();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		QPoint dist = complex2point(roots[i].value()) - point;
+		if (abs(dist.x()) < nf::RIR && abs(dist.y()) < nf::RIR) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+QVector<QVector2D> Parameters::rootsVec2()
+{
+	// Return vector of root values only
+	QVector<QVector2D> vec2;
+	quint8 rootCount = roots.count();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		vec2.append(roots[i].valueVec2());
+	}
+	return vec2;
+}
+
+QVector<QVector3D> Parameters::colorsVec3()
+{
+	// Return vector of root colors only
+	QVector<QVector3D> vec3;
+	quint8 rootCount = roots.count();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		vec3.append(roots[i].colorVec3());
+	}
+	return vec3;
+}
+
 complex string2complex(const QString &text)
 {
 	// Convert string to complex
@@ -116,57 +175,4 @@ QVector2D complex2vec2(complex z)
 {
 	// Convert complex to vec2
 	return QVector2D(z.real(), z.imag());
-}
-
-QPoint complex2point(complex z, const Parameters &params)
-{
-	// Convert complex to point
-	int x = (z.real() - params.limits.left()) * (params.size.width() - 1) / params.limits.width();
-	int y = (z.imag() - params.limits.top()) * (params.size.height() - 1) / -params.limits.height();
-	return QPoint(x, y);
-}
-
-complex point2complex(QPoint p, const Parameters &params)
-{
-	// Convert point to complex
-	double real = p.x() * params.limits.width() / (params.size.width() - 1) + params.limits.left();
-	double imag = p.y() * -params.limits.height() / (params.size.height() - 1) + params.limits.top();
-	return complex(real, imag);
-}
-
-complex distance2complex(QPointF d, const Parameters &params)
-{
-	// Convert distance to complex
-	double real = d.x() * params.limits.width()  / (params.size.width() - 1);
-	double imag = d.y() * -params.limits.height() / (params.size.height() - 1);
-	return complex(real, imag);
-}
-
-bool rootContainsPoint(QPoint root, QPoint point)
-{
-	// Check if root contains point
-	QPoint dist = root - point;
-	return (abs(dist.x()) < nf::RIR && abs(dist.y()) < nf::RIR);
-}
-
-QVector<QVector2D> rootsVec2(const Parameters &params)
-{
-	// Return vector of root values only
-	QVector<QVector2D> roots;
-	quint8 rootCount = params.roots.count();
-	for (quint8 i = 0; i < rootCount; ++i) {
-		roots.append(params.roots[i].valueVec2());
-	}
-	return roots;
-}
-
-QVector<QVector3D> colorsVec3(const Parameters &params)
-{
-	// Return vector of root colors only
-	QVector<QVector3D> colors;
-	quint8 rootCount = params.roots.count();
-	for (quint8 i = 0; i < rootCount; ++i) {
-		colors.append(params.roots[i].colorVec3());
-	}
-	return colors;
 }

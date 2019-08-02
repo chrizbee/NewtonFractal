@@ -175,8 +175,8 @@ void RenderThread::renderOrbit()
 	const complex d = curParams_.damping;
 
 	// Create complex number from current pixel
-	complex z = point2complex(curParams_.orbitStart, curParams_);
-	orbit.append(complex2point(z, curParams_));
+	complex z = curParams_.point2complex(curParams_.orbitStart);
+	orbit.append(curParams_.complex2point(z));
 
 	// Newton iteration
 	for (quint16 i = 0; i < curParams_.maxIterations; ++i) {
@@ -185,7 +185,7 @@ void RenderThread::renderOrbit()
 		complex z0 = z - d * f / df;
 
 		// Append point to vector
-		orbit.append(complex2point(z0, curParams_));
+		orbit.append(curParams_.complex2point(z0));
 
 		// Break if root has been found
 		if (abs(z0 - z) < nf::EPS) break;
