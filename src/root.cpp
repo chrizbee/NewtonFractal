@@ -5,6 +5,12 @@
 
 #include "root.h"
 
+Root::Root() :
+	value_(0, 0),
+	color_(0, 0, 0)
+{
+}
+
 Root::Root(complex value, QColor color) :
 	value_(value),
 	color_(color)

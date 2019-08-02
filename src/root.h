@@ -14,6 +14,7 @@
 class Root
 {
 public:
+	Root();
 	Root(complex value, QColor color);
 	complex value() const;
 	QColor color() const;
