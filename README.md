@@ -3,7 +3,7 @@
 [![built with](https://img.shields.io/badge/built%20with-Qt-41cd52.svg)](https://www.qt.io/) [![contributors](https://img.shields.io/github/contributors/chrizbee/NewtonFractal.svg)](https://GitHub.com/chrizbee/NewtonFractal/graphs/contributors/) [![release](https://img.shields.io/github/release/chrizbee/NewtonFractal.svg)](https://GitHub.com/chrizbee/NewtonFractal/releases/)  [![license](https://img.shields.io/github/license/chrizbee/NewtonFractal.svg)](https://github.com/chrizbee/NewtonFractal/blob/master/LICENSE) [![stars](https://img.shields.io/github/stars/chrizbee/NewtonFractal.svg?color=ffdd00)](https://GitHub.com/chrizbee/NewtonFractal/stargazers/)
 
 ## Basic Overview
-**NewtonFractal** is a *Qt5-Application* that renders fractals based on [*Newton's method*](https://en.wikipedia.org/wiki/Newton%27s_method). The application provides the following features:
+**NewtonFractal** is a *Qt5-Application* that renders fractals based on [*Newton's method*](https://en.wikipedia.org/wiki/Newton%27s_method). The application provides the following features (there is also a WebGL version at https://chrizbee.github.io/NewtonFractal/ with less features):
 
 ![roots](resources/images/roots.gif) ![move](resources/images/move.gif) ![zoom](resources/images/zoom.gif) ![orbit](resources/images/orbit.gif) ![position](resources/images/position.gif) 
 
