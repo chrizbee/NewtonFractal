@@ -51,17 +51,19 @@ class Parameters {
 		var vec2 = [];
 		let rootCount = this.roots.length;
 		for (i = 0; i < rootCount; ++i) {
-			vec2.push(this.roots[i].valueVec2());
+			let value = this.roots[i].valueVec2();
+			vec2.push(value[0], value[1]);
 		}
-		return vec2.flat();
+		return vec2;
 	}
 
 	colorsVec3() {
 		var vec3 = [];
 		let rootCount = this.roots.length;
 		for (i = 0; i < rootCount; ++i) {
-			vec3.push(this.roots[i].color);
+			let color = this.roots[i].color;
+			vec3.push(color[0], color[1], color[2]);
 		}
-		return vec3.flat();
+		return vec3;
 	}
 }
