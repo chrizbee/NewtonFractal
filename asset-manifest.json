@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/NewtonFractal/static/css/main.2cce8147.chunk.css",
-    "main.js": "/NewtonFractal/static/js/main.707dc51b.chunk.js",
-    "main.js.map": "/NewtonFractal/static/js/main.707dc51b.chunk.js.map",
+    "main.css": "/NewtonFractal/static/css/main.d95b8ab7.chunk.css",
+    "main.js": "/NewtonFractal/static/js/main.8e1d90ed.chunk.js",
+    "main.js.map": "/NewtonFractal/static/js/main.8e1d90ed.chunk.js.map",
     "runtime~main.js": "/NewtonFractal/static/js/runtime~main.29151420.js",
     "runtime~main.js.map": "/NewtonFractal/static/js/runtime~main.29151420.js.map",
     "static/js/2.b41502e9.chunk.js": "/NewtonFractal/static/js/2.b41502e9.chunk.js",
     "static/js/2.b41502e9.chunk.js.map": "/NewtonFractal/static/js/2.b41502e9.chunk.js.map",
     "index.html": "/NewtonFractal/index.html",
-    "precache-manifest.e5389e947cf330e4bf799ea2ceea3638.js": "/NewtonFractal/precache-manifest.e5389e947cf330e4bf799ea2ceea3638.js",
+    "precache-manifest.ac1f432d56d091af2178009f6b516905.js": "/NewtonFractal/precache-manifest.ac1f432d56d091af2178009f6b516905.js",
     "service-worker.js": "/NewtonFractal/service-worker.js",
-    "static/css/main.2cce8147.chunk.css.map": "/NewtonFractal/static/css/main.2cce8147.chunk.css.map",
+    "static/css/main.d95b8ab7.chunk.css.map": "/NewtonFractal/static/css/main.d95b8ab7.chunk.css.map",
     "static/media/logo.svg": "/NewtonFractal/static/media/logo.5d5d9eef.svg"
   }
 }

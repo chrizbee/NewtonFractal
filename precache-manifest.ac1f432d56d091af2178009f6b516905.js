@@ -1,19 +1,19 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "381e4e751eb5a325461711b83f1301e0",
+    "revision": "125aab7dc8cc75c6326d67e168f65f2c",
     "url": "/NewtonFractal/index.html"
   },
   {
-    "revision": "dcb7f4c2afcad2ef0fda",
-    "url": "/NewtonFractal/static/css/main.2cce8147.chunk.css"
+    "revision": "c64878994277ac00004c",
+    "url": "/NewtonFractal/static/css/main.d95b8ab7.chunk.css"
   },
   {
     "revision": "2e0129063922e3bb197a",
     "url": "/NewtonFractal/static/js/2.b41502e9.chunk.js"
   },
   {
-    "revision": "dcb7f4c2afcad2ef0fda",
-    "url": "/NewtonFractal/static/js/main.707dc51b.chunk.js"
+    "revision": "c64878994277ac00004c",
+    "url": "/NewtonFractal/static/js/main.8e1d90ed.chunk.js"
   },
   {
     "revision": "1910e11715f5ffef2a45",
