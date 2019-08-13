@@ -3,6 +3,8 @@
 // License: GNU General Public License version 3 or later,
 // see the file LICENSE in the main directory.
 
+import nf from "./Defaults";
+
 class Limits {
 	constructor(original = false) {
 		this.top = 1.0;
@@ -31,6 +33,7 @@ class Limits {
 	}
 
 	setZoomFactor(zf) {
+		if (zf <= 0.0) return;
 		let w2 = 0.5 * this.original.width() / zf;
 		let h2 = 0.5 * this.original.height() / zf;
 		let xMid = 0.5 * this.right + 0.5 * this.left;
@@ -52,8 +55,8 @@ class Limits {
 	}
 
 	move(x, y) {
-		let dx = x * this.width() / (canvas.width - 1);
-		let dy = y * -this.height() / (canvas.height - 1);
+		let dx = x * this.width() / (window.innerWidth - 1);
+		let dy = y * -this.height() / (window.innerHeight - 1);
 		this.top += dy;
 		this.right += dx;
 		this.bottom += dy;
@@ -74,12 +77,14 @@ class Limits {
 	}
 
 	reset() {
-		this.top = nf.DSF * canvas.height;
-		this.right = nf.DSF * canvas.width;
-		this.bottom = -nf.DSF * canvas.height;
-		this.left = -nf.DSF * canvas.width;
+		this.top = nf.DSF * window.innerHeight;
+		this.right = nf.DSF * window.innerWidth;
+		this.bottom = -nf.DSF * window.innerHeight;
+		this.left = -nf.DSF * window.innerWidth;
 		if (this.original != null) {
 			this.original.reset();
 		}
 	}
 }
+
+export default Limits;

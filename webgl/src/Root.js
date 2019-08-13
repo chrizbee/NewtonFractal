@@ -19,20 +19,14 @@ class Point {
 	}
 }
 
-class Complex {
-	constructor(real, imag) {
-		this.real = real;
-		this.imag = imag;
-	}
-}
-
 class Root {
 	constructor(value, color) {
 		this.value = value;
 		this.color = color;
 	}
+}
 
-	valueVec2() {
-		return [this.value.real, this.value.imag];
-	}
+export {
+	Point,
+	Root
 }

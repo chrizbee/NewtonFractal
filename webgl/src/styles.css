@@ -1,0 +1,59 @@
+/* This file is part of the NewtonFractal project.
+Copyright (C) 2019 Christian Bauer and Timon Foehl
+License: GNU General Public License version 3 or later,
+See the file LICENSE in the main directory. */
+
+@import "~normalize.css";
+@import "~@blueprintjs/core/lib/css/blueprint.css";
+@import "~@blueprintjs/icons/lib/css/blueprint-icons.css";
+@import "~@blueprintjs/select/lib/css/blueprint-select.css";
+@import "~@blueprintjs/docs-theme/lib/css/docs-theme.css";
+
+/* Fullscreen without margins or scrollbars */
+html, body, canvas {
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+	overflow: hidden;
+}
+
+/* App font */
+.app {
+	font-family: "Fira Code Light", "Courier New", monospace
+}
+
+/* SettingsWidget title */
+.title {
+	color: #7e96a7;
+	font-family: "Fira Code Medium", "Courier New", monospace
+}
+
+/* Hide scrollbars */
+.bm-item-list {
+	overflow: hidden;
+	padding: 0;
+}
+
+/* Background and color */
+.settingsWidget {
+	background: #293742;
+	font-size: 1.1em;
+	padding: .5em 1.5em .5em 1.5em;
+}
+
+/* All input fields in a column with margins and colored labels */
+.settingsItems {
+	display: flex;
+	flex-direction: column;
+	margin: 2px;
+}
+
+.settingsItems .item {
+	margin-bottom: 20px;
+}
+
+.settingsItems .item Label {
+	color: #e6e6e6;
+	margin-bottom: 7px;
+}
