@@ -12,7 +12,7 @@ class ComplexInput extends React.Component {
 		super(props);
 		this.state = {
 			intent: Intent.NONE,
-			complex: ""
+			complex: this.props.value
 		}
 	}
 
@@ -33,6 +33,8 @@ class ComplexInput extends React.Component {
 				intent: Intent.NONE,
 				complex: event.target.value
 			});
+			// raise onValueChange event
+			this.props.onValueChange(new Complex(event.target.value));
 		} else {
 			this.setState({
 				intent: Intent.DANGER,

@@ -10,11 +10,15 @@ import { Point, Root } from "./Root";
 
 class Parameters {
 	constructor() {
-		this.roots = [];
 		this.limits = new Limits();
 		this.maxIterations = nf.DMI;
 		this.damping = new Complex(nf.DDP, 0.0);
-		for (var i = 0; i < nf.DRC; ++i) {
+		this.setRoots(nf.DRC);
+	}
+
+	setRoots(DRC) {
+		this.roots = [];
+		for (var i = 0; i < DRC; ++i) {
 			this.roots.push(new Root(new Complex(0, 0), nf.predefColors[i]));
 		}
 		this.reset();

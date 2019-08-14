@@ -42,6 +42,14 @@ class SettingsWidget extends React.Component {
 
 	onDegreeChanged(number) {
 		// Update parameters and repaint
+		parameters.setRoots(number);
+		fractalWidget.paintGL();
+	}
+
+	onDampingChanged(number) {
+		// Update parameters and repaint
+		parameters.damping = number;
+		fractalWidget.paintGL();
 	}
 
 	keyPressEvent(event) {
@@ -96,7 +104,7 @@ class SettingsWidget extends React.Component {
 						<div className="item">
 							<Label>Damping factor</Label>
 							<ComplexInput
-								leftIcon="derive-column" fill={true}>
+								value={parameters.damping} leftIcon="derive-column" fill={true} onValueChange={(number) => this.onDampingChanged(number)}>
 							</ComplexInput>
 						</div>
 					</div>
