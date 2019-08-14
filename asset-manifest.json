@@ -1,16 +1,18 @@
 {
   "files": {
-    "main.css": "/NewtonFractal/static/css/main.d95b8ab7.chunk.css",
-    "main.js": "/NewtonFractal/static/js/main.8e1d90ed.chunk.js",
-    "main.js.map": "/NewtonFractal/static/js/main.8e1d90ed.chunk.js.map",
+    "main.css": "/NewtonFractal/static/css/main.2e52e43c.chunk.css",
+    "main.js": "/NewtonFractal/static/js/main.07aa1f4d.chunk.js",
+    "main.js.map": "/NewtonFractal/static/js/main.07aa1f4d.chunk.js.map",
     "runtime~main.js": "/NewtonFractal/static/js/runtime~main.29151420.js",
     "runtime~main.js.map": "/NewtonFractal/static/js/runtime~main.29151420.js.map",
-    "static/js/2.b41502e9.chunk.js": "/NewtonFractal/static/js/2.b41502e9.chunk.js",
-    "static/js/2.b41502e9.chunk.js.map": "/NewtonFractal/static/js/2.b41502e9.chunk.js.map",
+    "static/css/2.390d4e63.chunk.css": "/NewtonFractal/static/css/2.390d4e63.chunk.css",
+    "static/js/2.4af244be.chunk.js": "/NewtonFractal/static/js/2.4af244be.chunk.js",
+    "static/js/2.4af244be.chunk.js.map": "/NewtonFractal/static/js/2.4af244be.chunk.js.map",
     "index.html": "/NewtonFractal/index.html",
-    "precache-manifest.ac1f432d56d091af2178009f6b516905.js": "/NewtonFractal/precache-manifest.ac1f432d56d091af2178009f6b516905.js",
+    "precache-manifest.6963af987951313af792aca93b0a0ab4.js": "/NewtonFractal/precache-manifest.6963af987951313af792aca93b0a0ab4.js",
     "service-worker.js": "/NewtonFractal/service-worker.js",
-    "static/css/main.d95b8ab7.chunk.css.map": "/NewtonFractal/static/css/main.d95b8ab7.chunk.css.map",
-    "static/media/logo.svg": "/NewtonFractal/static/media/logo.5d5d9eef.svg"
+    "static/css/2.390d4e63.chunk.css.map": "/NewtonFractal/static/css/2.390d4e63.chunk.css.map",
+    "static/css/main.2e52e43c.chunk.css.map": "/NewtonFractal/static/css/main.2e52e43c.chunk.css.map",
+    "static/media/styles.css": "/NewtonFractal/static/media/icons-20.90247cfd.ttf"
   }
 }

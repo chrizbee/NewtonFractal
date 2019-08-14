@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/NewtonFractal/precache-manifest.ac1f432d56d091af2178009f6b516905.js"
+  "/NewtonFractal/precache-manifest.6963af987951313af792aca93b0a0ab4.js"
 );
 
 self.addEventListener('message', (event) => {
