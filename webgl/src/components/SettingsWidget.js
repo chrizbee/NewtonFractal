@@ -8,7 +8,7 @@ import parameters from "../Parameters";
 import ComplexInput from "./ComplexInput";
 import fractalWidget from "./FractalWidget";
 import { slide as Menu } from "react-burger-menu";
-import { NumericInput, FormGroup, Label, InputGroup } from "@blueprintjs/core";
+import { NumericInput, FormGroup, Label, InputGroup, Button } from "@blueprintjs/core";
 import "./styles.css";
 
 class SettingsWidget extends React.Component {
@@ -104,7 +104,8 @@ class SettingsWidget extends React.Component {
 						<div className="item">
 							<Label>Damping factor</Label>
 							<ComplexInput
-								value={parameters.damping} leftIcon="derive-column" fill={true} onValueChange={(number) => this.onDampingChanged(number)}>
+								value={parameters.damping} onValueChange={(number) => this.onDampingChanged(number)}
+								res={2} leftIcon="derive-column" fill={true}>
 							</ComplexInput>
 						</div>
 					</div>
