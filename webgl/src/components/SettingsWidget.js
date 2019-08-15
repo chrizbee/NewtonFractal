@@ -4,12 +4,12 @@
 // see the file LICENSE in the main directory.
 
 import React from "react";
-import parameters from "../Parameters";
+import parameters from "../models/Parameters";
 import ComplexInput from "./ComplexInput";
-import fractalWidget from "./FractalWidget";
+import fractal from "../models/Fractal";
 import { slide as Menu } from "react-burger-menu";
 import { NumericInput, FormGroup, Label, InputGroup, Button } from "@blueprintjs/core";
-import "./styles.css";
+import "../styles.css";
 
 class SettingsWidget extends React.Component {
 	constructor(props) {
@@ -31,25 +31,25 @@ class SettingsWidget extends React.Component {
 	onZoomChanged(number) {
 		// Update parameters and repaint
 		parameters.limits.setZoomFactor(number / 100.0);
-		fractalWidget.paintGL();
+		fractal.paintGL();
 	}
 
 	onIterationsChanged(number) {
 		// Update parameters and repaint
 		parameters.maxIterations = number;
-		fractalWidget.paintGL();
+		fractal.paintGL();
 	}
 
 	onDegreeChanged(number) {
 		// Update parameters and repaint
 		parameters.setRoots(number);
-		fractalWidget.paintGL();
+		fractal.paintGL();
 	}
 
 	onDampingChanged(number) {
 		// Update parameters and repaint
 		parameters.damping = number;
-		fractalWidget.paintGL();
+		fractal.paintGL();
 	}
 
 	keyPressEvent(event) {

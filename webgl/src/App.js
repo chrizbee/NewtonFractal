@@ -5,14 +5,14 @@
 
 import React from "react";
 import SettingsWidget from "./components/SettingsWidget"
-import Canvas from "./components/Canvas"
+import FractalWidget from "./components/FractalWidget";
 import "./styles.css";
 
 function App() {
 	return (
 		<div className="app">
-			<SettingsWidget className="settingsWidget"/>
-			<Canvas className="fractalWidget"/>
+			<SettingsWidget className="settingsWidget"  />
+			<FractalWidget className="fractalWidget"  />
 		</div>
 	);
 }
