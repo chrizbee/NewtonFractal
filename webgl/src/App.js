@@ -4,17 +4,36 @@
 // see the file LICENSE in the main directory.
 
 import React from "react";
-import SettingsWidget from "./components/SettingsWidget"
+import SettingsWidget from "./components/SettingsWidget";
 import FractalWidget from "./components/FractalWidget";
+import parameters from "./models/Parameters";
 import "./styles.css";
 
-function App() {
-	return (
-		<div className="app">
-			<SettingsWidget className="settingsWidget"  />
-			<FractalWidget className="fractalWidget"  />
-		</div>
-	);
+class App extends React.Component {
+	state = {
+		test: "hello"
+	}
+
+	// Repaint canvas
+	updateFractalWidget = () => {
+		this.refs.fractalWidget.paintGL();
+	}
+
+	// Re-render SettingsWidget
+	updateSettingsWidget = () => {
+		this.refs.settingsWidget.forceUpdate();
+	}
+
+	render() {
+		return (
+			<div className="app">
+				<SettingsWidget className="settingsWidget" ref="settingsWidget"
+				parameters={parameters} onUpdate={this.updateFractalWidget} test={this.state.test} />
+				<FractalWidget className="fractalWidget" ref="fractalWidget"
+				parameters={parameters} onUpdate={this.updateSettingsWidget} test={this.state.test} />
+			</div>
+		)
+	}
 }
 
 export default App;

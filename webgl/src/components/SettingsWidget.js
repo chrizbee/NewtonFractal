@@ -4,9 +4,7 @@
 // see the file LICENSE in the main directory.
 
 import React from "react";
-import parameters from "../models/Parameters";
 import ComplexInput from "./ComplexInput";
-import fractal from "../models/Fractal";
 import { slide as Menu } from "react-burger-menu";
 import { NumericInput, FormGroup, Label, InputGroup, Button } from "@blueprintjs/core";
 import "../styles.css";
@@ -25,38 +23,38 @@ class SettingsWidget extends React.Component {
 
 	onStateChanged(state) {
 		// Update SettingsWidget state from Menu state
-		this.setState({isOpen: state.isOpen});
+		this.setState({ isOpen: state.isOpen });
 	}
 
 	onZoomChanged(number) {
 		// Update parameters and repaint
-		parameters.limits.setZoomFactor(number / 100.0);
-		fractal.paintGL();
+		this.props.parameters.limits.setZoomFactor(number / 100.0);
+		this.props.onUpdate();
 	}
 
 	onIterationsChanged(number) {
 		// Update parameters and repaint
-		parameters.maxIterations = number;
-		fractal.paintGL();
+		this.props.parameters.maxIterations = number;
+		this.props.onUpdate();
 	}
 
 	onDegreeChanged(number) {
 		// Update parameters and repaint
-		parameters.setRoots(number);
-		fractal.paintGL();
+		this.props.parameters.setRoots(number);
+		this.props.onUpdate();
 	}
 
 	onDampingChanged(number) {
 		// Update parameters and repaint
-		parameters.damping = number;
-		fractal.paintGL();
+		this.props.parameters.damping = number;
+		this.props.onUpdate();
 	}
 
 	keyPressEvent(event) {
 		// Which key
 		let ascii = event.keyCode;
 		switch (ascii) {
-			case 83: this.setState(state => ({isOpen: !state.isOpen})); break;
+			case 83: this.setState(state => ({ isOpen: !state.isOpen })); break;
 			case 79: console.log("o was pressed"); break;
 			case 80: console.log("p was pressed"); break;
 			default: break;
@@ -83,28 +81,28 @@ class SettingsWidget extends React.Component {
 						<div className="item">
 							<Label>Zoom factor (%)</Label>
 							<NumericInput
-								value={parameters.limits.zoomFactor() * 100.0} onValueChange={(number) => this.onZoomChanged(number)} 
+								value={(this.props.parameters.limits.zoomFactor() * 100.0).toFixed(0)} onValueChange={(number) => this.onZoomChanged(number)}
 								min={0.01} buttonPosition="right" leftIcon="zoom-in" fill={true}>
 							</NumericInput>
 						</div>
 						<div className="item">
 							<Label>Max number of iterations</Label>
-							<NumericInput 
-								value={parameters.maxIterations} onValueChange={(number) => this.onIterationsChanged(number)} 
+							<NumericInput
+								value={this.props.parameters.maxIterations} onValueChange={(number) => this.onIterationsChanged(number)}
 								min={1} buttonPosition="right" leftIcon="repeat" fill={true}>
 							</NumericInput>
 						</div>
 						<div className="item">
 							<Label>Number of roots</Label>
-							<NumericInput 
-								value={parameters.roots.length} onValueChange={(number) => this.onDegreeChanged(number)}
+							<NumericInput
+								value={this.props.parameters.roots.length} onValueChange={(number) => this.onDegreeChanged(number)}
 								min={2} max={10} buttonPosition="right" leftIcon="graph" fill={true}>
 							</NumericInput>
 						</div>
 						<div className="item">
 							<Label>Damping factor</Label>
 							<ComplexInput
-								value={parameters.damping} onValueChange={(number) => this.onDampingChanged(number)}
+								value={this.props.parameters.damping} onValueChange={(number) => this.onDampingChanged(number)}
 								res={2} leftIcon="derive-column" fill={true}>
 							</ComplexInput>
 						</div>

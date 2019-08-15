@@ -81,5 +81,5 @@ class Parameters {
 	}
 }
 
-var parameters = new Parameters();
+const parameters = new Parameters();
 export default parameters;
