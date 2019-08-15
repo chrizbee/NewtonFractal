@@ -4,8 +4,8 @@
 // see the file LICENSE in the main directory.
 
 import React from "react";
-import SettingsWidget from "./SettingsWidget"
-import Canvas from "./Canvas"
+import SettingsWidget from "./components/SettingsWidget"
+import Canvas from "./components/Canvas"
 import "./styles.css";
 
 function App() {

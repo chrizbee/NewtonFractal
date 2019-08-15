@@ -3,10 +3,10 @@
 // License: GNU General Public License version 3 or later,
 // see the file LICENSE in the main directory.
 
-import nf from "./Defaults";
-import parameters from "./Parameters";
-import { vshader, fshader } from "./shader";
-import { Point } from "./Root";
+import nf from "../Defaults";
+import parameters from "../Parameters";
+import { vshader, fshader } from "../shader";
+import { Point } from "../Root";
 
 // Drag root or fractal
 const DraggingMode = { 

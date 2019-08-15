@@ -4,7 +4,7 @@
 // see the file LICENSE in the main directory.
 
 import React from "react";
-import parameters from "./Parameters";
+import parameters from "../Parameters";
 import ComplexInput from "./ComplexInput";
 import fractalWidget from "./FractalWidget";
 import { slide as Menu } from "react-burger-menu";
