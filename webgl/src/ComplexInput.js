@@ -12,16 +12,25 @@ class ComplexInput extends React.Component {
 		super(props);
 		this.state = {
 			intent: Intent.NONE,
-			complex: this.props.value
+			complex: this.complex2string(this.props.value)
 		}
+	}
+
+	complex2string(c) {
+		// Convert complex to string with res decimals
+		let reStr = c.re.toFixed(this.props.res);
+		let imStr = Math.abs(c.im).toFixed(this.props.res);
+		let str = reStr + (c.im < 0 ? " - " : " + ") + imStr + "i";
+		return str;
 	}
 
 	inputChanged(event) {
 		// Validate input
+		var c;
 		let valid = true;
 		let input = event.target.value;
 		try {
-			var c = new Complex(input);
+			c = new Complex(input);
 			valid = !c.isNaN();
 		} catch (e) {
 			valid = false;
@@ -33,8 +42,8 @@ class ComplexInput extends React.Component {
 				intent: Intent.NONE,
 				complex: event.target.value
 			});
-			// raise onValueChange event
-			this.props.onValueChange(new Complex(event.target.value));
+			// Raise onValueChange event
+			this.props.onValueChange(c);
 		} else {
 			this.setState({
 				intent: Intent.DANGER,
