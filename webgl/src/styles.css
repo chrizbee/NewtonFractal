@@ -31,6 +31,9 @@ html, body, canvas {
 
 /* Hide scrollbars */
 .bm-item-list {
+	height: 100%;
+	display: flex !important;
+	flex-direction: column;
 	overflow: hidden;
 	padding: 0;
 }
@@ -56,4 +59,26 @@ html, body, canvas {
 .settingsItems .item Label {
 	color: #e6e6e6;
 	margin-bottom: 7px;
+}
+
+.rootsItems {
+	display: flex;
+	flex-direction: column;
+	margin: 2px;
+}
+
+.rootsItems .item {
+	margin-bottom: 20px;
+}
+
+.rootsBlock {
+	margin-top: 30px;
+	margin-bottom: 30px;
+	flex: 1;
+	overflow: auto;
+}
+
+.infoBlock {
+	min-height: 100px;
+	background-color: black;
 }

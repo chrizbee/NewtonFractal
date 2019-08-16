@@ -11,26 +11,21 @@ import "./styles.css";
 
 class App extends React.Component {
 	state = {
-		test: "hello"
+		parameters: parameters
 	}
 
-	// Repaint canvas
-	updateFractalWidget = () => {
-		this.refs.fractalWidget.paintGL();
-	}
-
-	// Re-render SettingsWidget
-	updateSettingsWidget = () => {
-		this.refs.settingsWidget.forceUpdate();
+	// Sync parameters
+	handleOnUpdate = (parameters) => {
+		this.setState({parameters})
 	}
 
 	render() {
 		return (
 			<div className="app">
 				<SettingsWidget className="settingsWidget" ref="settingsWidget"
-				parameters={parameters} onUpdate={this.updateFractalWidget} test={this.state.test} />
+				parameters={this.state.parameters} onUpdate={this.handleOnUpdate} />
 				<FractalWidget className="fractalWidget" ref="fractalWidget"
-				parameters={parameters} onUpdate={this.updateSettingsWidget} test={this.state.test} />
+				parameters={this.state.parameters} onUpdate={this.handleOnUpdate} />
 			</div>
 		)
 	}

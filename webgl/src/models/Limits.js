@@ -42,6 +42,7 @@ class Limits {
 		this.right = xMid + w2;
 		this.bottom = yMid - h2;
 		this.left = xMid - w2;
+		return this;
 	}
 	
 	zoom(zoomin, xw, yw) {

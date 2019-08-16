@@ -13,15 +13,16 @@ class Parameters {
 		this.limits = new Limits();
 		this.maxIterations = nf.DMI;
 		this.damping = new Complex(nf.DDP, 0.0);
-		this.setRoots(nf.DRC);
+		this.roots = this.getRoots(nf.DRC);
+		this.reset();
 	}
 
-	setRoots(DRC) {
-		this.roots = [];
+	getRoots(DRC) {
+		let roots = [];
 		for (var i = 0; i < DRC; ++i) {
-			this.roots.push(new Root(new Complex(0, 0), nf.predefColors[i]));
+			roots.push(new Root(new Complex(0, 0), nf.predefColors[i]));
 		}
-		this.reset();
+		return roots;
 	}
 
 	reset() {

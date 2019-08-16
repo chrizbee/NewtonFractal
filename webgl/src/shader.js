@@ -89,7 +89,7 @@ void func(vec2 z, inout vec2 f, inout vec2 df)
 	// Calculate f and derivative with given roots
 	vec2 r = z - roots[0];
 	vec2 l = z - roots[1];
-	for (int i = 1; i < 10 - 1; ++i) {
+	for (int i = 1; i <= 10 - 1; ++i) {
 			if (i >= rootCount - 1) {
 				 f = cmpxmul(r, (z - roots[i]));
 				 break;
@@ -109,7 +109,7 @@ void main()
 	vec2 z = vec2(gl_FragCoord.x * xFactor + limits.w, (size.y - gl_FragCoord.y) * yFactor + limits.x);
 
 	// Root indicator if close enough to root
-	for (int r = 0; r < 10; ++r) {
+	for (int r = 0; r <= 10; ++r) {
 		if (r >= rootCount) break;
 		if (length(z - roots[r]) < RIR - 0.005) {
 			gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
@@ -131,7 +131,7 @@ void main()
 
 		// Check which root was reached
 		if (length(z0 - z) < EPS) {
-			for (int r = 0; r < 10; ++r) {
+			for (int r = 0; r <= 10; ++r) {
 				if (r >= rootCount) break;
 				if (length(z0 - roots[r]) < EPS) {
 
