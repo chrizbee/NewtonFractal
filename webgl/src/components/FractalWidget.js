@@ -31,10 +31,11 @@ class FractalWidget extends React.Component {
 		}
 	}
 
+	// Update lokal state parameters
 	componentWillReceiveProps(props) {
 		if (this.state.parameters === props.parameters) {return;}
-		console.log("[FractalWidget] Reiceived props:");
-		console.log(props);
+		//console.log("[FractalWidget] Reiceived props:");
+		//console.log(props);
 		this.setState({ parameters: props.parameters }, () => {
 			this.paintGL();
 		});
@@ -121,13 +122,15 @@ class FractalWidget extends React.Component {
 				parameters: {
 					roots: {
 						[dragger.index]: {
-							value: {$set: this.state.parameters.point2complex(pos)}
+							value: { $set: this.state.parameters.point2complex(pos) }
 						}
 					}
 				}
-			}));
-			this.canvas.style.cursor = "grabbing";
-			this.paintGL();
+			}), () => {
+				this.props.onUpdate(this.state.parameters);
+				this.canvas.style.cursor = "grabbing";
+				this.paintGL();
+			});
 
 			// Else move fractal
 		} else if (dragger.mode === DraggingMode.DraggingFractal) {

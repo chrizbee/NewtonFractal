@@ -25,13 +25,12 @@ class SettingsWidget extends React.Component {
 		document.onkeyup = this.keyPressEvent.bind(this);
 	}
 
+	// Update lokal state parameters
 	componentWillReceiveProps(props) {
 		if (this.state.parameters === props.parameters) {return;}
-		console.log("[SettingsWidget] Reiceived props:");
-		console.log(props);
-		this.setState({ parameters: props.parameters }, () => {
-			
-		});
+		//console.log("[SettingsWidget] Reiceived props:");
+		//console.log(props);
+		this.setState({ parameters: props.parameters });
 	}
 
 	onStateChanged(state) {
@@ -40,7 +39,7 @@ class SettingsWidget extends React.Component {
 	}
 
 	onZoomChanged(number) {
-		// Update parameters and repaint
+		// Update parameters and update
 		// TODO: use state
 		this.setState(update(this.state, {
 			parameters: {
@@ -53,7 +52,7 @@ class SettingsWidget extends React.Component {
 
 	onIterationsChanged(number) {
 		console.log(number);
-		// Update parameters and repaint
+		// Update parameters and update
 		this.setState(update(this.state, {
 			parameters: {
 				maxIterations: { $set: number }
@@ -64,22 +63,36 @@ class SettingsWidget extends React.Component {
 	}
 
 	onDegreeChanged(number) {
-		// Update parameters and repaint
+		// Update parameters and update
 		this.setState(update(this.state, {
 			parameters: {
 				roots: { $set: this.state.parameters.getRoots(number) }
 			}
 		}), () => {
-			this.state.parameters.reset();
 			this.props.onUpdate(this.state.parameters);
 		});
 	}
 
 	onDampingChanged(number) {
-		// Update parameters and repaint
+		// Update parameters and update
 		this.setState(update(this.state, {
 			parameters: {
 				damping: { $set: number }
+			}
+		}), () => {
+			this.props.onUpdate(this.state.parameters);
+		});
+	}
+
+	onRootChanged(i, number) {
+		// Update parameters and repaint
+		this.setState(update(this.state, {
+			parameters: {
+				roots: {
+					[i]: {
+						value: { $set: number }
+					}
+				}
 			}
 		}), () => {
 			this.props.onUpdate(this.state.parameters);
@@ -172,7 +185,7 @@ class SettingsWidget extends React.Component {
 									<div className="item">
 										<ComplexInput
 											key={i}
-											value={root.value} onValueChange={(number) => this.onDampingChanged(number)}
+											value={root.value} onValueChange={(number) => this.onRootChanged(i, number)}
 											res={2} leftIcon="selection" fill={true} rightElement={rootMenu} />
 									</div>
 								)}

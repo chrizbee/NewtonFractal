@@ -14,7 +14,12 @@ class ComplexInput extends React.Component {
 			intent: Intent.NONE,
 			complex: this.complex2string(this.props.value)
 		}
+		console.log(this.props.value);		
 	}
+
+	componentWillReceiveProps(props) {
+		this.setState({complex: this.complex2string(this.props.value)})		
+	} 
 
 	complex2string(c) {
 		// Convert complex to string with res decimals
@@ -41,9 +46,10 @@ class ComplexInput extends React.Component {
 			this.setState({
 				intent: Intent.NONE,
 				complex: event.target.value
+			}, () => {
+				// Raise onValueChange event
+				this.props.onValueChange(c);
 			});
-			// Raise onValueChange event
-			this.props.onValueChange(c);
 		} else {
 			this.setState({
 				intent: Intent.DANGER,
@@ -55,7 +61,7 @@ class ComplexInput extends React.Component {
 	render() {
 		return (
 			<InputGroup
-				disabled={this.props.disabled} fill={this.props.fill} 
+				disabled={this.props.disabled} fill={this.props.fill}
 				large={this.props.large} leftIcon={this.props.leftIcon} intent={this.state.intent}
 				placeholder={this.props.placeholder} rightElement={this.props.rightElement}
 				round={this.props.round} type={this.props.type} value={this.state.complex}

@@ -14,7 +14,7 @@ class Parameters {
 		this.maxIterations = nf.DMI;
 		this.damping = new Complex(nf.DDP, 0.0);
 		this.roots = this.getRoots(nf.DRC);
-		this.reset();
+		this.reset(this.roots);
 	}
 
 	getRoots(DRC) {
@@ -22,16 +22,18 @@ class Parameters {
 		for (var i = 0; i < DRC; ++i) {
 			roots.push(new Root(new Complex(0, 0), nf.predefColors[i]));
 		}
-		return roots;
+		
+		return this.reset(roots);
 	}
 
-	reset() {
-		let rootCount = this.roots.length;
+	reset(roots) {
+		let rootCount = roots.length;
 		for (var i = 0; i < rootCount; ++i) {
 			var angle = 2 * Math.PI * i / rootCount;
-			this.roots[i].value = new Complex(Math.cos(angle), Math.sin(angle));
+			roots[i].value = new Complex(Math.cos(angle), Math.sin(angle));
 		}
 		this.limits.reset();
+		return roots;
 	}
 
 	complex2point(z) {
