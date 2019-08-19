@@ -4,10 +4,10 @@
 // see the file LICENSE in the main directory.
 
 import React from "react";
+import Context from '../Context';
 import { vshader, fshader } from "../shader";
 import nf from "../models/Defaults";
 import { Point } from "../models/Root";
-import update from 'immutability-helper';
 
 // Drag root or fractal
 const DraggingMode = {
@@ -24,22 +24,7 @@ var dragger = {
 }
 
 class FractalWidget extends React.Component {
-	constructor(probs) {
-		super(probs);
-		this.state = {
-			parameters: this.props.parameters
-		}
-	}
-
-	// Update lokal state parameters
-	componentWillReceiveProps(props) {
-		if (this.state.parameters === props.parameters) {return;}
-		//console.log("[FractalWidget] Reiceived props:");
-		//console.log(props);
-		this.setState({ parameters: props.parameters }, () => {
-			this.paintGL();
-		});
-	}
+	static contextType = Context;
 
 	componentDidMount() {
 		// Get canvas and WebGL context
@@ -79,19 +64,19 @@ class FractalWidget extends React.Component {
 		this.gl.vertexAttribPointer(0, 3, this.gl.FLOAT, this.gl.FALSE, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
 
 		// Paint with new params
-		this.gl.uniform1i(this.gl.getUniformLocation(this.program, "rootCount"), this.state.parameters.roots.length);
-		this.gl.uniform4fv(this.gl.getUniformLocation(this.program, "limits"), this.state.parameters.limits.vec4());
-		this.gl.uniform1i(this.gl.getUniformLocation(this.program, "maxIterations"), this.state.parameters.maxIterations);
-		this.gl.uniform2f(this.gl.getUniformLocation(this.program, "damping"), this.state.parameters.damping.re, this.state.parameters.damping.im);
+		this.gl.uniform1i(this.gl.getUniformLocation(this.program, "rootCount"), this.context.parameters.roots.length);
+		this.gl.uniform4fv(this.gl.getUniformLocation(this.program, "limits"), this.context.parameters.limits.vec4());
+		this.gl.uniform1i(this.gl.getUniformLocation(this.program, "maxIterations"), this.context.parameters.maxIterations);
+		this.gl.uniform2f(this.gl.getUniformLocation(this.program, "damping"), this.context.parameters.damping.re, this.context.parameters.damping.im);
 		this.gl.uniform2f(this.gl.getUniformLocation(this.program, "size"), this.canvas.width, this.canvas.height);
-		this.gl.uniform2fv(this.gl.getUniformLocation(this.program, "roots"), this.state.parameters.rootsVec2());
-		this.gl.uniform3fv(this.gl.getUniformLocation(this.program, "colors"), this.state.parameters.colorsVec3());
+		this.gl.uniform2fv(this.gl.getUniformLocation(this.program, "roots"), this.context.parameters.rootsVec2());
+		this.gl.uniform3fv(this.gl.getUniformLocation(this.program, "colors"), this.context.parameters.colorsVec3());
 		this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, 4);
 	}
 
 	resizeGL() {
 		// Resize canvas and limits to window size
-		this.state.parameters.limits.resize(window.innerWidth - this.canvas.width, window.innerHeight - this.canvas.height);
+		this.context.parameters.limits.resize(window.innerWidth - this.canvas.width, window.innerHeight - this.canvas.height);
 		this.canvas.width = window.innerWidth;
 		this.canvas.height = window.innerHeight;
 		this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
@@ -101,7 +86,7 @@ class FractalWidget extends React.Component {
 	mousePressEvent(event) {
 		// Set cursor and dragger
 		dragger.previousPos.set(event.clientX, event.clientY);
-		let i = this.state.parameters.rootContainsPoint(new Point(event.clientX, event.clientY));
+		let i = this.context.parameters.rootContainsPoint(new Point(event.clientX, event.clientY));
 
 		// Cursor pressed on root
 		if (i >= 0) {
@@ -117,31 +102,23 @@ class FractalWidget extends React.Component {
 	mouseMoveEvent(event) {
 		// Move root if dragging
 		var pos = new Point(event.clientX, event.clientY);
-		if (dragger.mode === DraggingMode.DraggingRoot && dragger.index >= 0 && dragger.index < this.state.parameters.roots.length) {
-			this.setState(update(this.state, {
-				parameters: {
-					roots: {
-						[dragger.index]: {
-							value: { $set: this.state.parameters.point2complex(pos) }
-						}
-					}
-				}
-			}), () => {
-				this.props.onUpdate(this.state.parameters);
-				this.canvas.style.cursor = "grabbing";
-				this.paintGL();
-			});
+		if (dragger.mode === DraggingMode.DraggingRoot && dragger.index >= 0 && dragger.index < this.context.parameters.roots.length) {
+			this.context.parameters.roots[dragger.index].value = this.context.parameters.point2complex(pos);
+			this.context.updateParameters(this.context.parameters);
+			this.context.updateSettings();
+			this.canvas.style.cursor = "grabbing";
+			this.paintGL();
 
 			// Else move fractal
 		} else if (dragger.mode === DraggingMode.DraggingFractal) {
-			this.state.parameters.limits.move(dragger.previousPos.x - pos.x, dragger.previousPos.y - pos.y);
+			this.context.parameters.limits.move(dragger.previousPos.x - pos.x, dragger.previousPos.y - pos.y);
 			dragger.previousPos.set(pos.x, pos.y);
 			this.canvas.style.cursor = "move";
 			this.paintGL();
 
 			// Else if over root change cursor
 		} else {
-			if (this.state.parameters.rootContainsPoint(pos) >= 0) {
+			if (this.context.parameters.rootContainsPoint(pos) >= 0) {
 				this.canvas.style.cursor = "grab";
 			} else this.canvas.style.cursor = "default";
 		}
@@ -161,9 +138,8 @@ class FractalWidget extends React.Component {
 
 		// Zoom fractal in / out
 		let zoomin = event.deltaY < 0;
-		// TODO: use state
-		this.state.parameters.limits.zoom(zoomin, xw, yw);
-		this.props.onUpdate(this.state.parameters);
+		this.context.parameters.limits.zoom(zoomin, xw, yw);
+		this.context.updateParameters(this.context.parameters);
 		this.paintGL();
 	}
 
@@ -205,7 +181,7 @@ class FractalWidget extends React.Component {
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, verticesBufferObject);
 		this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
 		this.gl.uniform1f(this.gl.getUniformLocation(this.program, "EPS"), nf.EPS);
-		this.gl.uniform1f(this.gl.getUniformLocation(this.program, "RIR"), this.state.parameters.distance2complex(nf.RIR));
+		this.gl.uniform1f(this.gl.getUniformLocation(this.program, "RIR"), this.context.parameters.distance2complex(nf.RIR));
 	}
 
 	render() {

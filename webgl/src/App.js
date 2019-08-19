@@ -4,28 +4,43 @@
 // see the file LICENSE in the main directory.
 
 import React from "react";
+import Context from "./Context";
 import SettingsWidget from "./components/SettingsWidget";
 import FractalWidget from "./components/FractalWidget";
-import parameters from "./models/Parameters";
+import Parameters from "./models/Parameters";
 import "./styles.css";
 
 class App extends React.Component {
-	state = {
-		parameters: parameters
-	}
 
 	// Sync parameters
-	handleOnUpdate = (parameters) => {
+	updateParameters = parameters => {
 		this.setState({parameters})
+	}
+
+	// Update FractalWidget
+	updateUi = () => {
+		this.refs.fractalWidget.paintGL();
+	}
+
+	// Update SettingsWidget
+	updateSettings = () => {
+		this.refs.settingsWidget.updateSettings();
+	}
+
+	state = {
+		parameters: Parameters,
+		updateParameters: this.updateParameters,
+		updateUi: this.updateUi,
+		updateSettings: this.updateSettings
 	}
 
 	render() {
 		return (
 			<div className="app">
-				<SettingsWidget className="settingsWidget" ref="settingsWidget"
-				parameters={this.state.parameters} onUpdate={this.handleOnUpdate} />
-				<FractalWidget className="fractalWidget" ref="fractalWidget"
-				parameters={this.state.parameters} onUpdate={this.handleOnUpdate} />
+				<Context.Provider value={this.state}>
+					<SettingsWidget className="settingsWidget" ref="settingsWidget" />
+					<FractalWidget className="fractalWidget" ref="fractalWidget" />
+				</Context.Provider>
 			</div>
 		)
 	}

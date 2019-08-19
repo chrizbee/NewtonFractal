@@ -43,6 +43,7 @@ html, body, canvas {
 	background: #293742;
 	font-size: 1.1em;
 	padding: .5em 1.5em .5em 1.5em;
+	z-index: 0 !important;
 }
 
 /* All input fields in a column with margins and colored labels */

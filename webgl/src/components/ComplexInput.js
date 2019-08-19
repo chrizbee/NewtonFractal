@@ -11,29 +11,35 @@ class ComplexInput extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			intent: Intent.NONE,
-			complex: this.complex2string(this.props.value)
+			inputString: this.complex2string(this.props.value),
+			valid: false
 		}
-		console.log(this.props.value);		
+	}
+
+	componentDidMount() {
+		// Init valid
+		this.setState({valid: this.isValid(this.state.inputString)});
 	}
 
 	componentWillReceiveProps(props) {
-		this.setState({complex: this.complex2string(this.props.value)})		
-	} 
+		if(this.isValid(props.value) && this.props.overWriteValue){
+			this.setState({inputString: this.complex2string(props.value)})
+		}
+	}
 
 	complex2string(c) {
 		// Convert complex to string with res decimals
-		let reStr = c.re.toFixed(this.props.res);
-		let imStr = Math.abs(c.im).toFixed(this.props.res);
+		let reStr = c.re.toFixed(this.props.decimalCount);
+		let imStr = Math.abs(c.im).toFixed(this.props.decimalCount);
 		let str = reStr + (c.im < 0 ? " - " : " + ") + imStr + "i";
 		return str;
 	}
 
-	inputChanged(event) {
+	// Validate complex number
+	isValid(input) {
 		// Validate input
 		var c;
 		let valid = true;
-		let input = event.target.value;
 		try {
 			c = new Complex(input);
 			valid = !c.isNaN();
@@ -41,30 +47,29 @@ class ComplexInput extends React.Component {
 			valid = false;
 		}
 
-		// Set input field
-		if (valid) {
-			this.setState({
-				intent: Intent.NONE,
-				complex: event.target.value
-			}, () => {
-				// Raise onValueChange event
-				this.props.onValueChange(c);
-			});
-		} else {
-			this.setState({
-				intent: Intent.DANGER,
-				complex: event.target.value
-			});
+		// Update state
+		valid ? this.setState({ valid: true }) : this.setState({ valid: false });
+
+		return valid;
+	}
+
+	inputChanged(event) {
+		this.setState({overWriteValue: false});
+		this.setState({ inputString: event.target.value });
+		if (this.isValid(event.target.value)) {
+			this.props.onValueChange(new Complex(event.target.value));
 		}
 	}
 
 	render() {
+		const { valid, inputString } = this.state;
+		const { disabled, fill, large, leftIcon, placeholder, rightElement, round, type } = this.props;
 		return (
 			<InputGroup
-				disabled={this.props.disabled} fill={this.props.fill}
-				large={this.props.large} leftIcon={this.props.leftIcon} intent={this.state.intent}
-				placeholder={this.props.placeholder} rightElement={this.props.rightElement}
-				round={this.props.round} type={this.props.type} value={this.state.complex}
+				disabled={disabled} fill={fill}
+				large={large} leftIcon={leftIcon} intent={valid ? Intent.NONE : Intent.DANGER}
+				placeholder={placeholder} rightElement={rightElement}
+				round={round} type={type} value={inputString}
 				onChange={(event) => this.inputChanged(event)}>
 			</InputGroup>
 		);
