@@ -17,7 +17,6 @@
 #include <QDateTime>
 #include <QMenu>
 #include <QUrl>
-#include <QDebug>
 
 static bool updateParamsAllowed = true;
 
@@ -43,9 +42,9 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	rootMenu_->addAction(QIcon("://resources/icons/mirrory.png"), tr("Mirror on y-axis"), rootMenu_, &QMenu::hide);
 
 	// Connect ui signals to slots
-	connect(ui_->btnExportImage, &QPushButton::clicked, this, &SettingsWidget::on_btnExportImageClicked);
-	connect(ui_->btnExportSettings, &QPushButton::clicked, this, &SettingsWidget::on_btnExportSettingsClicked);
-	connect(ui_->btnImportSettings, &QPushButton::clicked, this, &SettingsWidget::on_btnImportSettingsClicked);
+	connect(ui_->btnExportImage, &QPushButton::clicked, this, &SettingsWidget::exportImage);
+	connect(ui_->btnExportSettings, &QPushButton::clicked, this, &SettingsWidget::exportSettings);
+	connect(ui_->btnImportSettings, &QPushButton::clicked, this, &SettingsWidget::importSettings);
 	connect(ui_->lineSize, &SizeEdit::sizeChanged, this, &SettingsWidget::sizeChanged);
 	connect(ui_->btnReset, &QPushButton::clicked, this, &SettingsWidget::reset);
 	connect(ui_->spinScale, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
@@ -173,6 +172,42 @@ void SettingsWidget::moveRoot(quint8 index, complex value)
 	}
 }
 
+void SettingsWidget::exportImage()
+{
+	// Export pixmap to file
+	QSettings settings;
+	QString dir = settings.value("imagedir", QStandardPaths::standardLocations(QStandardPaths::PicturesLocation)).toString();
+	dir = QFileDialog::getExistingDirectory(this, tr("Export fractal to"), dir);
+	if (!dir.isEmpty()) {
+		settings.setValue("imagedir", dir);
+		emit exportImageTo(dir);
+	}
+}
+
+void SettingsWidget::exportSettings()
+{
+	// Export roots to file
+	QSettings settings;
+	QString dir = settings.value("settingsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
+	dir = QFileDialog::getExistingDirectory(this, tr("Export settings to"), dir);
+	if (!dir.isEmpty()) {
+		settings.setValue("settingsdir", dir);
+		emit exportSettingsTo(dir);
+	}
+}
+
+void SettingsWidget::importSettings()
+{
+	// Import roots from file
+	QSettings settings;
+	QString dir = settings.value("settingsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
+	QString file = QFileDialog::getOpenFileName(this, tr("Import settings"), dir, tr("Ini-File (*.ini)"));
+	if (!file.isEmpty()) {
+		settings.setValue("settingsdir", dir);
+		emit importSettingsFrom(file);
+	}
+}
+
 void SettingsWidget::openRootContextMenu()
 {
 	// Open root context menu
@@ -238,41 +273,5 @@ void SettingsWidget::on_settingsChanged()
 
 		// Re-render
 		emit paramsChanged();
-	}
-}
-
-void SettingsWidget::on_btnExportImageClicked()
-{
-	// Export pixmap to file
-	QSettings settings;
-	QString dir = settings.value("imagedir", QStandardPaths::standardLocations(QStandardPaths::PicturesLocation)).toString();
-	dir = QFileDialog::getExistingDirectory(this, tr("Export fractal to"), dir);
-	if (!dir.isEmpty()) {
-		settings.setValue("imagedir", dir);
-		emit exportImage(dir);
-	}
-}
-
-void SettingsWidget::on_btnExportSettingsClicked()
-{
-	// Export roots to file
-	QSettings settings;
-	QString dir = settings.value("settingsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
-	dir = QFileDialog::getExistingDirectory(this, tr("Export settings to"), dir);
-	if (!dir.isEmpty()) {
-		settings.setValue("settingsdir", dir);
-		emit exportRoots(dir);
-	}
-}
-
-void SettingsWidget::on_btnImportSettingsClicked()
-{
-	// Import roots from file
-	QSettings settings;
-	QString dir = settings.value("settingsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
-	QString file = QFileDialog::getOpenFileName(this, tr("Import settings"), dir, tr("Ini-File (*.ini)"));
-	if (!file.isEmpty()) {
-		settings.setValue("settingsdir", dir);
-		emit importRoots(file);
 	}
 }

@@ -624,7 +624,7 @@
                  </size>
                 </property>
                 <property name="toolTip">
-                 <string>import roots from file</string>
+                 <string>import roots from file [Ctrl+I]</string>
                 </property>
                 <property name="text">
                  <string/>
@@ -659,7 +659,7 @@
                  </size>
                 </property>
                 <property name="toolTip">
-                 <string>export roots to file</string>
+                 <string>export roots to file [Ctrl+E]</string>
                 </property>
                 <property name="text">
                  <string/>
@@ -694,7 +694,7 @@
                  </size>
                 </property>
                 <property name="toolTip">
-                 <string>change to default zoom and equidistant roots</string>
+                 <string>change to default zoom and equidistant roots [Ctrl+R]</string>
                 </property>
                 <property name="text">
                  <string/>
@@ -729,7 +729,7 @@
                  </size>
                 </property>
                 <property name="toolTip">
-                 <string>export fractal as png</string>
+                 <string>export fractal as png [Ctrl+S]</string>
                 </property>
                 <property name="text">
                  <string/>

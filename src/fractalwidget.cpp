@@ -10,11 +10,11 @@
 #include <QMouseEvent>
 #include <QHBoxLayout>
 #include <QDateTime>
+#include <QShortcut>
 #include <QSettings>
 #include <QPainter>
 #include <QAction>
 #include <QIcon>
-#include <QDebug>
 
 static QPoint mousePosition;
 static const QVector<QVector3D> vertices = QVector<QVector3D>() <<
@@ -43,23 +43,25 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	centralLayout->addWidget(settingsWidget_);
 	setLayout(centralLayout);
 
-	// Add actions and connect signals
-	QAction *quit = new QAction(this);
-	QAction *hide = new QAction(this);
-	QAction *orbit = new QAction(this);
-	QAction *position = new QAction(this);
-	QAction *settings = new QAction(this);
-	quit->setShortcut(QKeySequence("Ctrl+Q"));
-	hide->setShortcut(Qt::Key_Escape);
-	orbit->setShortcut(Qt::Key_F2);
-	position->setShortcut(Qt::Key_F3);
-	settings->setShortcut(Qt::Key_F1);
-	addActions(QList<QAction*>() << quit << hide << orbit << position << settings);
-	connect(quit, &QAction::triggered, QApplication::instance(), &QCoreApplication::quit);
-	connect(hide, &QAction::triggered, [this]() { legend_ = !legend_; update(); });
-	connect(orbit, &QAction::triggered, [this]() { params_->orbitMode = !params_->orbitMode; updateParams(); });
-	connect(position, &QAction::triggered, [this]() { position_ = !position_; update(); });
-	connect(settings, &QAction::triggered, settingsWidget_, &SettingsWidget::toggle);
+	// Add shortcuts and connect them
+	QShortcut *quit = new QShortcut(QKeySequence("Ctrl+Q"), this);
+	QShortcut *hide = new QShortcut(QKeySequence(Qt::Key_Escape), this);
+	QShortcut *orbit = new QShortcut(QKeySequence(Qt::Key_F2), this);
+	QShortcut *position = new QShortcut(QKeySequence(Qt::Key_F3), this);
+	QShortcut *settings = new QShortcut(QKeySequence(Qt::Key_F1), this);
+	QShortcut *resetFractal = new QShortcut(QKeySequence("Ctrl+R"), this);
+	QShortcut *exportImage = new QShortcut(QKeySequence("Ctrl+S"), this);
+	QShortcut *exportSettings = new QShortcut(QKeySequence("Ctrl+E"), this);
+	QShortcut *importSettings = new QShortcut(QKeySequence("Ctrl+I"), this);
+	connect(quit, &QShortcut::activated, QApplication::instance(), &QCoreApplication::quit);
+	connect(hide, &QShortcut::activated, [this]() { legend_ = !legend_; update(); });
+	connect(orbit, &QShortcut::activated, [this]() { params_->orbitMode = !params_->orbitMode; updateParams(); });
+	connect(position, &QShortcut::activated, [this]() { position_ = !position_; update(); });
+	connect(settings, &QShortcut::activated, settingsWidget_, &SettingsWidget::toggle);
+	connect(resetFractal, &QShortcut::activated, settingsWidget_, &SettingsWidget::reset);
+	connect(exportImage, &QShortcut::activated, settingsWidget_, &SettingsWidget::exportImage);
+	connect(exportSettings, &QShortcut::activated, settingsWidget_, &SettingsWidget::exportSettings);
+	connect(importSettings, &QShortcut::activated, settingsWidget_, &SettingsWidget::importSettings);
 
 	// Initialize general stuff
 	setMinimumSize(nf::MSI, nf::MSI);
@@ -74,9 +76,9 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	// Connect settingswidget signals
 	connect(settingsWidget_, &SettingsWidget::paramsChanged, this, &FractalWidget::updateParams);
 	connect(settingsWidget_, &SettingsWidget::sizeChanged, this, QOverload<const QSize &>::of(&FractalWidget::resize));
-	connect(settingsWidget_, &SettingsWidget::exportImage, this, &FractalWidget::exportImage);
-	connect(settingsWidget_, &SettingsWidget::exportRoots, this, &FractalWidget::exportRoots);
-	connect(settingsWidget_, &SettingsWidget::importRoots, this, &FractalWidget::importRoots);
+	connect(settingsWidget_, &SettingsWidget::exportImageTo, this, &FractalWidget::exportImageTo);
+	connect(settingsWidget_, &SettingsWidget::exportSettingsTo, this, &FractalWidget::exportSettingsTo);
+	connect(settingsWidget_, &SettingsWidget::importSettingsFrom, this, &FractalWidget::importSettingsFrom);
 	connect(settingsWidget_, &SettingsWidget::reset, this, &FractalWidget::reset);
 	connect(this, &FractalWidget::rootMoved, settingsWidget_, &SettingsWidget::moveRoot);
 	connect(this, &FractalWidget::zoomChanged, settingsWidget_, &SettingsWidget::changeZoom);
@@ -100,8 +102,12 @@ void FractalWidget::updateParams()
 	renderThread_.render(*params_);
 }
 
-void FractalWidget::exportImage(const QString &dir)
+void FractalWidget::exportImageTo(const QString &dir)
 {
+	// Close settingsWidget
+	bool closed = settingsWidget_->isHidden();
+	settingsWidget_->setHidden(true);
+
 	// Export fractal to file
 	QString filePath = dir + "/fractal_" +
 		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
@@ -109,10 +115,13 @@ void FractalWidget::exportImage(const QString &dir)
 		QString::number(params_->size.width()) + "x" + QString::number(params_->size.width()) + ".png";
 	QFile f(filePath);
 	f.open(QIODevice::WriteOnly | QIODevice::Truncate);
-	pixmap_.save(&f, "png");
+	grab().save(&f, "png");
+
+	// Reopen if needed
+	settingsWidget_->setHidden(closed);
 }
 
-void FractalWidget::exportRoots(const QString &dir)
+void FractalWidget::exportSettingsTo(const QString &dir)
 {
 	// Export roots to file
 	quint8 rootCount = params_->roots.count();
@@ -159,7 +168,7 @@ void FractalWidget::exportRoots(const QString &dir)
 	ini.endGroup();
 }
 
-void FractalWidget::importRoots(const QString &file)
+void FractalWidget::importSettingsFrom(const QString &file)
 {
 	// Open ini file
 	QSettings ini(file, QSettings::IniFormat, this);

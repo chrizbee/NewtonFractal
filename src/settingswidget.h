@@ -36,13 +36,13 @@ public slots:
 	void addRoot(complex value = complex(0, 0), QColor color = Qt::black);
 	void removeRoot(qint8 index = -1);
 	void moveRoot(quint8 index, complex value);
+	void exportImage();
+	void exportSettings();
+	void importSettings();
 
 private slots:
 	void openRootContextMenu();
 	void on_settingsChanged();
-	void on_btnExportImageClicked();
-	void on_btnExportSettingsClicked();
-	void on_btnImportSettingsClicked();
 
 protected:
 	// Don't pass any events to parent while settings are shown
@@ -55,9 +55,9 @@ protected:
 signals:
 	void paramsChanged();
 	void sizeChanged(QSize size);
-	void exportImage(const QString &dir);
-	void exportRoots(const QString &dir);
-	void importRoots(const QString &file);
+	void exportImageTo(const QString &dir);
+	void exportSettingsTo(const QString &dir);
+	void importSettingsFrom(const QString &file);
 	void reset();
 
 private:

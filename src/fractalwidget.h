@@ -31,9 +31,9 @@ class FractalWidget : public QOpenGLWidget, protected QOpenGLFunctions
 public:
 	FractalWidget(QWidget *parent = nullptr);
 	void updateParams();
-	void exportImage(const QString &dir);
-	void exportRoots(const QString &dir);
-	void importRoots(const QString &file);
+	void exportImageTo(const QString &dir);
+	void exportSettingsTo(const QString &dir);
+	void importSettingsFrom(const QString &file);
 	void reset();
 
 public slots:
