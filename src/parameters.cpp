@@ -14,7 +14,8 @@ Parameters::Parameters() :
 	scaleDown(false),
 	processor(CPU_MULTI),
 	orbitMode(false),
-	orbitStart(0, 0)
+	orbitStart(0, 0),
+	benchmark(false)
 {
 }
 
@@ -39,7 +40,9 @@ bool Parameters::paramsChanged(const Parameters &other) const
 		damping != other.damping ||
 		scaleDownFactor != other.scaleDownFactor ||
 		scaleDown != other.scaleDown ||
-		processor != other.processor
+		processor != other.processor ||
+		benchmark != other.benchmark ||
+		scaleUpFactor != other.scaleUpFactor
 	);
 }
 

@@ -40,6 +40,8 @@ struct Parameters {
 	Processor processor;
 	bool orbitMode;
 	QPoint orbitStart;
+	bool benchmark;
+	uint scaleUpFactor;
 };
 
 complex string2complex(const QString &text);

@@ -36,6 +36,8 @@ public slots:
 	void addRoot(complex value = complex(0, 0), QColor color = Qt::black);
 	void removeRoot(qint8 index = -1);
 	void moveRoot(quint8 index, complex value);
+	void setBenchmarkProgress(int min, int max, int progress);
+	void showBenchmarkProgress(bool value);
 	void exportImage();
 	void exportSettings();
 	void importSettings();
@@ -58,6 +60,7 @@ signals:
 	void exportImageTo(const QString &dir);
 	void exportSettingsTo(const QString &dir);
 	void importSettingsFrom(const QString &file);
+	void benchmarkRequested();
 	void reset();
 
 private:

@@ -71,7 +71,7 @@ void Limits::zoom(bool in, double xw, double yw)
 
 void Limits::reset(QSize size)
 {
-	// Reset limits
+	// Reset limits to match size
 	left_ = -nf::DSF * size.width();
 	right_ = nf::DSF * size.width();
 	top_ = nf::DSF * size.height();

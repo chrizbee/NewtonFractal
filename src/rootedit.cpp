@@ -11,7 +11,8 @@ RootEdit::RootEdit(QWidget *parent) :
 {
 	// Set geometry and connect signal
 	setValue(complex(0, 0));
-	setMaximumWidth(110);
+	setMinimumSize(100, 25);
+	setMaximumSize(200, 25);
 	setAlignment(Qt::AlignRight);
 	connect(this, &RootEdit::editingFinished, this, &RootEdit::on_editingFinished);
 }

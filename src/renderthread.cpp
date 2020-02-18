@@ -5,7 +5,6 @@
 
 #include "renderthread.h"
 #include "imageline.h"
-#include <QtConcurrent>
 #include <QImage>
 #include <QPixmap>
 
@@ -50,7 +49,7 @@ inline void iterateX(ImageLine &il)
 			if (abs(z0 - z) < nf::EPS) {
 				for (quint8 r = 0; r < rootCount; ++r) {
 					if (abs(z0 - il.params.roots[r].value()) < nf::EPS) {
-						il.scanLine[x] = il.params.roots[r].color().darker(50 + i * 8).rgb();
+						il.scanLine[x] = il.params.roots[r].color().darker(60 + i * 8).rgb();
 						goto POINT_DONE;
 					}
 				}
@@ -77,7 +76,7 @@ RenderThread::~RenderThread()
 	wait();
 }
 
-void RenderThread::render(Parameters params)
+void RenderThread::render(const Parameters &params)
 {
 	// Lock mutex
 	QMutexLocker locker(&mutex_);
@@ -106,12 +105,19 @@ void RenderThread::run()
 		mutex_.lock();
 		orbitChanged = nextParams_.orbitChanged(curParams_);
 		paramsChanged = nextParams_.paramsChanged(curParams_);
-		if (paramsChanged || orbitChanged) curParams_ = nextParams_;
+		if (paramsChanged || orbitChanged)
+			curParams_ = nextParams_;
 		mutex_.unlock();
 
 		// Stop if nothing changed
 		if (!paramsChanged && !orbitChanged && firstRender)
 			return;
+
+		// Render benchmark
+		if (curParams_.benchmark) {
+			renderBenchmark();
+			return;
+		}
 
 		// Rerender pixmap
 		if (paramsChanged || !firstRender)
@@ -156,7 +162,6 @@ void RenderThread::renderPixmap()
 		pixmap = QPixmap::fromImage(image);
 
 	// Iterate x-pixels with multiple threads
-	// TODO: use map to report progress with QFuture
 	} else if (curParams_.processor == CPU_MULTI) {
 		QtConcurrent::blockingMap(lines, iterateX);
 		pixmap = QPixmap::fromImage(image);
@@ -194,4 +199,42 @@ void RenderThread::renderOrbit()
 
 	// Emit signal
 	emit orbitRendered(orbit, 1000.0 / timer_.elapsed());
+}
+
+void RenderThread::renderBenchmark()
+{
+	// Create image for fast pixel IO
+	// TODO: Allocate memory on hard disk and write directly to a file
+	// Otherwise RAM won't be enough
+	// Until then, the max size is 32767x32767 pixels
+	QList<ImageLine> lines;
+	QSize s = curParams_.size * curParams_.scaleUpFactor;
+	if (s.width() > 32767 || s.height() > 32767) {
+		emit benchmarkFinished(QImage()); // <- stupid
+		return;
+	}
+	QImage image(curParams_.size * curParams_.scaleUpFactor, QImage::Format_RGB32);
+	image.fill(Qt::black);
+	const qint32 height = image.size().height();
+	const double yFactor = -curParams_.limits.height() / (height - 1);
+
+	// Iterate y-pixels
+	for (int y = 0; y < height; ++y) {
+		ImageLine il((QRgb*)(image.scanLine(y)), y, image.width(), curParams_);
+		il.zy = y * yFactor + curParams_.limits.top();
+		lines.append(il);
+	}
+
+	// Set thread count to either single or multicore
+	uint threadCount = curParams_.processor == CPU_SINGLE ? 1 : QThread::idealThreadCount();
+	QThreadPool::globalInstance()->setMaxThreadCount(threadCount);
+	QtConcurrent::blockingMap(lines, iterateX);
+
+	// Iterate x-pixels
+	QFuture<void> future = QtConcurrent::map(lines, iterateX);
+
+	// Wait for future
+	// TODO: Show progress with QFuture!
+	future.waitForFinished();
+	emit benchmarkFinished(image);
 }

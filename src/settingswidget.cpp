@@ -5,7 +5,6 @@
 
 #include "settingswidget.h"
 #include "ui_settingswidget.h"
-#include "fractalwidget.h"
 #include "parameters.h"
 #include "rootedit.h"
 #include "rooticon.h"
@@ -28,9 +27,7 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 {
 	// Initialize ui
 	ui_->setupUi(this);
-	ui_->cbThreading->setEditable(true);
-	ui_->cbThreading->lineEdit()->setReadOnly(true);
-	ui_->cbThreading->lineEdit()->setAlignment(Qt::AlignCenter);
+	ui_->progressBenchmark->setVisible(false);
 	updateSettings();
 
 	// Create menu with actions for roots
@@ -47,12 +44,14 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	connect(ui_->btnImportSettings, &QPushButton::clicked, this, &SettingsWidget::importSettings);
 	connect(ui_->lineSize, &SizeEdit::sizeChanged, this, &SettingsWidget::sizeChanged);
 	connect(ui_->btnReset, &QPushButton::clicked, this, &SettingsWidget::reset);
-	connect(ui_->spinScale, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
+	connect(ui_->spinScaleDownFactor, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinIterations, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinDegree, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->lineDamping, &RootEdit::valueChanged, this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsWidget::on_settingsChanged);
+	connect(ui_->spinScaleUpFactor, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
+	connect(ui_->btnBenchmark, &QPushButton::clicked, this, &SettingsWidget::benchmarkRequested);
 
 	// Connect external links
 	connect(ui_->btnOpit7, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://github.com/opit7"));});
@@ -77,7 +76,7 @@ void SettingsWidget::updateSettings()
 	// Update settings from params
 	quint8 rootCount = params_->roots.count();
 	ui_->lineSize->setValue(params_->size);
-	ui_->spinScale->setValue(params_->scaleDownFactor * 100);
+	ui_->spinScaleDownFactor->setValue(params_->scaleDownFactor * 100);
 	ui_->spinZoom->setValue(params_->limits.zoomFactor() * 100);
 	ui_->spinIterations->setValue(params_->maxIterations);
 	ui_->spinDegree->setValue(rootCount);
@@ -172,6 +171,22 @@ void SettingsWidget::moveRoot(quint8 index, complex value)
 	}
 }
 
+void SettingsWidget::setBenchmarkProgress(int min, int max, int progress)
+{
+	// Set progress
+	ui_->progressBenchmark->setValue(progress);
+	ui_->progressBenchmark->setMinimum(min);
+	ui_->progressBenchmark->setMaximum(max);
+}
+
+void SettingsWidget::showBenchmarkProgress(bool value)
+{
+	// Show / hide button and progress bar
+	ui_->btnBenchmark->setVisible(!value);
+	ui_->spinScaleUpFactor->setVisible(!value);
+	ui_->progressBenchmark->setVisible(value);
+}
+
 void SettingsWidget::exportImage()
 {
 	// Export pixmap to file
@@ -261,8 +276,9 @@ void SettingsWidget::on_settingsChanged()
 		params_->limits.setZoomFactor(ui_->spinZoom->value() / 100.0);
 		params_->maxIterations = ui_->spinIterations->value();
 		params_->damping = ui_->lineDamping->value();
-		params_->scaleDownFactor = ui_->spinScale->value() / 100.0;
+		params_->scaleDownFactor = ui_->spinScaleDownFactor->value() / 100.0;
 		params_->processor = static_cast<Processor>(ui_->cbThreading->currentIndex());
+		params_->scaleUpFactor = ui_->spinScaleUpFactor->value();
 
 		// Update rootEdit value
 		if (rootEdits_.size() == params_->roots.count()) {

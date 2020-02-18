@@ -7,6 +7,8 @@
 #include "settingswidget.h"
 #include "parameters.h"
 #include <QApplication>
+#include <QMessageBox>
+#include <QFileDialog>
 #include <QMouseEvent>
 #include <QHBoxLayout>
 #include <QDateTime>
@@ -68,8 +70,8 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	setMouseTracking(true);
 	setWindowTitle(QApplication::applicationName());
 	setWindowIcon(QIcon("://resources/icons/icon.png"));
-	timer_.setInterval(nf::DTI);
-	timer_.setSingleShot(true);
+	scaleDownTimer_.setInterval(nf::DTI);
+	scaleDownTimer_.setSingleShot(true);
 	resize(params_->size);
 	settingsWidget_->hide();
 
@@ -87,10 +89,15 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	// Connect renderthread and timer signals
 	connect(&renderThread_, &RenderThread::fractalRendered, this, &FractalWidget::updateFractal);
 	connect(&renderThread_, &RenderThread::orbitRendered, this, &FractalWidget::updateOrbit);
-	connect(&timer_, &QTimer::timeout, [this]() {
+	connect(&scaleDownTimer_, &QTimer::timeout, [this]() {
 		params_->scaleDown = false;
 		updateParams();
 	});
+
+	// Connect benchmark signals
+	connect(settingsWidget_, &SettingsWidget::benchmarkRequested, this, &FractalWidget::runBenchmark);
+	connect(&renderThread_, &RenderThread::benchmarkFinished, this, &FractalWidget::finishBenchmark);
+	connect(&renderThread_, &RenderThread::benchmarkProgress, settingsWidget_, &SettingsWidget::setBenchmarkProgress);
 
 	// Initialize parameters
 	reset();
@@ -98,8 +105,10 @@ FractalWidget::FractalWidget(QWidget *parent) :
 
 void FractalWidget::updateParams()
 {
-	// Pass params by value to render thread
-	renderThread_.render(*params_);
+	// Pass params to renderthread by const reference
+	if (isEnabled()) {
+		renderThread_.render(*params_);
+	}
 }
 
 void FractalWidget::exportImageTo(const QString &dir)
@@ -112,7 +121,7 @@ void FractalWidget::exportImageTo(const QString &dir)
 	QString filePath = dir + "/fractal_" +
 		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
 		QString::number(params_->roots.count()) + "roots_" +
-		QString::number(params_->size.width()) + "x" + QString::number(params_->size.width()) + ".png";
+		QString::number(params_->size.width()) + "x" + QString::number(params_->size.height()) + ".png";
 	QFile f(filePath);
 	f.open(QIODevice::WriteOnly | QIODevice::Truncate);
 	grab().save(&f, "png");
@@ -185,7 +194,6 @@ void FractalWidget::importSettingsFrom(const QString &file)
 	params_->orbitStart = ini.value("orbitStart").toPoint();
 	ini.endGroup();
 
-
 	// Limits
 	ini.beginGroup("Limits");
 	params_->limits.set(
@@ -224,6 +232,63 @@ void FractalWidget::reset()
 	params_->reset();
 	updateParams();
 	settingsWidget_->updateSettings();
+}
+
+void FractalWidget::runBenchmark()
+{
+	// Disable editing and set params
+	setEnabled(false);
+	params_->benchmark = true;
+	params_->scaleDown = false;
+	settingsWidget_->showBenchmarkProgress(true);
+
+	// Run benchmark
+	benchmarkTimer_.start();
+	renderThread_.render(*params_);
+}
+
+void FractalWidget::finishBenchmark(const QImage &image)
+{
+	// Static output string
+	static const QString out = "Rendered %1 pixels in:\n%2 hr, %3 min, %4 sec and %5 ms";
+
+	// Get time and number of pixels
+	int pixels = image.width() * image.height();
+	qint64 elapsed = benchmarkTimer_.elapsed();
+	int s = elapsed / 1000;
+	int ms = elapsed % 1000;
+	int m = s / 60;
+	s %= 60;
+	int h = m / 60;
+	m %= 60;
+
+	// Show stats
+	QMessageBox::StandardButton btn = QMessageBox::question(
+		this, tr("Benchmark finished"),
+		out.arg(pixels).arg(h).arg(m).arg(s).arg(ms),
+		QMessageBox::Save | QMessageBox::Cancel);
+
+	// Save image
+	if (btn == QMessageBox::Save) {
+		QSettings settings;
+		QString dir = settings.value("imagedir", QStandardPaths::standardLocations(QStandardPaths::PicturesLocation)).toString();
+		dir = QFileDialog::getExistingDirectory(this, tr("Export fractal to"), dir);
+		if (!dir.isEmpty()) {
+			settings.setValue("imagedir", dir);
+			QSize s = params_->size * params_->scaleUpFactor;
+			QString filePath = dir + "/fractal_" +
+				QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
+				QString::number(params_->roots.count()) + "roots_" +
+				QString::number(s.width()) + "x" + QString::number(s.height()) + ".bmp";
+			image.save(filePath, "BMP", 100);
+		}
+	}
+
+	// Enable editing again and reset params
+	settingsWidget_->showBenchmarkProgress(false);
+	setEnabled(true);
+	params_->benchmark = false;
+	updateParams();
 }
 
 void FractalWidget::updateFractal(const QPixmap &pixmap, double fps)
@@ -367,11 +432,11 @@ void FractalWidget::paintGL()
 void FractalWidget::resizeGL(int w, int h)
 {
 	// Overwrite size with scaleSize for smooth resizing
-	if (!timer_.isActive() && params_->processor != GPU_OPENGL)
+	if (!scaleDownTimer_.isActive() && params_->processor != GPU_OPENGL)
 		params_->scaleDown = true;
 
 	// Restart timer
-	timer_.start();
+	scaleDownTimer_.start();
 
 	// Change resolution on resize
 	QSize newSize(w, h);
@@ -458,11 +523,11 @@ void FractalWidget::wheelEvent(QWheelEvent *event)
 	double yw = (double)event->pos().y() / height();
 
 	// Overwrite size with scaleSize for smooth moving
-	if (!timer_.isActive() && params_->processor != GPU_OPENGL)
+	if (!scaleDownTimer_.isActive() && params_->processor != GPU_OPENGL)
 		params_->scaleDown = true;
 
 	// Restart timer
-	timer_.start();
+	scaleDownTimer_.start();
 
 	// Zoom fractal in / out
 	bool in = event->angleDelta().y() > 0;

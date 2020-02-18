@@ -8,9 +8,10 @@
 
 #include "parameters.h"
 #include <QThread>
-#include <QMutex>
+#include <QtConcurrent>
 #include <QWaitCondition>
 #include <QElapsedTimer>
+#include <QMutex>
 #include <QColor>
 
 class RenderThread : public QThread
@@ -20,16 +21,19 @@ class RenderThread : public QThread
 public:
 	RenderThread(QObject *parent = nullptr);
 	~RenderThread();
-	void render(Parameters params);
+	void render(const Parameters &params);
 
 protected:
 	void run() override;
 	void renderPixmap();
 	void renderOrbit();
+	void renderBenchmark();
 
 signals:
 	void fractalRendered(const QPixmap &pixmap, double fps);
 	void orbitRendered(const QVector<QPoint> &orbit, double fps);
+	void benchmarkProgress(int min, int max, int progress);
+	void benchmarkFinished(const QImage &image);
 
 private:
 	bool abort_;

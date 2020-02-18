@@ -8,6 +8,7 @@
 
 #include "renderthread.h"
 #include <QTimer>
+#include <QElapsedTimer>
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
@@ -39,6 +40,8 @@ public:
 public slots:
 	void updateFractal(const QPixmap &pixmap, double fps);
 	void updateOrbit(const QVector<QPoint> &orbit, double fps);
+	void runBenchmark();
+	void finishBenchmark(const QImage &image);
 
 protected:
 	void initializeGL() override;
@@ -55,8 +58,9 @@ signals:
 	void sizeChanged(QSize size);
 
 private:
-	QTimer timer_;
 	QPixmap pixmap_;
+	QTimer scaleDownTimer_;
+	QElapsedTimer benchmarkTimer_;
 	QVector<QPoint> orbit_;
 	Parameters *params_;
 	SettingsWidget *settingsWidget_;
