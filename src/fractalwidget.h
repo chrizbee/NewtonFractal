@@ -52,11 +52,6 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *event) override;
 	void wheelEvent(QWheelEvent *event) override;
 
-signals:
-	void rootMoved(quint8 index, complex value);
-	void zoomChanged(double factor);
-	void sizeChanged(QSize size);
-
 private:
 	QPixmap pixmap_;
 	QTimer scaleDownTimer_;

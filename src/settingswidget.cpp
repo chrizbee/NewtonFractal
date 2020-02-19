@@ -195,7 +195,7 @@ void SettingsWidget::exportImage()
 	dir = QFileDialog::getExistingDirectory(this, tr("Export fractal to"), dir);
 	if (!dir.isEmpty()) {
 		settings.setValue("imagedir", dir);
-		emit exportImageTo(dir);
+		emit exportImageRequested(dir);
 	}
 }
 

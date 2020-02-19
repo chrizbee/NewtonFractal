@@ -4,6 +4,7 @@
 // see the file LICENSE in the main directory.
 
 #include "parameters.h"
+#include <QDateTime>
 
 Parameters::Parameters() :
 	limits(Limits()),
@@ -178,4 +179,15 @@ QVector2D complex2vec2(complex z)
 {
 	// Convert complex to vec2
 	return QVector2D(z.real(), z.imag());
+}
+
+QString dynamicFileName(const Parameters &params, const QString &ext)
+{
+	// Generate dynamic filename
+	QSize s = params.size * (params.benchmark ? params.scaleUpFactor : 1);
+	return("fractal_" +
+		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
+		QString::number(params.roots.count()) + "roots_" +
+		QString::number(s.width()) + "x" + QString::number(s.height()) + "." + ext
+	);
 }

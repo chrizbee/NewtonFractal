@@ -57,7 +57,7 @@ protected:
 signals:
 	void paramsChanged();
 	void sizeChanged(QSize size);
-	void exportImageTo(const QString &dir);
+	void exportImageRequested(const QString &dir);
 	void exportSettingsTo(const QString &dir);
 	void importSettingsFrom(const QString &file);
 	void benchmarkRequested();

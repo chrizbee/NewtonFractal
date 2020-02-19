@@ -11,7 +11,6 @@
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <QHBoxLayout>
-#include <QDateTime>
 #include <QShortcut>
 #include <QSettings>
 #include <QPainter>
@@ -78,13 +77,10 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	// Connect settingswidget signals
 	connect(settingsWidget_, &SettingsWidget::paramsChanged, this, &FractalWidget::updateParams);
 	connect(settingsWidget_, &SettingsWidget::sizeChanged, this, QOverload<const QSize &>::of(&FractalWidget::resize));
-	connect(settingsWidget_, &SettingsWidget::exportImageTo, this, &FractalWidget::exportImageTo);
+	connect(settingsWidget_, &SettingsWidget::exportImageRequested, this, &FractalWidget::exportImageTo);
 	connect(settingsWidget_, &SettingsWidget::exportSettingsTo, this, &FractalWidget::exportSettingsTo);
 	connect(settingsWidget_, &SettingsWidget::importSettingsFrom, this, &FractalWidget::importSettingsFrom);
 	connect(settingsWidget_, &SettingsWidget::reset, this, &FractalWidget::reset);
-	connect(this, &FractalWidget::rootMoved, settingsWidget_, &SettingsWidget::moveRoot);
-	connect(this, &FractalWidget::zoomChanged, settingsWidget_, &SettingsWidget::changeZoom);
-	connect(this, &FractalWidget::sizeChanged, settingsWidget_, &SettingsWidget::changeSize);
 
 	// Connect renderthread and timer signals
 	connect(&renderThread_, &RenderThread::fractalRendered, this, &FractalWidget::updateFractal);
@@ -118,11 +114,7 @@ void FractalWidget::exportImageTo(const QString &dir)
 	settingsWidget_->setHidden(true);
 
 	// Export fractal to file
-	QString filePath = dir + "/fractal_" +
-		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
-		QString::number(params_->roots.count()) + "roots_" +
-		QString::number(params_->size.width()) + "x" + QString::number(params_->size.height()) + ".png";
-	QFile f(filePath);
+	QFile f(dir + "/" + dynamicFileName(*params_, "png"));
 	f.open(QIODevice::WriteOnly | QIODevice::Truncate);
 	grab().save(&f, "png");
 
@@ -132,15 +124,8 @@ void FractalWidget::exportImageTo(const QString &dir)
 
 void FractalWidget::exportSettingsTo(const QString &dir)
 {
-	// Export roots to file
-	quint8 rootCount = params_->roots.count();
-	QString filePath = dir + "/fractal_" +
-		QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
-		QString::number(rootCount) + "roots_" +
-		QString::number(params_->size.width()) + "x" + QString::number(params_->size.width()) + ".ini";
-
 	// Create ini file
-	QSettings ini(filePath, QSettings::IniFormat, this);
+	QSettings ini(dir + "/" + dynamicFileName(*params_, "ini"), QSettings::IniFormat, this);
 
 	// General parameters
 	ini.beginGroup("Parameters");
@@ -168,6 +153,7 @@ void FractalWidget::exportSettingsTo(const QString &dir)
 
 	// Roots
 	ini.beginGroup("Roots");
+	quint8 rootCount = params_->roots.count();
 	for (quint8 i = 0; i < rootCount; ++i) {
 		ini.setValue(
 			"root" + QString::number(i),
@@ -275,12 +261,7 @@ void FractalWidget::finishBenchmark(const QImage &image)
 		dir = QFileDialog::getExistingDirectory(this, tr("Export fractal to"), dir);
 		if (!dir.isEmpty()) {
 			settings.setValue("imagedir", dir);
-			QSize s = params_->size * params_->scaleUpFactor;
-			QString filePath = dir + "/fractal_" +
-				QDateTime::currentDateTime().toString("yyMMdd_HHmmss_") +
-				QString::number(params_->roots.count()) + "roots_" +
-				QString::number(s.width()) + "x" + QString::number(s.height()) + ".bmp";
-			image.save(filePath, "BMP", 100);
+			image.save(dir + "/" + dynamicFileName(*params_, "bmp"), "BMP", 100);
 		}
 	}
 
@@ -380,17 +361,22 @@ void FractalWidget::paintGL()
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	// Draw roots
+
+	// Circle pen / brush
 	painter.setPen(circlePen);
 	painter.setBrush(opaqueBrush);
-	quint8 rootCount = params_->roots.count();
-	for (quint8 i = 0; i < rootCount; ++i) {
-		QPoint point = params_->complex2point(params_->roots[i].value());
-		painter.drawEllipse(point, nf::RIR, nf::RIR);
-	}
 
-	// Draw legend if enabled
+	// Draw roots and legend if enabled
 	if (legend_) {
+
+		// Draw roots
+		quint8 rootCount = params_->roots.count();
+		for (quint8 i = 0; i < rootCount; ++i) {
+			QPoint point = params_->complex2point(params_->roots[i].value());
+			painter.drawEllipse(point, nf::RIR, nf::RIR);
+		}
+
+		// Draw legend
 		painter.drawRoundedRect(legendRect, 10, 10);
 		painter.drawPixmap(ptHide, pixHide);
 		painter.drawPixmap(ptSettings, pixSettings);
@@ -442,8 +428,8 @@ void FractalWidget::resizeGL(int w, int h)
 	QSize newSize(w, h);
 	params_->resize(newSize);
 	glViewport(0, 0, w, h);
+	settingsWidget_->changeSize(newSize);
 	updateParams();
-	emit sizeChanged(newSize);
 }
 
 void FractalWidget::mousePressEvent(QMouseEvent *event)
@@ -478,8 +464,8 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 			params_->roots[dragger_.index] += params_->distance2complex(distance * nf::MOD);
 			dragger_.previousPos = mousePosition;
 		} else params_->roots[dragger_.index] = params_->point2complex(mousePosition);
+		settingsWidget_->moveRoot(dragger_.index, params_->roots[dragger_.index].value());
 		updateParams();
-		emit rootMoved(dragger_.index, params_->roots[dragger_.index].value());
 
 	// Else move fractal if dragging
 	} else if (dragger_.mode == DraggingFractal) {
@@ -532,6 +518,6 @@ void FractalWidget::wheelEvent(QWheelEvent *event)
 	// Zoom fractal in / out
 	bool in = event->angleDelta().y() > 0;
 	params_->limits.zoom(in, xw, yw);
+	settingsWidget_->changeZoom(params_->limits.zoomFactor());
 	updateParams();
-	emit zoomChanged(params_->limits.zoomFactor());
 }

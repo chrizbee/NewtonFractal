@@ -44,8 +44,10 @@ struct Parameters {
 	uint scaleUpFactor;
 };
 
+// Does not really belong here, but I don't care
 complex string2complex(const QString &text);
 QString complex2string(complex z, quint8 precision = 2);
 QVector2D complex2vec2(complex z);
+QString dynamicFileName(const Parameters &params, const QString &ext);
 
 #endif // PARAMETERS_H
