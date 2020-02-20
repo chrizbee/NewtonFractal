@@ -182,9 +182,9 @@ void SettingsWidget::setBenchmarkProgress(int min, int max, int progress)
 void SettingsWidget::showBenchmarkProgress(bool value)
 {
 	// Show / hide button and progress bar
-	ui_->btnBenchmark->setVisible(!value);
 	ui_->spinScaleUpFactor->setVisible(!value);
 	ui_->progressBenchmark->setVisible(value);
+	// TODO: Stop benchmark
 }
 
 void SettingsWidget::exportImage()
@@ -201,14 +201,52 @@ void SettingsWidget::exportImage()
 
 void SettingsWidget::exportSettings()
 {
-	// Export roots to file
+	// Get settings dir
 	QSettings settings;
 	QString dir = settings.value("settingsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
 	dir = QFileDialog::getExistingDirectory(this, tr("Export settings to"), dir);
-	if (!dir.isEmpty()) {
-		settings.setValue("settingsdir", dir);
-		emit exportSettingsTo(dir);
+	if (dir.isEmpty()) return;
+
+	// Save settings dir
+	settings.setValue("settingsdir", dir);
+
+	// Create ini file
+	QSettings ini(dir + "/" + dynamicFileName(*params_, "ini"), QSettings::IniFormat, this);
+
+	// General parameters
+	ini.beginGroup("Parameters");
+	ini.setValue("size", params_->size);
+	ini.setValue("maxIterations", params_->maxIterations);
+	ini.setValue("damping", complex2string(params_->damping));
+	ini.setValue("scaleDownFactor", params_->scaleDownFactor);
+	ini.setValue("scaleDown", params_->scaleDown);
+	ini.setValue("processor", static_cast<quint8>(params_->processor));
+	ini.setValue("orbitMode", params_->orbitMode);
+	ini.setValue("orbitStart", params_->orbitStart);
+	ini.endGroup();
+
+	// Limits
+	ini.beginGroup("Limits");
+	ini.setValue("left", params_->limits.left());
+	ini.setValue("right", params_->limits.right());
+	ini.setValue("top", params_->limits.top());
+	ini.setValue("bottom", params_->limits.bottom());
+	ini.setValue("left_original", params_->limits.original()->left());
+	ini.setValue("right_original", params_->limits.original()->right());
+	ini.setValue("top_original", params_->limits.original()->top());
+	ini.setValue("bottom_original", params_->limits.original()->bottom());
+	ini.endGroup();
+
+	// Roots
+	ini.beginGroup("Roots");
+	quint8 rootCount = params_->roots.count();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		ini.setValue(
+			"root" + QString::number(i),
+			complex2string(params_->roots[i].value(), 10) + " : " + params_->roots[i].color().name()
+		);
 	}
+	ini.endGroup();
 }
 
 void SettingsWidget::importSettings()
@@ -217,10 +255,55 @@ void SettingsWidget::importSettings()
 	QSettings settings;
 	QString dir = settings.value("settingsdir", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
 	QString file = QFileDialog::getOpenFileName(this, tr("Import settings"), dir, tr("Ini-File (*.ini)"));
-	if (!file.isEmpty()) {
-		settings.setValue("settingsdir", dir);
-		emit importSettingsFrom(file);
+	if (file.isEmpty()) return;
+
+	// Save settings dir
+	settings.setValue("settingsdir", dir);
+
+	// Open ini file
+	QSettings ini(file, QSettings::IniFormat, this);
+
+	// General parameters
+	ini.beginGroup("Parameters");
+	params_->size = ini.value("size", QSize(nf::DSI, nf::DSI)).toSize();
+	params_->maxIterations = ini.value("maxIterations", nf::DMI).toUInt();
+	params_->damping = string2complex(ini.value("damping", complex2string(nf::DDP)).toString());
+	params_->scaleDownFactor = ini.value("scaleDownFactor", nf::DSC).toDouble();
+	params_->scaleDown = ini.value("scaleDown", false).toBool();
+	params_->processor = static_cast<Processor>(ini.value("processor", 1).toUInt());
+	params_->orbitMode = ini.value("orbitMode", false).toBool();
+	params_->orbitStart = ini.value("orbitStart").toPoint();
+	ini.endGroup();
+
+	// Limits
+	ini.beginGroup("Limits");
+	params_->limits.set(
+		ini.value("left", 1).toDouble(), ini.value("right", 1).toDouble(),
+		ini.value("top", 1).toDouble(), ini.value("bottom", 1).toDouble());
+	params_->limits.original()->set(
+		ini.value("left_original", 1).toDouble(), ini.value("right_original", 1).toDouble(),
+		ini.value("top_original", 1).toDouble(), ini.value("bottom_original", 1).toDouble());
+	ini.endGroup();
+
+	// Update settings
+	emit sizeChanged(params_->size);
+	updateSettings();
+
+	// Remove old roots
+	quint8 rootCount = params_->roots.count();
+	for (quint8 i = 0; i < rootCount; ++i) {
+		removeRoot();
 	}
+
+	// Add Roots
+	ini.beginGroup("Roots");
+	for (QString key : ini.childKeys()) {
+		QStringList str = ini.value(key).toString().split(":");
+		if (str.length() >= 2) {
+			addRoot(string2complex(str.first()), QColor(str.last().simplified()));
+		}
+	}
+	ini.endGroup();
 }
 
 void SettingsWidget::openRootContextMenu()

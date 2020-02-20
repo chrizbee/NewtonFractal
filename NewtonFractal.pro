@@ -28,8 +28,8 @@ DESTDIR = build
 SOURCES += \
     src/main.cpp \
     src/fractalwidget.cpp \
-    src/renderthread.cpp \
     src/parameters.cpp \
+    src/renderer.cpp \
     src/rootedit.cpp \
     src/limits.cpp \
     src/sizeedit.cpp \
@@ -40,8 +40,8 @@ SOURCES += \
 
 HEADERS += \
     src/fractalwidget.h \
-    src/renderthread.h \
     src/parameters.h \
+    src/renderer.h \
     src/rootedit.h \
     src/defaults.h \
     src/limits.h \

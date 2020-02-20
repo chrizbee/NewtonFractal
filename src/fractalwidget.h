@@ -6,7 +6,7 @@
 #ifndef FRACTALWIDGET_H
 #define FRACTALWIDGET_H
 
-#include "renderthread.h"
+#include "renderer.h"
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QOpenGLWidget>
@@ -33,15 +33,13 @@ public:
 	FractalWidget(QWidget *parent = nullptr);
 	void updateParams();
 	void exportImageTo(const QString &dir);
-	void exportSettingsTo(const QString &dir);
-	void importSettingsFrom(const QString &file);
 	void reset();
 
 public slots:
 	void updateFractal(const QPixmap &pixmap, double fps);
 	void updateOrbit(const QVector<QPoint> &orbit, double fps);
 	void runBenchmark();
-	void finishBenchmark(const QImage &image);
+	void finishBenchmark(const QImage *image);
 
 protected:
 	void initializeGL() override;
@@ -60,7 +58,7 @@ private:
 	Parameters *params_;
 	SettingsWidget *settingsWidget_;
 	QOpenGLShaderProgram *program_;
-	RenderThread renderThread_;
+	Renderer renderer_;
 	Dragger dragger_;
 	double fps_;
 	bool legend_;

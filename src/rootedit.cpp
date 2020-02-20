@@ -14,7 +14,10 @@ RootEdit::RootEdit(QWidget *parent) :
 	setMinimumSize(100, 25);
 	setMaximumSize(200, 25);
 	setAlignment(Qt::AlignRight);
-	connect(this, &RootEdit::editingFinished, this, &RootEdit::on_editingFinished);
+	connect(this, &RootEdit::editingFinished, [this]() {
+		setValue(string2complex(text()));
+		emit valueChanged();
+	});
 }
 
 complex RootEdit::value() const
@@ -28,11 +31,4 @@ void RootEdit::setValue(complex value)
 	// Set root and text
 	root_ = value;
 	setText(complex2string(value));
-}
-
-void RootEdit::on_editingFinished()
-{
-	// Set new root value
-	setValue(string2complex(text()));
-	emit valueChanged();
 }

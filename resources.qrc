@@ -30,5 +30,7 @@
         <file>resources/icons/image.png</file>
         <file>src/fractal.fsh</file>
         <file>resources/icons/benchmark.png</file>
+        <file>resources/icons/play.png</file>
+        <file>resources/icons/stop.png</file>
     </qresource>
 </RCC>

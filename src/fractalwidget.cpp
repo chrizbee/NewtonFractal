@@ -17,6 +17,8 @@
 #include <QAction>
 #include <QIcon>
 
+#define newSC(x) (new QShortcut(QKeySequence(x), this))
+
 static QPoint mousePosition;
 static const QVector<QVector3D> vertices = QVector<QVector3D>() <<
 	QVector3D(-1, -1, 0) << QVector3D(1, -1, 0) << QVector3D(1, 1, 0) << QVector3D(-1, 1, 0);
@@ -44,26 +46,6 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	centralLayout->addWidget(settingsWidget_);
 	setLayout(centralLayout);
 
-	// Add shortcuts and connect them
-	QShortcut *quit = new QShortcut(QKeySequence("Ctrl+Q"), this);
-	QShortcut *hide = new QShortcut(QKeySequence(Qt::Key_Escape), this);
-	QShortcut *orbit = new QShortcut(QKeySequence(Qt::Key_F2), this);
-	QShortcut *position = new QShortcut(QKeySequence(Qt::Key_F3), this);
-	QShortcut *settings = new QShortcut(QKeySequence(Qt::Key_F1), this);
-	QShortcut *resetFractal = new QShortcut(QKeySequence("Ctrl+R"), this);
-	QShortcut *exportImage = new QShortcut(QKeySequence("Ctrl+S"), this);
-	QShortcut *exportSettings = new QShortcut(QKeySequence("Ctrl+E"), this);
-	QShortcut *importSettings = new QShortcut(QKeySequence("Ctrl+I"), this);
-	connect(quit, &QShortcut::activated, QApplication::instance(), &QCoreApplication::quit);
-	connect(hide, &QShortcut::activated, [this]() { legend_ = !legend_; update(); });
-	connect(orbit, &QShortcut::activated, [this]() { params_->orbitMode = !params_->orbitMode; updateParams(); });
-	connect(position, &QShortcut::activated, [this]() { position_ = !position_; update(); });
-	connect(settings, &QShortcut::activated, settingsWidget_, &SettingsWidget::toggle);
-	connect(resetFractal, &QShortcut::activated, settingsWidget_, &SettingsWidget::reset);
-	connect(exportImage, &QShortcut::activated, settingsWidget_, &SettingsWidget::exportImage);
-	connect(exportSettings, &QShortcut::activated, settingsWidget_, &SettingsWidget::exportSettings);
-	connect(importSettings, &QShortcut::activated, settingsWidget_, &SettingsWidget::importSettings);
-
 	// Initialize general stuff
 	setMinimumSize(nf::MSI, nf::MSI);
 	setMouseTracking(true);
@@ -74,17 +56,26 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	resize(params_->size);
 	settingsWidget_->hide();
 
+	// Connect new shortcut signals
+	connect(newSC("Ctrl+Q"), &QShortcut::activated, QApplication::instance(), &QCoreApplication::quit);
+	connect(newSC(Qt::Key_Escape), &QShortcut::activated, [this]() { legend_ = !legend_; update(); });
+	connect(newSC(Qt::Key_F2), &QShortcut::activated, [this]() { params_->orbitMode = !params_->orbitMode; updateParams(); });
+	connect(newSC(Qt::Key_F3), &QShortcut::activated, [this]() { position_ = !position_; update(); });
+	connect(newSC(Qt::Key_F1), &QShortcut::activated, settingsWidget_, &SettingsWidget::toggle);
+	connect(newSC("Ctrl+R"), &QShortcut::activated, settingsWidget_, &SettingsWidget::reset);
+	connect(newSC("Ctrl+S"), &QShortcut::activated, settingsWidget_, &SettingsWidget::exportImage);
+	connect(newSC("Ctrl+E"), &QShortcut::activated, settingsWidget_, &SettingsWidget::exportSettings);
+	connect(newSC("Ctrl+I"), &QShortcut::activated, settingsWidget_, &SettingsWidget::importSettings);
+
 	// Connect settingswidget signals
 	connect(settingsWidget_, &SettingsWidget::paramsChanged, this, &FractalWidget::updateParams);
 	connect(settingsWidget_, &SettingsWidget::sizeChanged, this, QOverload<const QSize &>::of(&FractalWidget::resize));
 	connect(settingsWidget_, &SettingsWidget::exportImageRequested, this, &FractalWidget::exportImageTo);
-	connect(settingsWidget_, &SettingsWidget::exportSettingsTo, this, &FractalWidget::exportSettingsTo);
-	connect(settingsWidget_, &SettingsWidget::importSettingsFrom, this, &FractalWidget::importSettingsFrom);
 	connect(settingsWidget_, &SettingsWidget::reset, this, &FractalWidget::reset);
 
 	// Connect renderthread and timer signals
-	connect(&renderThread_, &RenderThread::fractalRendered, this, &FractalWidget::updateFractal);
-	connect(&renderThread_, &RenderThread::orbitRendered, this, &FractalWidget::updateOrbit);
+	connect(&renderer_, &Renderer::fractalRendered, this, &FractalWidget::updateFractal);
+	connect(&renderer_, &Renderer::orbitRendered, this, &FractalWidget::updateOrbit);
 	connect(&scaleDownTimer_, &QTimer::timeout, [this]() {
 		params_->scaleDown = false;
 		updateParams();
@@ -92,8 +83,8 @@ FractalWidget::FractalWidget(QWidget *parent) :
 
 	// Connect benchmark signals
 	connect(settingsWidget_, &SettingsWidget::benchmarkRequested, this, &FractalWidget::runBenchmark);
-	connect(&renderThread_, &RenderThread::benchmarkFinished, this, &FractalWidget::finishBenchmark);
-	connect(&renderThread_, &RenderThread::benchmarkProgress, settingsWidget_, &SettingsWidget::setBenchmarkProgress);
+	connect(&renderer_, &Renderer::benchmarkFinished, this, &FractalWidget::finishBenchmark);
+	connect(&renderer_, &Renderer::benchmarkProgress, settingsWidget_, &SettingsWidget::setBenchmarkProgress);
 
 	// Initialize parameters
 	reset();
@@ -103,7 +94,7 @@ void FractalWidget::updateParams()
 {
 	// Pass params to renderthread by const reference
 	if (isEnabled()) {
-		renderThread_.render(*params_);
+		renderer_.render(*params_);
 	}
 }
 
@@ -120,96 +111,6 @@ void FractalWidget::exportImageTo(const QString &dir)
 
 	// Reopen if needed
 	settingsWidget_->setHidden(closed);
-}
-
-void FractalWidget::exportSettingsTo(const QString &dir)
-{
-	// Create ini file
-	QSettings ini(dir + "/" + dynamicFileName(*params_, "ini"), QSettings::IniFormat, this);
-
-	// General parameters
-	ini.beginGroup("Parameters");
-	ini.setValue("size", params_->size);
-	ini.setValue("maxIterations", params_->maxIterations);
-	ini.setValue("damping", complex2string(params_->damping));
-	ini.setValue("scaleDownFactor", params_->scaleDownFactor);
-	ini.setValue("scaleDown", params_->scaleDown);
-	ini.setValue("processor", static_cast<quint8>(params_->processor));
-	ini.setValue("orbitMode", params_->orbitMode);
-	ini.setValue("orbitStart", params_->orbitStart);
-	ini.endGroup();
-
-	// Limits
-	ini.beginGroup("Limits");
-	ini.setValue("left", params_->limits.left());
-	ini.setValue("right", params_->limits.right());
-	ini.setValue("top", params_->limits.top());
-	ini.setValue("bottom", params_->limits.bottom());
-	ini.setValue("left_original", params_->limits.original()->left());
-	ini.setValue("right_original", params_->limits.original()->right());
-	ini.setValue("top_original", params_->limits.original()->top());
-	ini.setValue("bottom_original", params_->limits.original()->bottom());
-	ini.endGroup();
-
-	// Roots
-	ini.beginGroup("Roots");
-	quint8 rootCount = params_->roots.count();
-	for (quint8 i = 0; i < rootCount; ++i) {
-		ini.setValue(
-			"root" + QString::number(i),
-			complex2string(params_->roots[i].value(), 10) + " : " + params_->roots[i].color().name()
-		);
-	}
-	ini.endGroup();
-}
-
-void FractalWidget::importSettingsFrom(const QString &file)
-{
-	// Open ini file
-	QSettings ini(file, QSettings::IniFormat, this);
-
-	// General parameters
-	ini.beginGroup("Parameters");
-	params_->size = ini.value("size", QSize(nf::DSI, nf::DSI)).toSize();
-	params_->maxIterations = ini.value("maxIterations", nf::DMI).toUInt();
-	params_->damping = string2complex(ini.value("damping", complex2string(nf::DDP)).toString());
-	params_->scaleDownFactor = ini.value("scaleDownFactor", nf::DSC).toDouble();
-	params_->scaleDown = ini.value("scaleDown", false).toBool();
-	params_->processor = static_cast<Processor>(ini.value("processor", 1).toUInt());
-	params_->orbitMode = ini.value("orbitMode", false).toBool();
-	params_->orbitStart = ini.value("orbitStart").toPoint();
-	ini.endGroup();
-
-	// Limits
-	ini.beginGroup("Limits");
-	params_->limits.set(
-		ini.value("left", 1).toDouble(), ini.value("right", 1).toDouble(),
-		ini.value("top", 1).toDouble(), ini.value("bottom", 1).toDouble());
-	params_->limits.original()->set(
-		ini.value("left_original", 1).toDouble(), ini.value("right_original", 1).toDouble(),
-		ini.value("top_original", 1).toDouble(), ini.value("bottom_original", 1).toDouble());
-	ini.endGroup();
-
-	// Update settings
-	resize(params_->size);
-	settingsWidget_->updateSettings();
-
-	// Remove old roots
-	quint8 rootCount = params_->roots.count();
-	for (quint8 i = 0; i < rootCount; ++i) {
-		settingsWidget_->removeRoot();
-	}
-
-	// Add Roots
-	ini.beginGroup("Roots");
-	for (QString key : ini.childKeys()) {
-		QStringList str = ini.value(key).toString().split(":");
-		if (str.length() >= 2) {
-			settingsWidget_->addRoot(string2complex(str.first()), QColor(str.last().simplified()));
-		}
-	}
-	ini.endGroup();
-
 }
 
 void FractalWidget::reset()
@@ -230,16 +131,20 @@ void FractalWidget::runBenchmark()
 
 	// Run benchmark
 	benchmarkTimer_.start();
-	renderThread_.render(*params_);
+	renderer_.render(*params_);
 }
 
-void FractalWidget::finishBenchmark(const QImage &image)
+void FractalWidget::finishBenchmark(const QImage *image)
 {
+	// Stupid
+	if (image == nullptr)
+		return;
+
 	// Static output string
 	static const QString out = "Rendered %1 pixels in:\n%2 hr, %3 min, %4 sec and %5 ms";
 
 	// Get time and number of pixels
-	int pixels = image.width() * image.height();
+	int pixels = image->width() * image->height();
 	qint64 elapsed = benchmarkTimer_.elapsed();
 	int s = elapsed / 1000;
 	int ms = elapsed % 1000;
@@ -261,7 +166,7 @@ void FractalWidget::finishBenchmark(const QImage &image)
 		dir = QFileDialog::getExistingDirectory(this, tr("Export fractal to"), dir);
 		if (!dir.isEmpty()) {
 			settings.setValue("imagedir", dir);
-			image.save(dir + "/" + dynamicFileName(*params_, "bmp"), "BMP", 100);
+			image->save(dir + "/" + dynamicFileName(*params_, "bmp"), "BMP", 100);
 		}
 	}
 
@@ -347,6 +252,7 @@ void FractalWidget::paintGL()
 		painter.drawPixmap(rect(), pixmap_);
 	} else {
 		// Update params and draw
+		qDebug() << "gpu";
 		quint8 rootCount = params_->roots.count();
 		program_->bind();
 		program_->enableAttributeArray(0);

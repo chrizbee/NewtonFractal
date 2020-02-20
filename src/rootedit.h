@@ -18,9 +18,6 @@ public:
 	complex value() const;
 	void setValue(complex value);
 
-private slots:
-	void on_editingFinished();
-
 signals:
 	void valueChanged();
 
