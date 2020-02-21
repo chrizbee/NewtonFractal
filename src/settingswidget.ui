@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>202</width>
+    <width>206</width>
     <height>530</height>
    </rect>
   </property>
@@ -807,6 +807,9 @@
                   <height>25</height>
                  </size>
                 </property>
+                <property name="toolTip">
+                 <string>start / stop benchmarking</string>
+                </property>
                 <property name="text">
                  <string/>
                 </property>
@@ -839,7 +842,7 @@
                    </size>
                   </property>
                   <property name="toolTip">
-                   <string>upsampling factor for benchmarking the cpu</string>
+                   <string>supersampling factor for benchmarking the cpu</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
