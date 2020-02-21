@@ -50,8 +50,10 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	connect(ui_->lineDamping, &RootEdit::valueChanged, this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsWidget::on_settingsChanged);
-	connect(ui_->spinScaleUpFactor, QOverload<int>::of(&QSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
-	connect(ui_->btnBenchmark, &QPushButton::clicked, this, &SettingsWidget::benchmarkRequested);
+	connect(ui_->btnBenchmark, &QPushButton::clicked, this, &SettingsWidget::startBenchmarkRequested);
+	connect(ui_->spinScaleUpFactor, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+		params_->scaleUpFactor = value;
+	});
 
 	// Connect external links
 	connect(ui_->btnOpit7, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://github.com/opit7"));});
@@ -179,12 +181,23 @@ void SettingsWidget::setBenchmarkProgress(int min, int max, int progress)
 	ui_->progressBenchmark->setMaximum(max);
 }
 
-void SettingsWidget::showBenchmarkProgress(bool value)
+void SettingsWidget::toggleBenchmarking(bool value)
 {
+	// Static icons
+	static const QIcon play("://resources/icons/play.png");
+	static const QIcon stop("://resources/icons/stop.png");
+
+	// Toggle all widgets except button
+	QList<QWidget*> childWidgets = findChildren<QWidget*>();
+	for (QWidget *w : childWidgets) {
+		w->setDisabled(value);
+	}
+	ui_->btnBenchmark->setEnabled(true);
+
 	// Show / hide button and progress bar
 	ui_->spinScaleUpFactor->setVisible(!value);
 	ui_->progressBenchmark->setVisible(value);
-	// TODO: Stop benchmark
+	ui_->btnBenchmark->setIcon(value ? stop : play);
 }
 
 void SettingsWidget::exportImage()

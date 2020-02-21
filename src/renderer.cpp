@@ -28,10 +28,10 @@ inline void func(complex z, complex &f, complex &df, const QVector<Root> &roots)
 inline void iterateX(ImageLine &il)
 {
 	// Iterate x-pixels
-	const quint8 rootCount = il.params.roots.count();
-	const Limits limits = il.params.limits;
+	const quint8 rootCount = il.params->roots.count();
+	const Limits limits = il.params->limits;
 	const double xFactor = limits.width() / (il.lineSize - 1);
-	const complex d = il.params.damping;
+	const complex d = il.params->damping;
 
 	for (int x = 0; x < il.lineSize; ++x) {
 
@@ -40,16 +40,16 @@ inline void iterateX(ImageLine &il)
 		complex z(il.zx, il.zy);
 
 		// Newton iteration
-		for (quint16 i = 0; i < il.params.maxIterations; ++i) {
+		for (quint16 i = 0; i < il.params->maxIterations; ++i) {
 			complex f, df;
-			func(z, f, df, il.params.roots);
+			func(z, f, df, il.params->roots);
 			complex z0 = z - d * f / df; // <- expensive division
 
 			// If root has been found set color and break
 			if (abs(z0 - z) < nf::EPS) {
 				for (quint8 r = 0; r < rootCount; ++r) {
-					if (abs(z0 - il.params.roots[r].value()) < nf::EPS) {
-						il.scanLine[x] = il.params.roots[r].color().darker(60 + i * 8).rgb();
+					if (abs(z0 - il.params->roots[r].value()) < nf::EPS) {
+						il.scanLine[x] = il.params->roots[r].color().darker(60 + i * 8).rgb();
 						goto POINT_DONE;
 					}
 				}
@@ -148,7 +148,7 @@ void Renderer::renderFractal()
 	// Create image for fast pixel IO
 	const qint32 height = size.height();
 	const double yFactor = -curParams_.limits.height() / (height - 1);
-	QVector<ImageLine> *lines = new QVector<ImageLine>();
+	QVector<ImageLine> *lines = new QVector<ImageLine>(height);
 	QImage *image = new QImage(size, QImage::Format_RGB32);
 	linesp_.reset(lines);
 	imagep_.reset(image);
@@ -156,10 +156,10 @@ void Renderer::renderFractal()
 
 	// Iterate y-pixels
 	for (int y = 0; y < height; ++y) {
-		ImageLine il((QRgb*)(image->scanLine(y)), y, image->width(), curParams_);
+		ImageLine il((QRgb*)(image->scanLine(y)), y, image->width(), &curParams_);
 		il.zy = y * yFactor + curParams_.limits.top();
-		lines->append(il);
-//		(*lines)[y] = il; // <- Preallocation requires a default ImageLine()
+//		lines->append(il);
+		(*lines)[y] = il; // <- Preallocation requires a default ImageLine()
 	}
 
 	// Set thread count to either single or multicore

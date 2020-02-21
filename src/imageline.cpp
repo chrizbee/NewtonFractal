@@ -5,7 +5,11 @@
 
 #include "imageline.h"
 
-ImageLine::ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters &params) :
+ImageLine::ImageLine()
+{
+}
+
+ImageLine::ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters *params) :
 	scanLine(scanLine),
 	lineIndex(lineIndex),
 	lineSize(lineSize),
@@ -28,11 +32,11 @@ ImageLine::ImageLine(const ImageLine &other) :
 ImageLine &ImageLine::operator=(const ImageLine &other)
 {
 	// Assign other values to this
-	// Except params. They couldn't have changed since they're const
 	scanLine = other.scanLine;
 	lineIndex = other.lineIndex;
 	lineSize = other.lineSize;
 	zx = other.zx;
 	zy = other.zy;
+	params = other.params;
 	return *this;
 }

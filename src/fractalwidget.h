@@ -42,6 +42,7 @@ public slots:
 	void finishBenchmark(const QImage *image);
 
 protected:
+	void enable(bool value);
 	void initializeGL() override;
 	void paintGL() override;
 	void resizeGL(int w, int h) override;
@@ -51,6 +52,7 @@ protected:
 	void wheelEvent(QWheelEvent *event) override;
 
 private:
+	bool enabled_;
 	QPixmap pixmap_;
 	QTimer scaleDownTimer_;
 	QElapsedTimer benchmarkTimer_;

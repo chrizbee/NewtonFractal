@@ -37,7 +37,7 @@ public slots:
 	void removeRoot(qint8 index = -1);
 	void moveRoot(quint8 index, complex value);
 	void setBenchmarkProgress(int min, int max, int progress);
-	void showBenchmarkProgress(bool value);
+	void toggleBenchmarking(bool value);
 	void exportImage();
 	void exportSettings();
 	void importSettings();
@@ -47,7 +47,6 @@ private slots:
 	void on_settingsChanged();
 
 protected:
-	// Don't pass any events to parent while settings are shown
 	void mousePressEvent(QMouseEvent *event) override { event->accept(); }
 	void mouseMoveEvent(QMouseEvent *event) override { event->accept(); }
 	void mouseReleaseEvent(QMouseEvent *event) override { event->accept(); }
@@ -58,9 +57,8 @@ signals:
 	void paramsChanged();
 	void sizeChanged(QSize size);
 	void exportImageRequested(const QString &dir);
-	void exportSettingsTo(const QString &dir);
-	void importSettingsFrom(const QString &file);
-	void benchmarkRequested();
+	void startBenchmarkRequested();
+	void stopBenchmarkRequested();
 	void reset();
 
 private:

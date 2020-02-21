@@ -31,6 +31,7 @@ Dragger::Dragger() :
 
 FractalWidget::FractalWidget(QWidget *parent) :
 	QOpenGLWidget(parent),
+	enabled_(true),
 	params_(new Parameters()),
 	settingsWidget_(new SettingsWidget(params_, this)),
 	fps_(0),
@@ -82,7 +83,7 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	});
 
 	// Connect benchmark signals
-	connect(settingsWidget_, &SettingsWidget::benchmarkRequested, this, &FractalWidget::runBenchmark);
+	connect(settingsWidget_, &SettingsWidget::startBenchmarkRequested, this, &FractalWidget::runBenchmark);
 	connect(&renderer_, &Renderer::benchmarkFinished, this, &FractalWidget::finishBenchmark);
 	connect(&renderer_, &Renderer::benchmarkProgress, settingsWidget_, &SettingsWidget::setBenchmarkProgress);
 
@@ -93,7 +94,7 @@ FractalWidget::FractalWidget(QWidget *parent) :
 void FractalWidget::updateParams()
 {
 	// Pass params to renderthread by const reference
-	if (isEnabled()) {
+	if (enabled_) {
 		renderer_.render(*params_);
 	}
 }
@@ -124,10 +125,10 @@ void FractalWidget::reset()
 void FractalWidget::runBenchmark()
 {
 	// Disable editing and set params
-	setEnabled(false);
+	enable(false);
 	params_->benchmark = true;
 	params_->scaleDown = false;
-	settingsWidget_->showBenchmarkProgress(true);
+	settingsWidget_->toggleBenchmarking(true);
 
 	// Run benchmark
 	benchmarkTimer_.start();
@@ -171,10 +172,20 @@ void FractalWidget::finishBenchmark(const QImage *image)
 	}
 
 	// Enable editing again and reset params
-	settingsWidget_->showBenchmarkProgress(false);
-	setEnabled(true);
+	settingsWidget_->toggleBenchmarking(false);
+	enable(true);
 	params_->benchmark = false;
 	updateParams();
+}
+
+void FractalWidget::enable(bool value)
+{
+	// Toggle all actions
+	enabled_ = value;
+	QList<QShortcut*> childShortcuts = findChildren<QShortcut*>();
+	for (QShortcut *sc : childShortcuts) {
+		sc->setEnabled(value);
+	}
 }
 
 void FractalWidget::updateFractal(const QPixmap &pixmap, double fps)
@@ -340,6 +351,9 @@ void FractalWidget::resizeGL(int w, int h)
 
 void FractalWidget::mousePressEvent(QMouseEvent *event)
 {
+	// Return if disabled
+	if (!enabled_) return;
+
 	// Set scaleDown, previousPos and orbit
 	QPoint pos = event->pos();
 	dragger_.previousPos = pos;
@@ -362,6 +376,9 @@ void FractalWidget::mousePressEvent(QMouseEvent *event)
 
 void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 {
+	// Return if disabled
+	if (!enabled_) return;
+
 	// Move root if dragging
 	mousePosition = event->pos();
 	if (dragger_.mode == DraggingRoot && dragger_.index >= 0 && dragger_.index < params_->roots.count()) {
@@ -400,6 +417,9 @@ void FractalWidget::mouseMoveEvent(QMouseEvent *event)
 
 void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+	// Return if disabled
+	if (!enabled_) return;
+
 	// Reset dragging and render actual size
 	Q_UNUSED(event);
 	params_->scaleDown = false;
@@ -410,6 +430,9 @@ void FractalWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void FractalWidget::wheelEvent(QWheelEvent *event)
 {
+	// Return if disabled
+	if (!enabled_) return;
+
 	// Calculate weight
 	double xw = (double)event->pos().x() / width();
 	double yw = (double)event->pos().y() / height();

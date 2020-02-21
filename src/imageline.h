@@ -10,7 +10,8 @@
 #include <QRgb>
 
 struct ImageLine {
-	ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters &params);
+	ImageLine();
+	ImageLine(QRgb *scanLine, int lineIndex, int lineSize, const Parameters *params);
 	ImageLine(const ImageLine &other);
 	ImageLine &operator=(const ImageLine &other);
 	QRgb *scanLine;
@@ -18,7 +19,7 @@ struct ImageLine {
 	int lineSize;
 	double zx;
 	double zy;
-	const Parameters &params;
+	const Parameters *params;
 };
 
 #endif // IMAGELINE_H
