@@ -19,6 +19,30 @@ Limits::Limits(bool original) :
 	}
 }
 
+Limits::~Limits()
+{
+	// Delete original
+	if (original_ != nullptr) {
+		delete original_;
+	}
+}
+
+Limits &Limits::operator=(const Limits &other)
+{
+	// Copy limits
+	set(other.left(), other.right(), other.top(), other.bottom());
+
+	// Deep copy original limits
+	if (original_ != nullptr) {
+		setOriginal(
+			other.original()->left(),
+			other.original()->right(),
+			other.original()->top(),
+			other.original()->bottom());
+	}
+	return *this;
+}
+
 bool Limits::operator==(const Limits &other) const
 {
 	// Check if limits are the same
@@ -106,6 +130,12 @@ void Limits::set(double left, double right, double top, double bottom)
 	bottom_ = bottom;
 }
 
+void Limits::setOriginal(double left, double right, double top, double bottom)
+{
+	// Set original limits
+	original_->set(left, right, top, bottom);
+}
+
 double Limits::width() const
 {
 	// Return width
@@ -148,12 +178,6 @@ QVector4D Limits::vec4() const
 	return QVector4D(top_, right_, bottom_, left_);
 }
 
-Limits *Limits::original()
-{
-	// Return pointer to original limits
-	return original_;
-}
-
 double Limits::zoomFactor() const
 {
 	// Return zoomFactor
@@ -171,4 +195,10 @@ void Limits::setZoomFactor(double zoomFactor)
 	left_ = xMid - w2;
 	top_ = yMid + h2;
 	bottom_ = yMid - h2;
+}
+
+const Limits *Limits::original() const
+{
+	// Return pointer to original limits
+	return original_;
 }

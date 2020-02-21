@@ -14,6 +14,8 @@ class Limits
 {
 public:
 	Limits(bool original = false);
+	~Limits();
+	Limits &operator=(const Limits &other);
 	bool operator==(const Limits &other) const;
 	bool operator!=(const Limits &other) const;
 	void move(QPoint distance, const QSize &ref);
@@ -21,6 +23,7 @@ public:
 	void reset(QSize size);
 	void resize(QSize delta);
 	void set(double left, double right, double top, double bottom);
+	void setOriginal(double left, double right, double top, double bottom);
 
 	double width() const;
 	double height() const;
@@ -29,9 +32,9 @@ public:
 	double top() const;
 	double bottom() const;
 	QVector4D vec4() const;
-	Limits *original();
 	double zoomFactor() const;
 	void setZoomFactor(double zoomFactor);
+	const Limits *original() const;
 
 private:
 	double left_;

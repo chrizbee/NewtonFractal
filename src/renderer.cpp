@@ -29,14 +29,14 @@ inline void iterateX(ImageLine &il)
 {
 	// Iterate x-pixels
 	const quint8 rootCount = il.params->roots.count();
-	const Limits limits = il.params->limits;
-	const double xFactor = limits.width() / (il.lineSize - 1);
+	const double left = il.params->limits.left();
+	const double xFactor = il.params->limits.width() / (il.lineSize - 1);
 	const complex d = il.params->damping;
 
 	for (int x = 0; x < il.lineSize; ++x) {
 
 		// Create complex number from current pixel
-		il.zx = x * xFactor + limits.left();
+		il.zx = x * xFactor + left;
 		complex z(il.zx, il.zy);
 
 		// Newton iteration
@@ -158,8 +158,7 @@ void Renderer::renderFractal()
 	for (int y = 0; y < height; ++y) {
 		ImageLine il((QRgb*)(image->scanLine(y)), y, image->width(), &curParams_);
 		il.zy = y * yFactor + curParams_.limits.top();
-//		lines->append(il);
-		(*lines)[y] = il; // <- Preallocation requires a default ImageLine()
+		(*lines)[y] = il;
 	}
 
 	// Set thread count to either single or multicore

@@ -298,7 +298,7 @@ void SettingsWidget::importSettings()
 	params_->limits.set(
 		ini.value("left", 1).toDouble(), ini.value("right", 1).toDouble(),
 		ini.value("top", 1).toDouble(), ini.value("bottom", 1).toDouble());
-	params_->limits.original()->set(
+	params_->limits.setOriginal(
 		ini.value("left_original", 1).toDouble(), ini.value("right_original", 1).toDouble(),
 		ini.value("top_original", 1).toDouble(), ini.value("bottom_original", 1).toDouble());
 	ini.endGroup();
