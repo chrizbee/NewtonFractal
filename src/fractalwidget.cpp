@@ -91,6 +91,13 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	reset();
 }
 
+FractalWidget::~FractalWidget()
+{
+	// Delete params only -> other pointers are being handled by Qt
+	// TODO: Use QSharedPointer for params
+	delete params_;
+}
+
 void FractalWidget::updateParams()
 {
 	// Pass params to renderthread by const reference
@@ -263,7 +270,6 @@ void FractalWidget::paintGL()
 		painter.drawPixmap(rect(), pixmap_);
 	} else {
 		// Update params and draw
-		qDebug() << "gpu";
 		quint8 rootCount = params_->roots.count();
 		program_->bind();
 		program_->enableAttributeArray(0);
