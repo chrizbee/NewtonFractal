@@ -84,6 +84,7 @@ FractalWidget::FractalWidget(QWidget *parent) :
 
 	// Connect benchmark signals
 	connect(settingsWidget_, &SettingsWidget::startBenchmarkRequested, this, &FractalWidget::runBenchmark);
+	connect(settingsWidget_, &SettingsWidget::stopBenchmarkRequested, &renderer_, &Renderer::stop);
 	connect(&renderer_, &Renderer::benchmarkFinished, this, &FractalWidget::finishBenchmark);
 	connect(&renderer_, &Renderer::benchmarkProgress, settingsWidget_, &SettingsWidget::setBenchmarkProgress);
 
@@ -144,37 +145,35 @@ void FractalWidget::runBenchmark()
 
 void FractalWidget::finishBenchmark(const QImage *image)
 {
-	// Stupid
-	if (image == nullptr)
-		return;
-
 	// Static output string
 	static const QString out = "Rendered %1 pixels in:\n%2 hr, %3 min, %4 sec and %5 ms";
 
 	// Get time and number of pixels
-	int pixels = image->width() * image->height();
-	qint64 elapsed = benchmarkTimer_.elapsed();
-	int s = elapsed / 1000;
-	int ms = elapsed % 1000;
-	int m = s / 60;
-	s %= 60;
-	int h = m / 60;
-	m %= 60;
+	if (image != nullptr) {
+		int pixels = image->width() * image->height();
+		qint64 elapsed = benchmarkTimer_.elapsed();
+		int s = elapsed / 1000;
+		int ms = elapsed % 1000;
+		int m = s / 60;
+		s %= 60;
+		int h = m / 60;
+		m %= 60;
 
-	// Show stats
-	QMessageBox::StandardButton btn = QMessageBox::question(
-		this, tr("Benchmark finished"),
-		out.arg(pixels).arg(h).arg(m).arg(s).arg(ms),
-		QMessageBox::Save | QMessageBox::Cancel);
+		// Show stats
+		QMessageBox::StandardButton btn = QMessageBox::question(
+			this, tr("Benchmark finished"),
+			out.arg(pixels).arg(h).arg(m).arg(s).arg(ms),
+			QMessageBox::Save | QMessageBox::Cancel);
 
-	// Save image
-	if (btn == QMessageBox::Save) {
-		QSettings settings;
-		QString dir = settings.value("imagedir", QStandardPaths::standardLocations(QStandardPaths::PicturesLocation)).toString();
-		dir = QFileDialog::getExistingDirectory(this, tr("Export fractal to"), dir);
-		if (!dir.isEmpty()) {
-			settings.setValue("imagedir", dir);
-			image->save(dir + "/" + dynamicFileName(*params_, "bmp"), "BMP", 100);
+		// Save image
+		if (btn == QMessageBox::Save) {
+			QSettings settings;
+			QString dir = settings.value("imagedir", QStandardPaths::standardLocations(QStandardPaths::PicturesLocation)).toString();
+			dir = QFileDialog::getExistingDirectory(this, tr("Export fractal to"), dir);
+			if (!dir.isEmpty()) {
+				settings.setValue("imagedir", dir);
+				image->save(dir + "/" + dynamicFileName(*params_, "bmp"), "BMP", 100);
+			}
 		}
 	}
 

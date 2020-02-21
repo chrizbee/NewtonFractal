@@ -50,9 +50,13 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	connect(ui_->lineDamping, &RootEdit::valueChanged, this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsWidget::on_settingsChanged);
-	connect(ui_->btnBenchmark, &QPushButton::clicked, this, &SettingsWidget::startBenchmarkRequested);
 	connect(ui_->spinScaleUpFactor, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
 		params_->scaleUpFactor = value;
+	});
+	connect(ui_->btnBenchmark, &QPushButton::clicked, [this]() {
+		if (ui_->btnBenchmark->property("started").toBool())
+			emit stopBenchmarkRequested();
+		else emit startBenchmarkRequested();
 	});
 
 	// Connect external links
@@ -188,7 +192,7 @@ void SettingsWidget::toggleBenchmarking(bool value)
 	static const QIcon stop("://resources/icons/stop.png");
 
 	// Toggle all widgets except button
-	QList<QWidget*> childWidgets = findChildren<QWidget*>();
+	QList<QWidget*> childWidgets = ui_->settingsWidget->findChildren<QWidget*>();
 	for (QWidget *w : childWidgets) {
 		w->setDisabled(value);
 	}
@@ -198,6 +202,7 @@ void SettingsWidget::toggleBenchmarking(bool value)
 	ui_->spinScaleUpFactor->setVisible(!value);
 	ui_->progressBenchmark->setVisible(value);
 	ui_->btnBenchmark->setIcon(value ? stop : play);
+	ui_->btnBenchmark->setProperty("started", value);
 }
 
 void SettingsWidget::exportImage()
