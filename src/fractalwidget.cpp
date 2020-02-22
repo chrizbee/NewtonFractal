@@ -6,6 +6,7 @@
 #include "fractalwidget.h"
 #include "settingswidget.h"
 #include "parameters.h"
+#include <QStandardPaths>
 #include <QApplication>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -75,8 +76,9 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	connect(settingsWidget_, &SettingsWidget::reset, this, &FractalWidget::reset);
 
 	// Connect renderthread and timer signals
-	connect(&renderer_, &Renderer::fractalRendered, this, &FractalWidget::updateFractal);
 	connect(&renderer_, &Renderer::orbitRendered, this, &FractalWidget::updateOrbit);
+#ifndef WASM
+	connect(&renderer_, &Renderer::fractalRendered, this, &FractalWidget::updateFractal);
 	connect(&scaleDownTimer_, &QTimer::timeout, [this]() {
 		params_->scaleDown = false;
 		updateParams();
@@ -87,6 +89,7 @@ FractalWidget::FractalWidget(QWidget *parent) :
 	connect(settingsWidget_, &SettingsWidget::stopBenchmarkRequested, &renderer_, &Renderer::stop);
 	connect(&renderer_, &Renderer::benchmarkFinished, this, &FractalWidget::finishBenchmark);
 	connect(&renderer_, &Renderer::benchmarkProgress, settingsWidget_, &SettingsWidget::setBenchmarkProgress);
+#endif
 
 	// Initialize parameters
 	reset();
@@ -202,11 +205,10 @@ void FractalWidget::updateFractal(const QPixmap &pixmap, double fps)
 	update();
 }
 
-void FractalWidget::updateOrbit(const QVector<QPoint> &orbit, double fps)
+void FractalWidget::updateOrbit(const QVector<QPoint> &orbit)
 {
 	// Update
 	orbit_ = orbit;
-	fps_ = fps;
 	update();
 }
 
@@ -262,7 +264,7 @@ void FractalWidget::paintGL()
 	QPainter painter(this);
 	painter.setFont(consolas);
 	painter.setRenderHint(QPainter::Antialiasing);
-	glEnable(GL_MULTISAMPLE);
+	glEnable(0x809D); //GL_MULTISAMPLE_
 
 	// Draw pixmap if rendered yet and cpu mode
 	if (params_->processor != GPU_OPENGL && !pixmap_.isNull()) {

@@ -60,10 +60,10 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	});
 
 	// Connect external links
-	connect(ui_->btnOpit7, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://github.com/opit7"));});
-	connect(ui_->btnChrizbee, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://github.com/chrizbee"));});
-	connect(ui_->btnOhm, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://www.th-nuernberg.de/fakultaeten/efi"));});
-	connect(ui_->btnIcons8, &QPushButton::clicked, [this]() {QDesktopServices::openUrl(QUrl("https://icons8.com"));});
+	connect(ui_->btnOpit7, &QPushButton::clicked, []() {QDesktopServices::openUrl(QUrl("https://github.com/opit7"));});
+	connect(ui_->btnChrizbee, &QPushButton::clicked, []() {QDesktopServices::openUrl(QUrl("https://github.com/chrizbee"));});
+	connect(ui_->btnOhm, &QPushButton::clicked, []() {QDesktopServices::openUrl(QUrl("https://www.th-nuernberg.de/fakultaeten/efi"));});
+	connect(ui_->btnIcons8, &QPushButton::clicked, []() {QDesktopServices::openUrl(QUrl("https://icons8.com"));});
 
 	// Initialize roots
 	ui_->spinDegree->setValue(nf::DRC);

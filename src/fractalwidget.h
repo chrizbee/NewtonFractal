@@ -38,7 +38,7 @@ public:
 
 public slots:
 	void updateFractal(const QPixmap &pixmap, double fps);
-	void updateOrbit(const QVector<QPoint> &orbit, double fps);
+	void updateOrbit(const QVector<QPoint> &orbit);
 	void runBenchmark();
 	void finishBenchmark(const QImage *image);
 

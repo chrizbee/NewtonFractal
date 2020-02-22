@@ -7,10 +7,13 @@
 #define RENDERER_H
 
 #include "parameters.h"
-#include "imageline.h"
 #include <QObject>
-#include <QtConcurrent>
+
+#ifndef WASM
+#include "imageline.h"
 #include <QElapsedTimer>
+#include <QtConcurrent>
+#endif
 
 class Renderer : public QObject
 {
@@ -20,30 +23,38 @@ public:
 	Renderer(QObject *parent = nullptr);
 	~Renderer();
 	void render(const Parameters &params);
+#ifndef WASM
 	void stop();
 
 public slots:
 	void onProgressChanged(int value);
 	void onFinished();
+#endif
 
 protected:
 	void run();
-	void renderFractal();
 	void renderOrbit();
+#ifndef WASM
+	void renderFractal();
+#endif
 
 signals:
+	void orbitRendered(const QVector<QPoint> &orbit);
+#ifndef WASM
 	void fractalRendered(const QPixmap &pixmap, double fps);
-	void orbitRendered(const QVector<QPoint> &orbit, double fps);
 	void benchmarkProgress(int min, int max, int progress);
 	void benchmarkFinished(const QImage *image);
+#endif
 
 private:
-	QElapsedTimer timer_;
 	Parameters curParams_;
 	Parameters nextParams_;
+#ifndef WASM
+	QElapsedTimer timer_;
 	QScopedPointer<QImage> imagep_;
 	QScopedPointer<QVector<ImageLine>> linesp_;
 	QFutureWatcher<void> watcher_;
+#endif
 };
 
 #endif // RENDERER_H

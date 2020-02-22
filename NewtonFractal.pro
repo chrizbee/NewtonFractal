@@ -8,6 +8,12 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 win32:LIBS += -lOpenGL32
 unix:LIBS += -lOpenGL
 
+equals(QMAKE_CC, emcc) | equals(QMAKE_CXX, em++) {
+    message(Compiling for WebAssembly)
+    DEFINES += WASM
+    QT -= concurrent
+}
+
 CONFIG(release, debug|release) {
     OBJECTS_DIR = release/obj
     MOC_DIR = release/moc

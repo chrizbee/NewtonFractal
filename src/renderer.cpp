@@ -4,9 +4,11 @@
 // see the file LICENSE in the main directory.
 
 #include "renderer.h"
+#ifndef WASM
 #include <QImage>
 #include <QPixmap>
 #include <QFutureWatcher>
+#endif
 
 inline void func(complex z, complex &f, complex &df, const QVector<Root> &roots)
 {
@@ -25,6 +27,7 @@ inline void func(complex z, complex &f, complex &df, const QVector<Root> &roots)
 	f = r * (z - roots[rootCount - 1].value());
 }
 
+#ifndef WASM
 inline void iterateX(ImageLine &il)
 {
 	// Iterate x-pixels
@@ -59,28 +62,33 @@ inline void iterateX(ImageLine &il)
 		POINT_DONE:;
 	}
 }
+#endif
 
 Renderer::Renderer(QObject *parent) :
 	QObject(parent)
 {
 	// Connect signals
+#ifndef WASM
 	connect(&watcher_, &QFutureWatcher<void>::finished, this, &Renderer::onFinished);
 	connect(&watcher_, &QFutureWatcher<void>::progressValueChanged, this, &Renderer::onProgressChanged);
+#endif
 }
 
 Renderer::~Renderer()
 {
-	// Cleanup
 }
 
 void Renderer::render(const Parameters &params)
 {
 	// Set next params and run if not running
 	nextParams_ = params;
+#ifndef WASM
 	if (!watcher_.isRunning())
+#endif
 		run();
 }
 
+#ifndef WASM
 void Renderer::stop()
 {
 	// Stop if running
@@ -103,26 +111,59 @@ void Renderer::onFinished()
 		else emit fractalRendered(QPixmap::fromImage(*imagep_.data()), 1000.0 / timer_.elapsed());
 	}
 }
+#endif
 
 void Renderer::run()
 {
-	// Start timer to measure fps
-	timer_.start();
+	// Check if new params
 	bool paramsChanged = nextParams_.paramsChanged(curParams_);
 	bool orbitChanged =	nextParams_.orbitChanged(curParams_);
 	if (paramsChanged || orbitChanged)
 		curParams_ = nextParams_;
 	else return;
 
+#ifndef WASM
 	// Rerender pixmap
-	if (paramsChanged)
+	if (paramsChanged) {
+		timer_.start();
 		renderFractal();
+	}
+#endif
 
 	// Rerender orbit
 	if (orbitChanged && !curParams_.benchmark)
 		renderOrbit();
 }
 
+void Renderer::renderOrbit()
+{
+	// Create vector of points
+	QVector<QPoint> orbit;
+	const complex d = curParams_.damping;
+
+	// Create complex number from current pixel
+	complex z = curParams_.point2complex(curParams_.orbitStart);
+	orbit.append(curParams_.complex2point(z));
+
+	// Newton iteration
+	for (quint16 i = 0; i < curParams_.maxIterations; ++i) {
+		complex f, df;
+		func(z, f, df, curParams_.roots);
+		complex z0 = z - d * f / df;
+
+		// Append point to vector
+		orbit.append(curParams_.complex2point(z0));
+
+		// Break if root has been found
+		if (abs(z0 - z) < nf::EPS) break;
+		z = z0;
+	}
+
+	// Emit signal
+	emit orbitRendered(orbit);
+}
+
+#ifndef WASM
 void Renderer::renderFractal()
 {
 	// OpenGL not here
@@ -168,31 +209,4 @@ void Renderer::renderFractal()
 	// Iterate x-pixels with watcher
 	watcher_.setFuture(QtConcurrent::map(*lines, iterateX));
 }
-
-void Renderer::renderOrbit()
-{
-	// Create vector of points
-	QVector<QPoint> orbit;
-	const complex d = curParams_.damping;
-
-	// Create complex number from current pixel
-	complex z = curParams_.point2complex(curParams_.orbitStart);
-	orbit.append(curParams_.complex2point(z));
-
-	// Newton iteration
-	for (quint16 i = 0; i < curParams_.maxIterations; ++i) {
-		complex f, df;
-		func(z, f, df, curParams_.roots);
-		complex z0 = z - d * f / df;
-
-		// Append point to vector
-		orbit.append(curParams_.complex2point(z0));
-
-		// Break if root has been found
-		if (abs(z0 - z) < nf::EPS) break;
-		z = z0;
-	}
-
-	// Emit signal
-	emit orbitRendered(orbit, 1000.0 / timer_.elapsed());
-}
+#endif
