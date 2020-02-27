@@ -69,4 +69,5 @@ RESOURCES += \
     resources.qrc
 
 DISTFILES += \
-    src/fractal.fsh
+    src/fractal.fsh \
+    src/vertex.vsh

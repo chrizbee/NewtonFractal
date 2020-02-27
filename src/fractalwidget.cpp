@@ -225,6 +225,7 @@ void FractalWidget::initializeGL()
 	glDisable(GL_DEPTH_TEST);
 	program_ = new QOpenGLShaderProgram(this);
 	program_->addShaderFromSourceFile(QOpenGLShader::Fragment, "://src/fractal.fsh");
+	program_->addShaderFromSourceFile(QOpenGLShader::Vertex, "://src/vertex.vsh");
 	program_->link();
 	program_->bind();
 	program_->setUniformValue("EPS", float(nf::EPS));

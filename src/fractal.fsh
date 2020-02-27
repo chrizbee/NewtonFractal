@@ -3,7 +3,9 @@
 // License: GNU General Public License version 3 or later,
 // see the file LICENSE in the main directory.
 
+precision mediump float;
 uniform float EPS;          // Max error allowed
+uniform float RIR;          // Root indicator radius
 uniform int rootCount;      // Number of roots <= 10
 uniform int maxIterations;  // Maximum number of iterations
 uniform vec2 damping;       // Complex damping factor
