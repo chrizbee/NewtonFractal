@@ -13,7 +13,7 @@ Parameters::Parameters() :
 	damping(nf::DDP),
 	scaleDownFactor(nf::DSC),
 	scaleDown(false),
-	processor(CPU_MULTI),
+	processor(GPU_OPENGL),
 	orbitMode(false),
 	orbitStart(0, 0),
 	benchmark(false)

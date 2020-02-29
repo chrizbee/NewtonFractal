@@ -32,5 +32,6 @@
         <file>resources/icons/benchmark.png</file>
         <file>resources/icons/play.png</file>
         <file>resources/icons/stop.png</file>
+        <file>resources/fonts/fira.ttf</file>
     </qresource>
 </RCC>
