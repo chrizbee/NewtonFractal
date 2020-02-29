@@ -14,7 +14,11 @@
 #include <QVector2D>
 #include <QVector3D>
 
-enum Processor { CPU_SINGLE, CPU_MULTI, GPU_OPENGL };
+enum Processor {
+	CPU_SINGLE,
+	CPU_MULTI,
+	GPU_OPENGL
+};
 
 struct Parameters {
 	Parameters();

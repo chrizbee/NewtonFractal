@@ -7,6 +7,7 @@
 #define SETTINGSWIDGET_H
 
 #include "defaults.h"
+#include "styler.h"
 #include <QMenu>
 #include <QWidget>
 #include <QMouseEvent>
@@ -65,6 +66,7 @@ private:
 	Ui::SettingsWidget *ui_;
 	Parameters *params_;
 	QMenu *rootMenu_;
+	Styler styler_;
 	QList<RootEdit*> rootEdits_;
 	QList<RootIcon*> rootIcons_;
 };

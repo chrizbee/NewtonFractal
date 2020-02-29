@@ -17,8 +17,6 @@ int main(int argc, char *argv[])
 	app.setOrganizationDomain("th-nuernberg.de");
 	app.setApplicationName("NewtonFractal");
 	app.setApplicationVersion(APP_VERSION);
-	app.setStyle("Fusion");
-	app.setFont(QFont("Consolas", 10));
 
 	// Set format
 	QSurfaceFormat fmt;

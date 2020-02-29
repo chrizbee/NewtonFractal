@@ -16,6 +16,7 @@
 #include <QDateTime>
 #include <QMenu>
 #include <QUrl>
+#include <QDebug>
 
 static bool updateParamsAllowed = true;
 
@@ -29,6 +30,10 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	ui_->setupUi(this);
 	ui_->progressBenchmark->setVisible(false);
 	updateSettings();
+
+	// Initialize styles
+	ui_->cbStyles->addItems(styler_.availableStyles());
+	styler_.setStyle(ui_->cbStyles->currentText());
 
 	// Create menu with actions for roots
 	// Kind of ugly flags, but needed for e.g. KDE's "Focus strictly under mouse"
@@ -50,6 +55,9 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	connect(ui_->lineDamping, &RootEdit::valueChanged, this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsWidget::on_settingsChanged);
+	connect(ui_->cbStyles, QOverload<const QString &>::of(&QComboBox::currentIndexChanged), [this](const QString &style) {
+		styler_.setStyle(style);
+	});
 	connect(ui_->spinScaleUpFactor, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
 		params_->scaleUpFactor = value;
 	});
@@ -97,6 +105,10 @@ void SettingsWidget::updateSettings()
 void SettingsWidget::disableOpenGL()
 {
 	// Disable combobox entry
+	if (ui_->cbThreading->currentIndex() == 2) {
+		ui_->cbThreading->setCurrentIndex(static_cast<quint8>(CPU_MULTI));
+		on_settingsChanged();
+	}
 	ui_->cbThreading->setItemData(2, 0, Qt::UserRole - 1);
 }
 
@@ -238,7 +250,7 @@ void SettingsWidget::exportSettings()
 	ini.setValue("damping", complex2string(params_->damping));
 	ini.setValue("scaleDownFactor", params_->scaleDownFactor);
 	ini.setValue("scaleDown", params_->scaleDown);
-	ini.setValue("processor", static_cast<quint8>(params_->processor));
+	ini.setValue("processor", static_cast<uint>(params_->processor));
 	ini.setValue("orbitMode", params_->orbitMode);
 	ini.setValue("orbitStart", params_->orbitStart);
 	ini.endGroup();
@@ -255,6 +267,9 @@ void SettingsWidget::exportSettings()
 	ini.setValue("bottom_original", params_->limits.original()->bottom());
 	ini.endGroup();
 
+	// Style
+	ini.setValue("style", ui_->cbStyles->currentIndex());
+
 	// Roots
 	ini.beginGroup("Roots");
 	quint8 rootCount = params_->roots.count();
@@ -265,6 +280,7 @@ void SettingsWidget::exportSettings()
 		);
 	}
 	ini.endGroup();
+
 }
 
 void SettingsWidget::importSettings()
@@ -303,6 +319,9 @@ void SettingsWidget::importSettings()
 		ini.value("top_original", 1).toDouble(), ini.value("bottom_original", 1).toDouble());
 	ini.endGroup();
 
+	// Change style
+	ui_->cbStyles->setCurrentIndex(static_cast<Style>(ini.value("style", 0).toUInt()));
+
 	// Update settings
 	emit sizeChanged(params_->size);
 	updateSettings();
@@ -322,6 +341,7 @@ void SettingsWidget::importSettings()
 		}
 	}
 	ini.endGroup();
+
 }
 
 void SettingsWidget::openRootContextMenu()
