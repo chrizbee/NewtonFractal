@@ -44,17 +44,23 @@ Styler::Styler()
 
 void Styler::setStyle(const Style style)
 {
+	// Static style at first call
+	static const QString systemStyle = qApp->style()->objectName();
+
 	// Set style
-	if (style == FusionDark) {
+	if (style == SYSTEM) {
+		qApp->setStyle(systemStyle);
+		qApp->setPalette(qApp->style()->standardPalette());
+	} else if (style == FUSIONDARK) {
 		qApp->setStyle("Fusion");
 		qApp->setPalette(darkPalette_);
-	} else if (style == FusionLight) {
+	} else if (style == FUSIONLIGHT) {
 		qApp->setStyle("Fusion");
 		qApp->setPalette(qApp->style()->standardPalette());
-	} else if (style == OldschoolDark) {
+	} else if (style == OLDSCHOOLDARK) {
 		qApp->setStyle("Windows");
 		qApp->setPalette(darkPalette_);
-	} else if (style == OldschoolLight) {
+	} else if (style == OLDSCHOOLLIGHT) {
 		qApp->setStyle("Windows");
 		qApp->setPalette(qApp->style()->standardPalette());
 	}
@@ -75,34 +81,37 @@ QStringList Styler::availableStyles() const
 	QStringList styles;
 	QStringList available = QStyleFactory::keys();
 	if (available.contains("Fusion")) {
-		styles.append(style2string(FusionDark));
-		styles.append(style2string(FusionLight));
+		styles.append(style2string(FUSIONDARK));
+		styles.append(style2string(FUSIONLIGHT));
 	}
 	if (available.contains("Windows")) {
-		styles.append(style2string(OldschoolDark));
-		styles.append(style2string(OldschoolLight));
+		styles.append(style2string(OLDSCHOOLDARK));
+		styles.append(style2string(OLDSCHOOLLIGHT));
 	}
+	styles.append(style2string(SYSTEM));
 	return styles;
 }
 
 Style Styler::string2style(const QString &str) const
 {
 	// Get style from string
-	if (str == "Fusion Dark") return FusionDark;
-	if (str == "Fusion Light") return FusionLight;
-	if (str == "Oldschool Dark") return OldschoolDark;
-	if (str == "Oldschool Light") return OldschoolLight;
-	else return Style::NoStyle;
+	if (str == "System") return SYSTEM;
+	if (str == "Fusion Dark") return FUSIONDARK;
+	if (str == "Fusion Light") return FUSIONLIGHT;
+	if (str == "Oldschool Dark") return OLDSCHOOLDARK;
+	if (str == "Oldschool Light") return OLDSCHOOLLIGHT;
+	else return NOSTYLE;
 }
 
 QString Styler::style2string(const Style style) const
 {
 	// Get string from style
 	switch (style) {
-	case FusionDark: return "Fusion Dark";
-	case FusionLight: return "Fusion Light";
-	case OldschoolDark: return "Oldschool Dark";
-	case OldschoolLight: return "Oldschool Light";
+	case SYSTEM: return "System";
+	case FUSIONDARK: return "Fusion Dark";
+	case FUSIONLIGHT: return "Fusion Light";
+	case OLDSCHOOLDARK: return "Oldschool Dark";
+	case OLDSCHOOLLIGHT: return "Oldschool Light";
 	default: return "";
 	}
 }

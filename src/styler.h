@@ -7,11 +7,12 @@
 #include <QStringList>
 
 enum Style {
-	FusionDark,
-	FusionLight,
-	OldschoolDark,
-	OldschoolLight,
-	NoStyle
+	SYSTEM,
+	FUSIONDARK,
+	FUSIONLIGHT,
+	OLDSCHOOLDARK,
+	OLDSCHOOLLIGHT,
+	NOSTYLE
 };
 
 class Styler
