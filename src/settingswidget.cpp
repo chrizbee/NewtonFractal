@@ -32,8 +32,11 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	updateSettings();
 
 	// Initialize styles
-	ui_->cbStyles->addItems(styler_.availableStyles());
-	styler_.setStyle(ui_->cbStyles->currentText());
+	QStringList styles = styler_.availableStyles();
+	QString last = QSettings().value("style", styles.first()).toString();
+	ui_->cbStyles->addItems(styles);
+	ui_->cbStyles->setCurrentText(last);
+	styler_.setStyle(last);
 
 	// Create menu with actions for roots
 	// Kind of ugly flags, but needed for e.g. KDE's "Focus strictly under mouse"
@@ -56,6 +59,7 @@ SettingsWidget::SettingsWidget(Parameters *params, QWidget *parent) :
 	connect(ui_->spinZoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->cbThreading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SettingsWidget::on_settingsChanged);
 	connect(ui_->cbStyles, QOverload<const QString &>::of(&QComboBox::currentIndexChanged), [this](const QString &style) {
+		QSettings().setValue("style", style);
 		styler_.setStyle(style);
 	});
 	connect(ui_->spinScaleUpFactor, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
@@ -267,9 +271,6 @@ void SettingsWidget::exportSettings()
 	ini.setValue("bottom_original", params_->limits.original()->bottom());
 	ini.endGroup();
 
-	// Style
-	ini.setValue("style", ui_->cbStyles->currentIndex());
-
 	// Roots
 	ini.beginGroup("Roots");
 	quint8 rootCount = params_->roots.count();
@@ -318,9 +319,6 @@ void SettingsWidget::importSettings()
 		ini.value("left_original", 1).toDouble(), ini.value("right_original", 1).toDouble(),
 		ini.value("top_original", 1).toDouble(), ini.value("bottom_original", 1).toDouble());
 	ini.endGroup();
-
-	// Change style
-	ui_->cbStyles->setCurrentIndex(static_cast<Style>(ini.value("style", 0).toUInt()));
 
 	// Update settings
 	emit sizeChanged(params_->size);
