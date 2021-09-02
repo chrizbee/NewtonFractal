@@ -18,6 +18,7 @@
 - Single- or multithreading (*cpu*) or OpenGL (*gpu*)
 - Export / import configuration
 - Export fractal as png
+- Super cool feature
 
 ## Getting Started
 
