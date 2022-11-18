@@ -9,7 +9,7 @@
 		"@blueprintjs/select": "^3.10.0",
 		"react": "^16.8.6",
 		"react-dom": "^16.8.6",
-		"react-scripts": "3.0.1",
+		"react-scripts": "5.0.1",
 		"simplebar-react": "^1.1.0",
 		"typescript": "^3.5.3"
 	},
